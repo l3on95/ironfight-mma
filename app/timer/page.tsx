@@ -146,7 +146,7 @@ function TimerRing({
             fontSize: "78px",
             letterSpacing: "0.02em",
             color: "var(--fg)",
-            textShadow: active ? `0 0 30px ${accent.shadow}` : "none",
+            textShadow: pulseClass ? `0 0 30px ${accent.shadow}` : "none",
           }}
         >
           {formatTime(remaining)}
