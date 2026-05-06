@@ -101,15 +101,14 @@ function TimerRing({
 }) {
   const r = 120;
   const circ = 2 * Math.PI * r;
-  const isWork = phase === "work";
   const accent = phaseAccent(phase);
-  const active = phase === "prep" || phase === "work" || phase === "rest";
+  const pulseClass =
+    phase === "prep" ? "phase-prep-pulse" :
+    phase === "work" ? "phase-work-pulse" :
+    phase === "rest" ? "phase-rest-pulse" : "";
 
   return (
-    <div
-      className={`relative flex h-[280px] w-[280px] items-center justify-center ${isWork ? "animate-[workPulse_1s_ease-in-out_infinite]" : ""}`}
-      style={active ? { filter: `drop-shadow(0 0 16px ${accent.glow})` } : {}}
-    >
+    <div className={`relative flex h-[280px] w-[280px] items-center justify-center ${pulseClass}`}>
       <svg
         className="absolute inset-0"
         viewBox="0 0 280 280"
@@ -431,13 +430,13 @@ function TimerView() {
                   i < t.round - 1
                     ? "var(--ta-cyan)"
                     : i === t.round - 1 && t.phase !== "idle" && t.phase !== "done"
-                    ? "var(--ta-pink)"
+                    ? accent.color
                     : "var(--ink-5)",
                 boxShadow:
                   i < t.round - 1
                     ? "0 0 8px var(--ta-cyan)"
                     : i === t.round - 1 && t.phase !== "idle" && t.phase !== "done"
-                    ? "0 0 10px var(--ta-pink)"
+                    ? `0 0 10px ${accent.color}`
                     : "none",
               }}
             />
