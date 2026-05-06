@@ -51,9 +51,8 @@ export function useWorkoutTimer(initial: TimerConfig = DEFAULT_CONFIG): UseWorko
   const endAtRef = useRef<number | null>(null);
   const phaseRef = useRef<Phase>("idle");
   const roundRef = useRef(1);
-  // Verhindert doppelte Countdown-Ticks: speichert die zuletzt abgespielte Sekunde
-  const lastTickSecRef = useRef<number>(-1);
-  const restSoundTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Einmalige Countdown-Flag pro Phase — verhindert mehrfaches Abspielen
+  const countdownFiredRef = useRef(false);
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { roundRef.current = round; }, [round]);
@@ -67,11 +66,6 @@ export function useWorkoutTimer(initial: TimerConfig = DEFAULT_CONFIG): UseWorko
 
   const enterPhase = useCallback(
     (next: Phase, nextRound = roundRef.current) => {
-      if (restSoundTimeoutRef.current !== null) {
-        clearTimeout(restSoundTimeoutRef.current);
-        restSoundTimeoutRef.current = null;
-      }
-
       const seconds =
         next === "prep"
           ? config.prepSeconds
@@ -85,7 +79,7 @@ export function useWorkoutTimer(initial: TimerConfig = DEFAULT_CONFIG): UseWorko
       setRound(nextRound);
       setRemaining(seconds);
       endAtRef.current = seconds > 0 ? Date.now() + seconds * 1000 : null;
-      lastTickSecRef.current = -1; // Reset Countdown-Tracker
+      countdownFiredRef.current = false; // Countdown-Guard für neue Phase zurücksetzen
 
       if (next === "work") {
         playRoundStart();
@@ -112,13 +106,11 @@ export function useWorkoutTimer(initial: TimerConfig = DEFAULT_CONFIG): UseWorko
 
       const cur = phaseRef.current;
 
-      // ─── Countdown: genau 4 Sek. vor Kampf-Beginn — einmalig ───
-      if ((cur === "rest" || cur === "prep") && left === 4) {
-        if (lastTickSecRef.current !== 4) {
-          lastTickSecRef.current = 4;
-          playCountdownTick(1.0);
-          vibrateTick();
-        }
+      // Countdown: genau 4 Sek. vor Kampf-Beginn — einmalig pro Phase
+      if ((cur === "rest" || cur === "prep") && left === 4 && !countdownFiredRef.current) {
+        countdownFiredRef.current = true;
+        playCountdownTick(1.0);
+        vibrateTick();
       }
 
       if (left === 0) {
@@ -140,7 +132,6 @@ export function useWorkoutTimer(initial: TimerConfig = DEFAULT_CONFIG): UseWorko
     if (phase === "done" || phase === "idle") {
       enterPhase("prep", 1);
     } else {
-      // Resume: endAt aus aktuellem remaining berechnen
       endAtRef.current = Date.now() + remaining * 1000;
     }
     setRunning(true);
@@ -152,16 +143,12 @@ export function useWorkoutTimer(initial: TimerConfig = DEFAULT_CONFIG): UseWorko
   }, []);
 
   const reset = useCallback(() => {
-    if (restSoundTimeoutRef.current !== null) {
-      clearTimeout(restSoundTimeoutRef.current);
-      restSoundTimeoutRef.current = null;
-    }
     setRunning(false);
     setPhase("idle");
     setRound(1);
     setRemaining(config.workSeconds);
     endAtRef.current = null;
-    lastTickSecRef.current = -1;
+    countdownFiredRef.current = false;
   }, [config.workSeconds]);
 
   const skip = useCallback(() => {

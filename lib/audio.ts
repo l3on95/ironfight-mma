@@ -1,21 +1,15 @@
 /**
  * Tidal Athletics — Audio Engine
  *
- * Warum HTMLAudioElement statt Web Audio API:
- *   Web Audio API (AudioContext) respektiert auf iOS immer den Stummschalter.
- *   HTMLAudioElement aktiviert hingegen die AVAudioSession im "Playback"-Modus,
- *   der den Stummschalter ignoriert — genau wie Spotify oder YouTube.
+ * HTMLAudioElement statt Web Audio API: aktiviert auf iOS die AVAudioSession
+ * im Playback-Modus (ignoriert den Stummschalter), genau wie Spotify/YouTube.
  *
- * iOS-Strategie (3 Schritte):
- *   1. initAudio()   → Pool aus Audio-Objekten anlegen (kein User-Gesture nötig)
- *   2. unlockAudio() → MUSS in User-Geste aufgerufen werden:
- *                      Alle Pool-Elemente kurz abspielen → MediaSession aktivieren
- *                      Keep-Alive-Loop starten (0.001 Lautstärke, unhörbar)
- *                      → hält Playback-Session aktiv zwischen Sounds
- *   3. Sounds        → play() auf bereits aktivierten Elementen
- *                      → Silent Switch wird ignoriert ✓
- *
- * Android/Desktop: funktioniert wie gehabt.
+ * iOS-Strategie:
+ *   1. initAudio()   → Audio-Objekte anlegen (kein User-Gesture nötig)
+ *   2. unlockAudio() → In User-Geste aufrufen: kurz abspielen → AVAudioSession
+ *                      aktivieren; Keep-Alive-Loop starten (unhörbar, hält
+ *                      Session zwischen Sounds aktiv)
+ *   3. Sounds        → play() auf aktivierten Elementen → Silent Switch ignoriert
  */
 
 const BELL_URL =
@@ -23,72 +17,56 @@ const BELL_URL =
 const COUNTDOWN_URL =
   "/audio/lesiakower-countdown-sound-effect-8-bit-151797.mp3";
 
-// Pool-Größen: mehrere Elemente pro Sound für schnelle Wiedergabe
-const BELL_POOL      = 3;
-const COUNTDOWN_POOL = 6; // Countdown-Ticks kommen sekündlich
+// ─── State ────────────────────────────────────────────────────────────────────
 
-// ─── State ────────────────────────────────────────────────────────────────
-
-let _bellPool: HTMLAudioElement[]      = [];
-let _countdownPool: HTMLAudioElement[] = [];
+let _bell: HTMLAudioElement | null = null;
+let _countdown: HTMLAudioElement | null = null;
 let _keepAlive: HTMLAudioElement | null = null;
 
-let _bellIdx      = 0;
-let _countdownIdx = 0;
-
 let _unlocked = false;
-let _muted    = false;
-let _inited   = false;
+let _muted = false;
+let _inited = false;
 
-// ─── Exports ──────────────────────────────────────────────────────────────
+// ─── Exports ──────────────────────────────────────────────────────────────────
 
-export function setAudioMuted(value: boolean)  { _muted = value; }
-export function isAudioUnlocked()              { return _unlocked; }
+export function setAudioMuted(value: boolean) { _muted = value; }
+export function isAudioUnlocked()             { return _unlocked; }
 
-// ─── Pool-Erstellung ──────────────────────────────────────────────────────
-
-function makeEl(url: string): HTMLAudioElement {
-  const el = new Audio(url);
-  el.preload  = "auto";
-  el.volume   = 1.0;
-  return el;
-}
+// ─── Initialisierung ──────────────────────────────────────────────────────────
 
 /**
- * Stufe 1: Audio-Objekte anlegen (KEIN User-Gesture nötig).
+ * Stufe 1: Audio-Objekte anlegen. Kein User-Gesture nötig.
  * Browser lädt Dateien im Hintergrund vor.
  */
 export function initAudio(): void {
   if (typeof window === "undefined" || _inited) return;
   _inited = true;
 
-  _bellPool      = Array.from({ length: BELL_POOL },      () => makeEl(BELL_URL));
-  _countdownPool = Array.from({ length: COUNTDOWN_POOL }, () => makeEl(COUNTDOWN_URL));
+  _bell = new Audio(BELL_URL);
+  _bell.preload = "auto";
 
-  // Keep-Alive: Countdown-Datei bei 0 Lautstärke — vollständig lautlos.
-  // volume=0 hält die iOS AVAudioSession aktiv, ohne dass etwas hörbar ist.
-  _keepAlive         = makeEl(COUNTDOWN_URL);
-  _keepAlive.loop    = true;
-  _keepAlive.volume  = 0;
+  _countdown = new Audio(COUNTDOWN_URL);
+  _countdown.preload = "auto";
+
+  // Unhörbarer Keep-Alive-Loop hält die iOS AVAudioSession aktiv.
+  _keepAlive = new Audio(COUNTDOWN_URL);
+  _keepAlive.loop = true;
+  _keepAlive.volume = 0;
 }
 
-// ─── Unlock (MUSS in User-Geste aufgerufen werden) ───────────────────────
+// ─── Unlock ───────────────────────────────────────────────────────────────────
 
 /**
- * Stufe 2: Alle Elemente kurz abspielen → iOS MediaSession aktivieren.
- * Nur so spielen spätere Sounds auch wenn der Stummschalter aktiv ist.
+ * Stufe 2: MUSS in einer User-Geste aufgerufen werden.
+ * Kurz abspielen → iOS MediaSession (Playback-Modus) aktivieren.
  */
 export async function unlockAudio(): Promise<boolean> {
   if (typeof window === "undefined") return false;
-  // Guard: bereits entsperrt — kein erneutes Unlock, keine doppelten Pool-Plays
   if (_unlocked) return true;
-
-  // Pool anlegen falls initAudio noch nicht aufgerufen wurde
   if (!_inited) initAudio();
 
-  // Alle Pool-Elemente kurz anspielen → iOS MediaSession (Playback-Modus) aktivieren
-  const all = [..._bellPool, ..._countdownPool];
-  const proms = all.map(async (el) => {
+  for (const el of [_bell, _countdown]) {
+    if (!el) continue;
     try {
       el.volume = 0;
       await el.play();
@@ -98,26 +76,18 @@ export async function unlockAudio(): Promise<boolean> {
     } catch {
       // Einige Browser brauchen keine Aktivierung — ignorieren
     }
-  });
-  await Promise.allSettled(proms);
+  }
 
-  // Keep-Alive starten: hält die Playback-Session zwischen Sounds aktiv.
-  // Wird nur gestartet wenn noch nicht läuft (paused-Check verhindert doppelten Start).
-  if (_keepAlive && _keepAlive.paused) {
-    try {
-      await _keepAlive.play();
-    } catch {
-      // Keep-Alive ist optional — kein kritischer Fehler
-    }
+  if (_keepAlive?.paused) {
+    try { await _keepAlive.play(); } catch {}
   }
 
   _unlocked = true;
   return true;
 }
 
-// ─── Keep-Alive stoppen (optional beim Timer-Reset) ───────────────────────
+// ─── Keep-Alive ───────────────────────────────────────────────────────────────
 
-/** Stoppt den unhörbaren Loop — z. B. wenn Timer komplett beendet wird. */
 export function stopKeepAlive(): void {
   if (_keepAlive && !_keepAlive.paused) {
     _keepAlive.pause();
@@ -125,107 +95,46 @@ export function stopKeepAlive(): void {
   }
 }
 
-// ─── Wiedergabe-Hilfe ─────────────────────────────────────────────────────
+// ─── Wiedergabe ───────────────────────────────────────────────────────────────
 
-function playEl(
-  el: HTMLAudioElement,
-  volume: number,
-  rate = 1.0,
-): void {
-  if (!_unlocked || _muted) return;
+function playOnce(el: HTMLAudioElement | null, volume: number): void {
+  if (!el || !_unlocked || _muted) return;
   try {
-    el.playbackRate = rate;
-    el.volume       = Math.max(0, Math.min(1, volume));
-    el.currentTime  = 0;
+    el.volume = Math.max(0, Math.min(1, volume));
+    el.currentTime = 0;
     el.play().catch(() => {});
-  } catch {
-    // Ignorieren — z. B. wenn Browser Autoplay noch nicht erlaubt
-  }
+  } catch {}
 }
 
-function nextBell(): HTMLAudioElement | null {
-  if (_bellPool.length === 0) return null;
-  const el = _bellPool[_bellIdx % _bellPool.length];
-  _bellIdx++;
-  return el;
-}
+// ─── PUBLIC API ───────────────────────────────────────────────────────────────
 
-function nextCountdown(): HTMLAudioElement | null {
-  if (_countdownPool.length === 0) return null;
-  const el = _countdownPool[_countdownIdx % _countdownPool.length];
-  _countdownIdx++;
-  return el;
-}
+/** Rundenstart — Boxing Bell (einmalig) */
+export function playRoundStart(): void { playOnce(_bell, 0.9); }
 
-// ─── PUBLIC API ───────────────────────────────────────────────────────────
+/** Rundenende — Boxing Bell (einmalig) */
+export function playRoundEnd(): void { playOnce(_bell, 0.85); }
 
-/** Rundenstart — Boxing Bell */
-export function playRoundStart(): void {
-  const el = nextBell();
-  if (el) playEl(el, 0.9);
-}
-
-/** Rundenende — Boxing Bell (Datei enthält Doppelglocke) */
-export function playRoundEnd(): void {
-  const el = nextBell();
-  if (el) playEl(el, 0.85);
-}
-
-/** Session-Ende — Bell (Datei enthält bereits Doppelglocke) */
-export function playSessionEnd(): void {
-  const el = nextBell();
-  if (el) playEl(el, 0.85);
-}
-
-/** Pause-Start — leiser Glocken-Hinweis */
-export function playRestStart(): void {
-  const el = nextBell();
-  if (el) playEl(el, 0.35);
-}
+/** Session-Ende — Boxing Bell (einmalig) */
+export function playSessionEnd(): void { playOnce(_bell, 0.85); }
 
 /**
- * Countdown-Tick — Lautstärke steigt in den letzten Sekunden
+ * Countdown-Ton — 4 Sek. vor Kampf-Beginn (einmalig pro Runde).
  * @param volume 0..1
  */
-export function playCountdownTick(volume = 0.5): void {
-  const el = nextCountdown();
-  if (el) playEl(el, Math.max(0.2, Math.min(1, volume)));
+export function playCountdownTick(volume = 1.0): void {
+  playOnce(_countdown, Math.max(0.2, Math.min(1, volume)));
 }
 
-/** Letzter Tick — lauter und etwas schneller */
-export function playLastTick(): void {
-  const el = nextCountdown();
-  if (el) playEl(el, 1.0, 1.2);
-}
-
-/** Vorbereitungs-Beep — leiser Countdown-Ton */
-export function playPrepBeep(): void {
-  const el = nextCountdown();
-  if (el) playEl(el, 0.3, 0.9);
-}
-
-// ─── Lautstärke-Kurve für Countdown ──────────────────────────────────────
-
-/**
- * Lautstärke für die letzten 10 Sekunden — linear ansteigend.
- */
-export function tickVolumeForRemaining(remaining: number): number {
-  if (remaining > 10 || remaining < 1) return 0.5;
-  if (remaining <= 2) return 1.0;
-  const t = (10 - remaining) / 7;
-  return 0.3 + 0.65 * t;
-}
-
-// ─── Vibration ────────────────────────────────────────────────────────────
+// ─── Vibration ────────────────────────────────────────────────────────────────
 
 let _vibrateEnabled = true;
 
 export function setVibrationEnabled(value: boolean) { _vibrateEnabled = value; }
 
-export function vibrate(pattern: number | number[]) {
+function vibrate(pattern: number | number[]) {
   if (!_vibrateEnabled || typeof navigator === "undefined") return;
   const nav = navigator as Navigator & { vibrate?: (p: number | number[]) => boolean };
-  try { nav.vibrate?.(pattern); } catch { /* ignore */ }
+  try { nav.vibrate?.(pattern); } catch {}
 }
 
 export function vibrateTick()       { vibrate(35); }
