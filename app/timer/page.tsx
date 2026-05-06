@@ -42,6 +42,41 @@ const PHASE_LABEL: Record<Phase, string> = {
   done: "Fertig!",
 };
 
+function phaseAccent(phase: Phase) {
+  if (phase === "prep") return {
+    color: "rgb(255,140,0)",
+    border: "rgba(255,140,0,.4)",
+    bg: "rgba(255,140,0,.06)",
+    glow: "rgba(255,140,0,.4)",
+    shadow: "rgba(255,140,0,.5)",
+    bigShadow: "rgba(255,140,0,.6)",
+  };
+  if (phase === "work") return {
+    color: "rgb(220,38,38)",
+    border: "rgba(220,38,38,.4)",
+    bg: "rgba(220,38,38,.06)",
+    glow: "rgba(220,38,38,.4)",
+    shadow: "rgba(220,38,38,.5)",
+    bigShadow: "rgba(220,38,38,.6)",
+  };
+  if (phase === "rest") return {
+    color: "rgb(59,130,246)",
+    border: "rgba(59,130,246,.4)",
+    bg: "rgba(59,130,246,.06)",
+    glow: "rgba(59,130,246,.4)",
+    shadow: "rgba(59,130,246,.5)",
+    bigShadow: "rgba(59,130,246,.6)",
+  };
+  return {
+    color: "var(--fg-3)",
+    border: "rgba(136,147,161,.2)",
+    bg: "rgba(136,147,161,.03)",
+    glow: "transparent",
+    shadow: "transparent",
+    bigShadow: "transparent",
+  };
+}
+
 function formatTime(s: number) {
   const m = Math.floor(s / 60);
   const sec = s % 60;
@@ -67,20 +102,13 @@ function TimerRing({
   const r = 120;
   const circ = 2 * Math.PI * r;
   const isWork = phase === "work";
-  const isRest = phase === "rest";
-  const strokeColor = isRest ? "var(--ta-pink)" : "var(--ta-cyan)";
-  const trackColor = "var(--ink-4)";
+  const accent = phaseAccent(phase);
+  const active = phase === "prep" || phase === "work" || phase === "rest";
 
   return (
     <div
       className={`relative flex h-[280px] w-[280px] items-center justify-center ${isWork ? "animate-[workPulse_1s_ease-in-out_infinite]" : ""}`}
-      style={
-        isRest
-          ? { filter: "drop-shadow(0 0 16px rgba(255,45,120,.4))" }
-          : isWork
-          ? { filter: "drop-shadow(0 0 16px rgba(0,212,230,.4))" }
-          : {}
-      }
+      style={active ? { filter: `drop-shadow(0 0 16px ${accent.glow})` } : {}}
     >
       <svg
         className="absolute inset-0"
@@ -93,7 +121,7 @@ function TimerRing({
           cy="140"
           r={r}
           fill="none"
-          stroke={trackColor}
+          stroke="var(--ink-4)"
           strokeWidth="8"
         />
         {/* Progress */}
@@ -102,7 +130,7 @@ function TimerRing({
           cy="140"
           r={r}
           fill="none"
-          stroke={strokeColor}
+          stroke={accent.color}
           strokeWidth="8"
           strokeLinecap="round"
           strokeDasharray={circ}
@@ -119,10 +147,7 @@ function TimerRing({
             fontSize: "78px",
             letterSpacing: "0.02em",
             color: "var(--fg)",
-            textShadow:
-              phase === "rest"
-                ? "0 0 30px rgba(255,45,120,.5)"
-                : "0 0 30px rgba(0,212,230,.5)",
+            textShadow: active ? `0 0 30px ${accent.shadow}` : "none",
           }}
         >
           {formatTime(remaining)}
@@ -245,7 +270,7 @@ function TimerView() {
   }
 
   const isLocked = t.phase !== "idle";
-  const isRest = t.phase === "rest";
+  const accent = phaseAccent(t.phase);
 
   // Icon helpers
   const IconPlay = () => (
@@ -283,7 +308,7 @@ function TimerView() {
               className="font-mono-ta text-sm uppercase"
               style={{
                 letterSpacing: "0.25em",
-                color: isRest ? "var(--ta-pink)" : "var(--ta-cyan)",
+                color: accent.color,
               }}
             >
               {PHASE_LABEL[t.phase]}
@@ -301,9 +326,7 @@ function TimerView() {
               fontSize: "clamp(6rem, 28vw, 22rem)",
               letterSpacing: "0.02em",
               color: "var(--fg)",
-              textShadow: isRest
-                ? "0 0 40px rgba(255,45,120,.6)"
-                : "0 0 40px rgba(0,212,230,.6)",
+              textShadow: `0 0 40px ${accent.bigShadow}`,
             }}
           >
             {formatTime(t.remaining)}
@@ -382,13 +405,9 @@ function TimerView() {
             className="font-mono-ta text-[11px] uppercase px-4 py-1.5 rounded-full"
             style={{
               letterSpacing: "0.25em",
-              color: isRest ? "var(--ta-pink)" : "var(--ta-cyan)",
-              border: isRest
-                ? "1px solid rgba(255,45,120,.4)"
-                : "1px solid rgba(0,212,230,.4)",
-              background: isRest
-                ? "rgba(255,45,120,.06)"
-                : "rgba(0,212,230,.06)",
+              color: accent.color,
+              border: `1px solid ${accent.border}`,
+              background: accent.bg,
               transition: "all .3s",
             }}
           >
