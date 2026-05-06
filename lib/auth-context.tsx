@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { FirebaseError } from "firebase/app";
 import {
   createUserWithEmailAndPassword,
   getRedirectResult,
@@ -49,10 +50,6 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function isMobileBrowser(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -62,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [redirectError, setRedirectError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Redirect-Ergebnis prüfen (Google Sign-In auf Mobile via Redirect)
+    // Redirect-Ergebnis prüfen (Fallback wenn Popup geblockt war)
     getRedirectResult(getFirebaseAuth())
       .then((result) => {
         // Erfolg: onAuthStateChanged übernimmt den Rest
@@ -73,7 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .catch((err: { code?: string; message?: string }) => {
         // auth/no-auth-event = normaler Fall (kein Redirect gestartet)
-        if (err?.code && err.code !== "auth/no-auth-event" && err.code !== "auth/null-user") {
+        const ignoredCodes = new Set(["auth/no-auth-event", "auth/null-user"]);
+        if (err?.code && !ignoredCodes.has(err.code)) {
+          console.error("[TidalAthletics] getRedirectResult error:", err.code, err.message);
           setRedirectError("Google-Anmeldung fehlgeschlagen. Bitte erneut versuchen.");
         }
       });
@@ -174,18 +173,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: "select_account" });
 
-        // Auf Mobile (iOS/Android): Redirect statt Popup
-        // signInWithPopup wird auf iOS Safari geblockt
-        if (isMobileBrowser()) {
-          await signInWithRedirect(getFirebaseAuth(), provider);
-          // Page navigiert weg — dieser Code wird nicht mehr ausgeführt
-          // getRedirectResult() im AuthProvider-useEffect übernimmt das Ergebnis
-          return null;
+        try {
+          // Popup funktioniert auf Desktop und modernem Mobile zuverlässig.
+          // signInWithRedirect ist von Firebase für Browser-Apps deprecated.
+          const cred = await signInWithPopup(getFirebaseAuth(), provider);
+          return cred.user;
+        } catch (err) {
+          if (
+            err instanceof FirebaseError &&
+            (err.code === "auth/popup-blocked" ||
+              err.code === "auth/operation-not-supported-in-this-environment")
+          ) {
+            // Fallback auf Redirect, wenn Popup explizit blockiert wurde
+            await signInWithRedirect(getFirebaseAuth(), provider);
+            return null;
+          }
+          throw err;
         }
-
-        // Desktop: Popup
-        const cred = await signInWithPopup(getFirebaseAuth(), provider);
-        return cred.user;
       },
 
       resetPassword: async (email) => {

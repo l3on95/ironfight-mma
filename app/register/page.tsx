@@ -81,14 +81,16 @@ export default function RegisterPage() {
     try {
       const result = await signInWithGoogle();
       if (result === null) {
+        // Redirect-Fallback: Browser navigiert weg, kein weiterer Code nötig
         setGoogleRedirectPending(true);
         return;
       }
-      router.push("/dashboard");
+      // Popup-Erfolg: onAuthStateChanged aktualisiert user → useEffect übernimmt Redirect.
+      // Kein router.push hier, da user noch null sein kann (Race Condition).
+      // googleLoading bleibt true bis die Seite wegnavigiert.
     } catch (err) {
       const code = err instanceof FirebaseError ? err.code : "";
       setError(authErrorMessage(code));
-    } finally {
       setGoogleLoading(false);
     }
   }
