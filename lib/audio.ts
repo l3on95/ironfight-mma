@@ -6,10 +6,14 @@
  *
  * iOS-Strategie:
  *   1. initAudio()   → Audio-Objekte anlegen (kein User-Gesture nötig)
- *   2. unlockAudio() → In User-Geste aufrufen: kurz abspielen → AVAudioSession
- *                      aktivieren; Keep-Alive-Loop starten (unhörbar, hält
- *                      Session zwischen Sounds aktiv)
+ *   2. unlockAudio() → In User-Geste aufrufen: Session aktivieren;
+ *                      Keep-Alive-Loop (stille WAV) starten
  *   3. Sounds        → play() auf aktivierten Elementen → Silent Switch ignoriert
+ *
+ * Warum eine stille WAV statt volume=0:
+ *   Auf iOS Safari ist HTMLAudioElement.volume nicht per JavaScript setzbar.
+ *   Der Keep-Alive muss daher eine wirklich stille Audiodatei sein, keine
+ *   echte Audiodatei bei volume=0.
  */
 
 const BELL_URL =
@@ -32,6 +36,40 @@ let _inited = false;
 export function setAudioMuted(value: boolean) { _muted = value; }
 export function isAudioUnlocked()             { return _unlocked; }
 
+// ─── Stille WAV ───────────────────────────────────────────────────────────────
+
+/**
+ * Erzeugt eine 1-Sekunde-stille-WAV-Datei als Blob-URL.
+ * PCM, 8000 Hz, 8-Bit, Mono — iOS Safari spielt diese absolut lautlos ab,
+ * unabhängig von den iOS-Lautstärke-Einschränkungen der Web-API.
+ */
+function makeSilentWavBlobUrl(): string {
+  const sampleRate = 8000;
+  const numSamples = sampleRate; // 1 Sekunde
+  const buf = new Uint8Array(44 + numSamples);
+  const dv = new DataView(buf.buffer);
+
+  const str = (offset: number, s: string) =>
+    [...s].forEach((c, i) => (buf[offset + i] = c.charCodeAt(0)));
+
+  str(0, "RIFF");
+  dv.setUint32(4, 36 + numSamples, true);
+  str(8, "WAVE");
+  str(12, "fmt ");
+  dv.setUint32(16, 16, true);   // fmt chunk size
+  dv.setUint16(20, 1, true);    // PCM
+  dv.setUint16(22, 1, true);    // mono
+  dv.setUint32(24, sampleRate, true);
+  dv.setUint32(28, sampleRate, true); // byte rate (rate × 1ch × 1byte)
+  dv.setUint16(32, 1, true);    // block align
+  dv.setUint16(34, 8, true);    // 8 bits per sample
+  str(36, "data");
+  dv.setUint32(40, numSamples, true);
+  buf.fill(0x80, 44); // 0x80 = Mittelpunkt für unsigned 8-bit (Stille)
+
+  return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+}
+
 // ─── Initialisierung ──────────────────────────────────────────────────────────
 
 /**
@@ -48,45 +86,44 @@ export function initAudio(): void {
   _countdown = new Audio(COUNTDOWN_URL);
   _countdown.preload = "auto";
 
-  // Unhörbarer Keep-Alive-Loop hält die iOS AVAudioSession aktiv.
-  _keepAlive = new Audio(COUNTDOWN_URL);
+  // Keep-Alive: echte stille WAV als Blob-URL — lautlos auf allen Geräten
+  const silentUrl = makeSilentWavBlobUrl();
+  _keepAlive = new Audio(silentUrl);
   _keepAlive.loop = true;
-  _keepAlive.volume = 0;
 }
 
 // ─── Unlock ───────────────────────────────────────────────────────────────────
 
 /**
  * Stufe 2: MUSS in einer User-Geste aufgerufen werden.
- * Kurz abspielen → iOS MediaSession (Playback-Modus) aktivieren.
+ * Aktiviert die iOS AVAudioSession und startet den Silent-Keep-Alive-Loop.
  */
 export async function unlockAudio(): Promise<boolean> {
   if (typeof window === "undefined") return false;
   if (_unlocked) return true;
   if (!_inited) initAudio();
 
+  // Stille WAV abspielen → iOS AVAudioSession (Playback-Modus) aktivieren
+  if (_keepAlive?.paused) {
+    try { await _keepAlive.play(); } catch {}
+  }
+
+  // Bell und Countdown kurz anspielen+pausieren → iOS-Pre-Buffering
+  // (Session ist durch Keep-Alive bereits aktiv, kein Lautstärkeproblem)
   for (const el of [_bell, _countdown]) {
     if (!el) continue;
     try {
-      el.volume = 0;
       await el.play();
       el.pause();
       el.currentTime = 0;
-      el.volume = 1.0;
-    } catch {
-      // Einige Browser brauchen keine Aktivierung — ignorieren
-    }
-  }
-
-  if (_keepAlive?.paused) {
-    try { await _keepAlive.play(); } catch {}
+    } catch {}
   }
 
   _unlocked = true;
   return true;
 }
 
-// ─── Keep-Alive ───────────────────────────────────────────────────────────────
+// ─── Keep-Alive stoppen ───────────────────────────────────────────────────────
 
 export function stopKeepAlive(): void {
   if (_keepAlive && !_keepAlive.paused) {
