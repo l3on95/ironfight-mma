@@ -147,6 +147,12 @@ function TimerView() {
     setAudioUnlocked(isAudioUnlocked());
   }, []);
 
+  // Vibration Feature-Detection — auf iOS/Safari ist navigator.vibrate nicht vorhanden
+  const [vibrateSupported, setVibrateSupported] = useState(false);
+  useEffect(() => {
+    setVibrateSupported(typeof navigator !== "undefined" && typeof navigator.vibrate === "function");
+  }, []);
+
   const [logState, setLogState] = useState<"idle" | "saving" | "saved" | "error">(
     "idle",
   );
@@ -389,20 +395,22 @@ function TimerView() {
           )}
         </div>
 
-        {/* Settings: Sound, Vibration, Vollbild */}
-        <div className="mt-6 grid grid-cols-3 gap-2 text-center text-xs uppercase tracking-widest">
+        {/* Settings: Sound, Vibration (nur wenn unterstützt), Vollbild */}
+        <div className={`mt-6 grid ${vibrateSupported ? "grid-cols-3" : "grid-cols-2"} gap-2 text-center text-xs uppercase tracking-widest`}>
           <SettingToggle
             label="Sound"
             value={settings.soundOn}
             onChange={setSoundOn}
             icon="🔔"
           />
-          <SettingToggle
-            label="Vibration"
-            value={settings.vibrate}
-            onChange={setVibrate}
-            icon="📳"
-          />
+          {vibrateSupported && (
+            <SettingToggle
+              label="Vibration"
+              value={settings.vibrate}
+              onChange={setVibrate}
+              icon="📳"
+            />
+          )}
           <button
             onClick={openFullscreen}
             className="flex flex-col items-center gap-1 rounded-lg border border-carbon-500 bg-carbon-700/40 px-3 py-3 transition-all hover:border-blood/60 hover:text-blood"

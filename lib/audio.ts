@@ -65,10 +65,11 @@ export function initAudio(): void {
   _bellPool      = Array.from({ length: BELL_POOL },      () => makeEl(BELL_URL));
   _countdownPool = Array.from({ length: COUNTDOWN_POOL }, () => makeEl(COUNTDOWN_URL));
 
-  // Keep-Alive: Glocken-Datei bei 0.001 Lautstärke — praktisch unhörbar
-  _keepAlive         = makeEl(BELL_URL);
+  // Keep-Alive: Countdown-Datei bei 0 Lautstärke — vollständig lautlos.
+  // volume=0 hält die iOS AVAudioSession aktiv, ohne dass etwas hörbar ist.
+  _keepAlive         = makeEl(COUNTDOWN_URL);
   _keepAlive.loop    = true;
-  _keepAlive.volume  = 0.001;
+  _keepAlive.volume  = 0;
 }
 
 // ─── Unlock (MUSS in User-Geste aufgerufen werden) ───────────────────────
@@ -79,6 +80,8 @@ export function initAudio(): void {
  */
 export async function unlockAudio(): Promise<boolean> {
   if (typeof window === "undefined") return false;
+  // Guard: bereits entsperrt — kein erneutes Unlock, keine doppelten Pool-Plays
+  if (_unlocked) return true;
 
   // Pool anlegen falls initAudio noch nicht aufgerufen wurde
   if (!_inited) initAudio();
@@ -98,9 +101,9 @@ export async function unlockAudio(): Promise<boolean> {
   });
   await Promise.allSettled(proms);
 
-  // Keep-Alive starten: hält die Playback-Session zwischen Sounds aktiv
-  // Ohne diesen Loop könnte iOS die Session nach längerer Stille deaktivieren
-  if (_keepAlive) {
+  // Keep-Alive starten: hält die Playback-Session zwischen Sounds aktiv.
+  // Wird nur gestartet wenn noch nicht läuft (paused-Check verhindert doppelten Start).
+  if (_keepAlive && _keepAlive.paused) {
     try {
       await _keepAlive.play();
     } catch {
