@@ -49,20 +49,48 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-carbon-500/60 bg-carbon-900/80 backdrop-blur">
+    <header
+      className="sticky top-0 z-50 backdrop-blur"
+      style={{
+        background: "linear-gradient(180deg, rgba(7,9,12,.95), rgba(3,4,6,.92))",
+        borderBottom: "1px solid var(--ink-4)",
+      }}
+    >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        {/* Brand */}
         <Link
           href="/"
-          className="flex items-center gap-2 font-display text-xl font-black uppercase tracking-tight"
+          className="flex items-center gap-3"
+          style={{ textDecoration: "none" }}
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blood text-[10px] font-black text-white">
+          <div
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-[11px] font-black"
+            style={{
+              background: "linear-gradient(135deg, var(--ta-cyan), var(--ta-cyan-deep))",
+              color: "#001417",
+              boxShadow: "0 0 18px rgba(0,212,230,.35)",
+            }}
+          >
             TA
-          </span>
-          <span>
-            Tidal<span className="text-blood">Athletics</span>
-          </span>
+          </div>
+          <div>
+            <div
+              className="font-display-ta text-lg font-black uppercase leading-none"
+              style={{ letterSpacing: "0.12em" }}
+            >
+              <span style={{ color: "var(--ta-pink)" }}>Tidal</span>
+              <span style={{ color: "var(--ta-cyan)" }}>Athletics</span>
+            </div>
+            <div
+              className="font-mono-ta text-[9px] uppercase"
+              style={{ letterSpacing: "0.25em", color: "var(--fg-3)", marginTop: "2px" }}
+            >
+              MMA Training
+            </div>
+          </div>
         </Link>
 
+        {/* Desktop links */}
         <div className="hidden items-center gap-1 md:flex">
           {links.map((link) => {
             const active = isActive(link);
@@ -70,36 +98,72 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors lg:text-sm lg:px-4 ${
-                  active ? "text-blood" : "text-foreground/70 hover:text-foreground"
-                }`}
+                className="relative px-3 py-2 text-xs font-bold uppercase transition-colors lg:px-4 lg:text-sm"
+                style={{
+                  fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                  letterSpacing: "0.12em",
+                  color: active ? "var(--ta-cyan)" : "var(--fg-3)",
+                }}
               >
                 {link.label}
                 {active && (
-                  <span className="absolute inset-x-2 -bottom-px h-0.5 bg-blood" />
+                  <span
+                    className="absolute inset-x-2 -bottom-px h-0.5 rounded-b"
+                    style={{
+                      background: "var(--ta-cyan)",
+                      boxShadow: "0 0 8px var(--ta-cyan)",
+                    }}
+                  />
                 )}
               </Link>
             );
           })}
         </div>
 
+        {/* Auth controls */}
         <div className="hidden items-center gap-3 md:flex">
           {loading ? (
-            <div className="h-8 w-24 animate-pulse rounded-lg bg-carbon-600" />
+            <div
+              className="h-8 w-24 animate-pulse rounded-xl"
+              style={{ background: "var(--ink-4)" }}
+            />
           ) : user ? (
             <>
               <Link
                 href="/profile"
-                className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground/80 hover:text-blood"
+                className="flex items-center gap-2 text-sm font-bold uppercase transition-colors"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  letterSpacing: "0.1em",
+                  color: "var(--fg-2)",
+                }}
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-blood bg-blood/15 text-xs font-black text-blood">
+                <span
+                  className="flex h-8 w-8 items-center justify-center rounded-xl text-xs font-black"
+                  style={{
+                    border: "1px solid rgba(0,212,230,.4)",
+                    background: "rgba(0,212,230,.08)",
+                    color: "var(--ta-cyan)",
+                  }}
+                >
                   {initialsOf(fighterName)}
                 </span>
                 <span className="hidden lg:inline">{fighterName}</span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="text-sm font-bold uppercase tracking-wider text-foreground/60 hover:text-blood"
+                className="text-sm font-bold uppercase transition-colors"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  letterSpacing: "0.1em",
+                  color: "var(--fg-4)",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "var(--ta-pink)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "var(--fg-4)")
+                }
               >
                 Logout
               </button>
@@ -108,7 +172,12 @@ export default function Navbar() {
             <>
               <Link
                 href="/login"
-                className="text-sm font-bold uppercase tracking-wider text-foreground/80 hover:text-blood"
+                className="text-sm font-bold uppercase transition-colors"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  letterSpacing: "0.1em",
+                  color: "var(--fg-3)",
+                }}
               >
                 Login
               </Link>
@@ -119,26 +188,44 @@ export default function Navbar() {
           )}
         </div>
 
+        {/* Mobile hamburger */}
         <button
           onClick={() => setOpen((v) => !v)}
-          className="rounded-lg border border-carbon-400 p-2 md:hidden"
+          className="rounded-xl p-2 md:hidden"
+          style={{
+            background: "var(--ink-3)",
+            border: "1px solid var(--ink-5)",
+            color: "var(--fg-2)",
+          }}
           aria-label="Toggle menu"
         >
-          <span className="block h-0.5 w-5 bg-foreground" />
-          <span className="mt-1 block h-0.5 w-5 bg-foreground" />
-          <span className="mt-1 block h-0.5 w-5 bg-foreground" />
+          <span className="block h-0.5 w-5" style={{ background: "currentColor" }} />
+          <span className="mt-1 block h-0.5 w-5" style={{ background: "currentColor" }} />
+          <span className="mt-1 block h-0.5 w-5" style={{ background: "currentColor" }} />
         </button>
       </nav>
 
+      {/* Mobile drawer */}
       {open && (
-        <div className="border-t border-carbon-500/60 bg-carbon-800 md:hidden">
+        <div
+          className="border-t md:hidden"
+          style={{
+            borderColor: "var(--ink-4)",
+            background: "var(--ink-1)",
+          }}
+        >
           <div className="flex flex-col p-4">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="px-2 py-3 text-sm font-bold uppercase tracking-wider text-foreground/80 hover:text-blood"
+                className="px-2 py-3 text-sm font-bold uppercase transition-colors"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  letterSpacing: "0.12em",
+                  color: isActive(link) ? "var(--ta-cyan)" : "var(--fg-3)",
+                }}
               >
                 {link.label}
               </Link>
@@ -147,12 +234,20 @@ export default function Navbar() {
               <Link
                 href="/profile"
                 onClick={() => setOpen(false)}
-                className="px-2 py-3 text-sm font-bold uppercase tracking-wider text-foreground/80 hover:text-blood"
+                className="px-2 py-3 text-sm font-bold uppercase transition-colors"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  letterSpacing: "0.12em",
+                  color: "var(--fg-3)",
+                }}
               >
                 Profil ({fighterName})
               </Link>
             )}
-            <div className="mt-2 flex gap-2 border-t border-carbon-500 pt-3">
+            <div
+              className="mt-2 flex gap-2 border-t pt-3"
+              style={{ borderColor: "var(--ink-4)" }}
+            >
               {user ? (
                 <button
                   onClick={handleLogout}

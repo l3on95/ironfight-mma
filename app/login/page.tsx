@@ -1,6 +1,5 @@
 "use client";
 
-import PageHeader from "@/components/PageHeader";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -50,12 +49,10 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleRedirectPending, setGoogleRedirectPending] = useState(false);
 
-  // Redirect wenn bereits eingeloggt (z. B. nach Google-Redirect)
   useEffect(() => {
     if (user) router.replace("/dashboard");
   }, [user, router]);
 
-  // Redirect-Fehler aus Google-Auth anzeigen
   useEffect(() => {
     if (redirectError) setError(redirectError);
   }, [redirectError]);
@@ -83,7 +80,6 @@ export default function LoginPage() {
     try {
       const result = await signInWithGoogle();
       if (result === null) {
-        // Mobile-Redirect eingeleitet
         setGoogleRedirectPending(true);
         return;
       }
@@ -98,31 +94,75 @@ export default function LoginPage() {
 
   if (googleRedirectPending) {
     return (
-      <div className="mx-auto max-w-md px-4 py-32 text-center sm:px-6">
-        <div className="mb-4 text-2xl">🔄</div>
-        <p className="text-sm uppercase tracking-widest text-foreground/60">
-          Weiterleitung zu Google…
-        </p>
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <div className="text-center">
+          <div className="mb-4 text-2xl">🔄</div>
+          <p className="font-mono-ta text-sm uppercase" style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}>
+            Weiterleitung zu Google…
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <>
-      <PageHeader eyebrow="Account" title="Login" />
-      <div className="mx-auto max-w-md px-4 py-12 sm:px-6">
-        <div className="card space-y-5">
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12 sm:px-6">
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <div
+            className="flex h-20 w-20 items-center justify-center rounded-2xl font-display-ta text-2xl font-black"
+            style={{
+              background: "linear-gradient(135deg, var(--ta-cyan), var(--ta-cyan-deep))",
+              color: "#001417",
+              boxShadow:
+                "0 0 40px rgba(0,212,230,.25), 0 0 80px rgba(255,45,120,.1)",
+            }}
+          >
+            TA
+          </div>
+          <div>
+            <h1
+              className="font-display-ta text-center font-black uppercase leading-none"
+              style={{ fontSize: "32px", letterSpacing: "0.04em" }}
+            >
+              Tidal Athletics
+            </h1>
+            <div
+              className="font-mono-ta mt-1.5 text-center text-[10px] uppercase"
+              style={{ letterSpacing: "0.25em", color: "var(--ta-cyan)" }}
+            >
+              Einloggen
+            </div>
+          </div>
+        </div>
 
-          {/* Google Sign-In */}
+        {/* Card */}
+        <div
+          className="rounded-2xl p-6"
+          style={{
+            background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+            border: "1px solid var(--ink-4)",
+          }}
+        >
+          {/* Google SSO */}
           <button
             type="button"
             onClick={handleGoogle}
             disabled={googleLoading || submitting}
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-carbon-400 bg-carbon-800 px-4 py-3 text-sm font-bold transition-all hover:border-foreground/50 hover:bg-carbon-700 active:scale-95 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all disabled:opacity-50"
+            style={{
+              background: "var(--ink-2)",
+              border: "1px solid var(--ink-5)",
+              color: "var(--fg-2)",
+            }}
           >
             {googleLoading ? (
               <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-foreground/30 border-t-foreground" />
+                <div
+                  className="h-4 w-4 animate-spin rounded-full border-2"
+                  style={{ borderColor: "var(--fg-4)", borderTopColor: "var(--ta-cyan)" }}
+                />
                 Verbinde…
               </>
             ) : (
@@ -134,16 +174,24 @@ export default function LoginPage() {
           </button>
 
           {/* Divider */}
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-carbon-500" />
-            <span className="text-xs uppercase tracking-widest text-foreground/40">oder</span>
-            <div className="h-px flex-1 bg-carbon-500" />
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1" style={{ background: "var(--ink-5)" }} />
+            <span
+              className="font-mono-ta text-[10px] uppercase"
+              style={{ letterSpacing: "0.2em", color: "var(--fg-4)" }}
+            >
+              oder
+            </span>
+            <div className="h-px flex-1" style={{ background: "var(--ink-5)" }} />
           </div>
 
-          {/* E-Mail Form */}
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-foreground/70">
+              <label
+                className="font-mono-ta mb-1.5 block text-[10px] uppercase"
+                style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+              >
                 E-Mail
               </label>
               <input
@@ -153,12 +201,15 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={submitting}
-                className="w-full rounded-xl border border-carbon-400 bg-carbon-800 px-3 py-2.5 text-sm focus:border-blood focus:outline-none disabled:opacity-50"
                 placeholder="name@beispiel.de"
+                className="input-field disabled:opacity-50"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-foreground/70">
+              <label
+                className="font-mono-ta mb-1.5 block text-[10px] uppercase"
+                style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+              >
                 Passwort
               </label>
               <input
@@ -168,13 +219,20 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={submitting}
-                className="w-full rounded-xl border border-carbon-400 bg-carbon-800 px-3 py-2.5 text-sm focus:border-blood focus:outline-none disabled:opacity-50"
                 placeholder="••••••••"
+                className="input-field disabled:opacity-50"
               />
             </div>
 
             {error && (
-              <div className="rounded-xl border border-blood/40 bg-blood/10 px-4 py-3 text-sm text-blood">
+              <div
+                className="rounded-xl px-4 py-3 text-sm"
+                style={{
+                  border: "1px solid rgba(255,45,120,.4)",
+                  background: "rgba(255,45,120,.08)",
+                  color: "var(--ta-pink)",
+                }}
+              >
                 {error}
               </div>
             )}
@@ -186,7 +244,10 @@ export default function LoginPage() {
             >
               {submitting ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  <span
+                    className="h-4 w-4 animate-spin rounded-full border-2"
+                    style={{ borderColor: "rgba(0,20,23,.3)", borderTopColor: "#001417" }}
+                  />
                   Einloggen…
                 </span>
               ) : (
@@ -195,24 +256,30 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="space-y-2 text-center text-sm text-foreground/60">
+          {/* Footer links */}
+          <div className="mt-5 space-y-2 text-center">
             <div>
               <Link
                 href="/forgot-password"
-                className="text-xs uppercase tracking-widest text-foreground/50 hover:text-blood"
+                className="font-mono-ta text-[10px] uppercase transition-colors"
+                style={{ letterSpacing: "0.2em", color: "var(--fg-4)" }}
               >
                 Passwort vergessen?
               </Link>
             </div>
-            <p>
+            <p className="font-mono-ta text-xs" style={{ color: "var(--fg-3)" }}>
               Noch kein Account?{" "}
-              <Link href="/register" className="font-bold text-blood hover:underline">
+              <Link
+                href="/register"
+                className="font-bold transition-colors"
+                style={{ color: "var(--ta-cyan)" }}
+              >
                 Registrieren
               </Link>
             </p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

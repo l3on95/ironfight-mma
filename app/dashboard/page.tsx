@@ -37,7 +37,53 @@ function formatHours(seconds: number) {
   if (seconds < 3600) return `${Math.round(seconds / 60)} min`;
   const h = Math.floor(seconds / 3600);
   const m = Math.round((seconds % 3600) / 60);
-  return `${h} h ${m} min`;
+  return `${h}h ${m}m`;
+}
+
+// 7-day streak calendar
+function StreakCalendar({ sessions }: { sessions: WorkoutSession[] }) {
+  const days = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+  const today = new Date();
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - 6 + i);
+    return d;
+  });
+
+  const sessionDays = new Set(
+    sessions.map((s) => s.completedAt.toDateString())
+  );
+
+  return (
+    <div className="mt-4 flex gap-1.5">
+      {weekDays.map((d, i) => {
+        const isToday = d.toDateString() === today.toDateString();
+        const done = sessionDays.has(d.toDateString());
+        return (
+          <div
+            key={i}
+            className="flex flex-1 flex-col items-center rounded-md py-2 font-mono-ta text-[9px] uppercase"
+            style={{
+              letterSpacing: "0.1em",
+              background: isToday
+                ? "var(--ta-pink)"
+                : done
+                ? "var(--ta-cyan)"
+                : "var(--ink-4)",
+              color: isToday ? "#fff" : done ? "#001417" : "var(--fg-3)",
+              boxShadow: isToday
+                ? "0 0 12px rgba(255,45,120,.5)"
+                : done
+                ? "0 0 12px rgba(0,212,230,.4)"
+                : "none",
+            }}
+          >
+            {days[i]}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 function DashboardContent() {
@@ -54,12 +100,16 @@ function DashboardContent() {
     setSessions(null);
     setStats(null);
 
-    // Timeout verhindert endlosen Ladezustand auf Mobile (z. B. bei Firestore-Problemen)
     const timeout = new Promise<never>((_, reject) =>
       setTimeout(
-        () => reject(new Error("Verbindung zu Firestore dauert zu lange. Bitte Internetverbindung prüfen.")),
-        15000,
-      ),
+        () =>
+          reject(
+            new Error(
+              "Verbindung zu Firestore dauert zu lange. Bitte Internetverbindung prüfen."
+            )
+          ),
+        15000
+      )
     );
 
     Promise.race([getRecentWorkouts(user.uid, 20), timeout])
@@ -70,7 +120,6 @@ function DashboardContent() {
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : "Unbekannter Fehler";
         setError(msg);
-        // Leere Sessions setzen damit kein endloser Skeleton-Zustand entsteht
         setSessions([]);
         setStats(computeStats([]));
       });
@@ -81,17 +130,27 @@ function DashboardContent() {
   }, [fetchData]);
 
   const statCards = [
-    { label: "Diese Woche", value: stats ? String(stats.thisWeek) : null },
+    {
+      label: "Diese Woche",
+      value: stats ? String(stats.thisWeek) : null,
+      delta: null,
+    },
     {
       label: "Streak",
       value: stats
         ? `${stats.streak} ${stats.streak === 1 ? "Tag" : "Tage"}`
         : null,
+      delta: null,
     },
-    { label: "Workouts gesamt", value: stats ? String(stats.total) : null },
+    {
+      label: "Workouts gesamt",
+      value: stats ? String(stats.total) : null,
+      delta: null,
+    },
     {
       label: "Trainingszeit",
       value: stats ? formatHours(stats.totalSeconds) : null,
+      delta: null,
     },
   ];
 
@@ -118,17 +177,79 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Stat-Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Streak hero card */}
+        <div
+          className="mb-6 rounded-2xl p-5 relative overflow-hidden"
+          style={{
+            background:
+              "radial-gradient(300px 200px at 90% -20%, rgba(0,212,230,.22), transparent 60%), linear-gradient(160deg, #0B1218, #050709)",
+            border: "1px solid var(--ink-5)",
+          }}
+        >
+          <div
+            className="pointer-events-none absolute right-[-20px] top-[-20px] h-48 w-48 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(0,212,230,.15), transparent 60%)",
+            }}
+          />
+          <div
+            className="font-mono-ta text-[10px] uppercase"
+            style={{ letterSpacing: "0.25em", color: "var(--fg-3)" }}
+          >
+            Trainings-Streak
+          </div>
+          {stats === null ? (
+            <Skeleton className="mt-2 h-16 w-24" />
+          ) : (
+            <div
+              className="font-display-ta mt-1 font-black leading-none"
+              style={{
+                fontSize: "72px",
+                color: "var(--ta-cyan)",
+                textShadow: "0 0 20px rgba(0,212,230,.5)",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {stats.streak}
+              <span
+                className="font-mono-ta ml-2 text-base"
+                style={{ color: "var(--fg-3)", letterSpacing: "0.2em" }}
+              >
+                {stats.streak === 1 ? "Tag" : "Tage"}
+              </span>
+            </div>
+          )}
+          {sessions !== null && (
+            <StreakCalendar sessions={sessions} />
+          )}
+        </div>
+
+        {/* Stat grid */}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {statCards.map((stat) => (
-            <div key={stat.label} className="card">
-              <div className="text-xs font-bold uppercase tracking-widest text-foreground/60">
+            <div
+              key={stat.label}
+              className="rounded-2xl p-4"
+              style={{
+                background:
+                  "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+                border: "1px solid var(--ink-4)",
+              }}
+            >
+              <div
+                className="font-mono-ta text-[9px] uppercase"
+                style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+              >
                 {stat.label}
               </div>
               {stat.value === null ? (
-                <Skeleton className="mt-3 h-10 w-20" />
+                <Skeleton className="mt-2 h-8 w-20" />
               ) : (
-                <div className="font-display mt-3 text-4xl font-black text-blood">
+                <div
+                  className="font-display-ta mt-2 font-black leading-none"
+                  style={{ fontSize: "28px", color: "var(--fg)" }}
+                >
                   {stat.value}
                 </div>
               )}
@@ -136,35 +257,65 @@ function DashboardContent() {
           ))}
         </div>
 
-        {/* Top-Kategorie + Quick-Actions */}
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          <div className="card">
-            <div className="text-xs font-bold uppercase tracking-widest text-foreground/60">
+        {/* Quick actions + top discipline */}
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          {/* Top category */}
+          <div
+            className="rounded-2xl p-5"
+            style={{
+              background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+              border: "1px solid var(--ink-4)",
+            }}
+          >
+            <div
+              className="font-mono-ta text-[9px] uppercase"
+              style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+            >
               Lieblings-Disziplin
             </div>
             {stats === null ? (
               <Skeleton className="mt-3 h-8 w-32" />
             ) : stats.topCategory ? (
-              <div className="mt-2">
-                <div className="heading-display text-2xl font-black text-blood">
+              <div className="mt-3">
+                <div
+                  className="font-display-ta font-black uppercase"
+                  style={{
+                    fontSize: "24px",
+                    color: "var(--ta-cyan)",
+                    letterSpacing: "0.04em",
+                  }}
+                >
                   {CATEGORY_LABEL[stats.topCategory.category]}
                 </div>
-                <div className="mt-1 text-xs uppercase tracking-widest text-foreground/60">
+                <div
+                  className="font-mono-ta mt-1 text-[10px] uppercase"
+                  style={{ letterSpacing: "0.15em", color: "var(--fg-3)" }}
+                >
                   {stats.topCategory.count} Sessions
                 </div>
               </div>
             ) : (
-              <div className="mt-2 text-sm text-foreground/60">
+              <div className="mt-3 text-sm" style={{ color: "var(--fg-3)" }}>
                 Noch keine Daten — starte dein erstes Workout!
               </div>
             )}
           </div>
 
-          <div className="card lg:col-span-2">
-            <div className="text-xs font-bold uppercase tracking-widest text-foreground/60">
+          {/* Quick start */}
+          <div
+            className="rounded-2xl p-5 lg:col-span-2"
+            style={{
+              background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+              border: "1px solid var(--ink-4)",
+            }}
+          >
+            <div
+              className="font-mono-ta text-[9px] uppercase"
+              style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+            >
               Schnell-Start
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Link href="/workout/generator" className="btn-primary text-sm">
                 Auto-Workout starten
               </Link>
@@ -181,39 +332,57 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* Letzte Sessions */}
-        <div className="mt-10 card">
+        {/* Session history */}
+        <div
+          className="mt-6 rounded-2xl p-5"
+          style={{
+            background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+            border: "1px solid var(--ink-4)",
+          }}
+        >
           <div className="flex items-center justify-between">
-            <h2 className="heading-display text-2xl font-black">
+            <h2
+              className="font-display-ta font-black uppercase"
+              style={{ fontSize: "22px", letterSpacing: "0.06em" }}
+            >
               Letzte Trainings
             </h2>
             <Link
               href="/training"
-              className="text-xs font-bold uppercase tracking-widest text-foreground/70 hover:text-blood"
+              className="font-mono-ta text-[10px] uppercase transition-colors"
+              style={{ letterSpacing: "0.2em", color: "var(--ta-cyan)" }}
             >
               + Neue Session
             </Link>
           </div>
 
           {sessions === null && !error && (
-            <div className="mt-6 space-y-3">
+            <div className="mt-6 flex flex-col gap-2">
               {[0, 1, 2].map((i) => (
-                <Skeleton key={i} className="h-14 w-full" />
+                <Skeleton key={i} className="h-16 w-full" />
               ))}
             </div>
           )}
 
           {sessions && sessions.length === 0 && !error && (
-            <div className="mt-6 rounded-xl border border-dashed border-carbon-400 bg-carbon-800/40 p-8 text-center">
+            <div
+              className="mt-6 rounded-xl p-8 text-center"
+              style={{
+                border: "1px dashed var(--ink-5)",
+                background: "var(--ink-2)",
+              }}
+            >
               <div className="text-3xl">🥊</div>
-              <p className="mt-3 text-sm font-bold text-foreground/70">Noch keine Sessions.</p>
-              <p className="mt-1 text-xs text-foreground/50">
+              <p className="mt-3 text-sm font-bold" style={{ color: "var(--fg-3)" }}>
+                Noch keine Sessions.
+              </p>
+              <p className="mt-1 text-xs" style={{ color: "var(--fg-4)" }}>
                 Starte dein erstes Training über{" "}
-                <Link href="/workout/generator" className="text-blood hover:underline">
+                <Link href="/workout/generator" style={{ color: "var(--ta-cyan)" }}>
                   Generator
                 </Link>{" "}
                 oder{" "}
-                <Link href="/training" className="text-blood hover:underline">
+                <Link href="/training" style={{ color: "var(--ta-cyan)" }}>
                   Trainingspläne
                 </Link>
                 .
@@ -222,38 +391,84 @@ function DashboardContent() {
           )}
 
           {sessions && sessions.length > 0 && (
-            <ul className="mt-6 divide-y divide-carbon-500/60">
+            <div className="mt-4 flex flex-col gap-2">
               {sessions.slice(0, 10).map((s) => (
-                <li
+                <div
                   key={s.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-3"
+                  className="flex items-center gap-3 rounded-xl p-3"
+                  style={{
+                    background: "var(--ink-2)",
+                    border: "1px solid var(--ink-4)",
+                  }}
                 >
-                  <div>
-                    <div className="font-bold">
+                  {/* Date block */}
+                  <div className="font-display-ta min-w-[44px] text-center leading-tight">
+                    <span
+                      className="block"
+                      style={{ fontSize: "22px", color: "var(--ta-cyan)", lineHeight: 1 }}
+                    >
+                      {s.completedAt.getDate()}
+                    </span>
+                    <span
+                      className="font-mono-ta text-[9px] uppercase"
+                      style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+                    >
+                      {s.completedAt.toLocaleDateString("de-DE", { month: "short" })}
+                    </span>
+                  </div>
+                  {/* Divider */}
+                  <div
+                    className="h-10 w-px flex-shrink-0"
+                    style={{ background: "var(--ink-5)" }}
+                  />
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div
+                      className="font-display-ta font-bold uppercase truncate"
+                      style={{ fontSize: "14px", letterSpacing: "0.04em" }}
+                    >
                       {s.label ?? "Freies Workout"}
                       {s.status === "aborted" && (
-                        <span className="ml-2 rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-widest text-yellow-300">
+                        <span
+                          className="ml-2 rounded px-1.5 py-0.5 text-[9px] uppercase"
+                          style={{
+                            border: "1px solid rgba(255,45,120,.3)",
+                            background: "rgba(255,45,120,.08)",
+                            color: "var(--ta-pink)",
+                            letterSpacing: "0.15em",
+                          }}
+                        >
                           abgebrochen
                         </span>
                       )}
                     </div>
-                    <div className="text-xs uppercase tracking-widest text-foreground/60">
+                    <div
+                      className="font-mono-ta mt-0.5 text-[9px] uppercase"
+                      style={{ letterSpacing: "0.15em", color: "var(--fg-3)" }}
+                    >
                       {s.category ? CATEGORY_LABEL[s.category] : "—"} ·{" "}
                       {s.rounds}× {Math.round(s.workSeconds / 60)} min · Pause{" "}
                       {s.restSeconds}s
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm font-bold text-blood">
+                  {/* Duration + time */}
+                  <div className="text-right flex-shrink-0">
+                    <div
+                      className="font-display-ta font-bold"
+                      style={{ fontSize: "16px", color: "var(--ta-pink)" }}
+                    >
                       {formatMinutes(s.totalWorkSeconds)}
                     </div>
-                    <div className="text-xs uppercase tracking-widest text-foreground/60">
+                    <div
+                      className="font-mono-ta text-[9px] uppercase"
+                      style={{ letterSpacing: "0.15em", color: "var(--fg-4)" }}
+                    >
                       {formatRelative(s.completedAt)}
                     </div>
                   </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </div>
