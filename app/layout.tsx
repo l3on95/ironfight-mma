@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/lib/auth-context";
 import PwaRegister from "@/components/PwaRegister";
+import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import FighterNameModal from "@/components/auth/FighterNameModal";
 
 const barlowCondensed = Barlow_Condensed({
@@ -65,6 +66,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <PwaRegister />
+          <PwaInstallPrompt />
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
