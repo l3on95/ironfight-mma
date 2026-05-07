@@ -274,14 +274,14 @@ function GuestHome() {
           alt=""
           fill
           className="pointer-events-none object-cover object-center"
-          style={{ opacity: 0.6 }}
+          style={{ opacity: 0.8 }}
           priority
         />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.12), transparent 60%), radial-gradient(420px 260px at 0% 110%, rgba(255,45,120,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.65), rgba(5,7,9,.75) 70%)",
+              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.12), transparent 60%), radial-gradient(420px 260px at 0% 110%, rgba(255,45,120,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.50), rgba(5,7,9,.60) 70%)",
           }}
         />
         <div
@@ -534,14 +534,14 @@ function UserHome() {
           alt=""
           fill
           className="pointer-events-none object-cover object-center"
-          style={{ opacity: 0.55 }}
+          style={{ opacity: 0.75 }}
           priority
         />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.70), rgba(5,7,9,.80) 70%)",
+              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.55), rgba(5,7,9,.65) 70%)",
           }}
         />
         <div
