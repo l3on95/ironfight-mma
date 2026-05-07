@@ -59,7 +59,7 @@ export default function FighterNameModal() {
           <p className="mt-3 text-sm text-foreground/70">
             Wähle deinen Fighter-Namen für die App. Du kannst das jederzeit in
             den Einstellungen ändern. Wenn du diesen Schritt überspringst,
-            heißt du erstmal einfach <strong>Fighter</strong>.
+            heißt du erstmal einfach <strong>Flex</strong>.
           </p>
         </div>
 

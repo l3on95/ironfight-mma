@@ -224,5 +224,5 @@ export function useAuth() {
 
 export function useFighterName(): string {
   const { profile } = useAuth();
-  return profile?.displayName?.trim() || "Fighter";
+  return profile?.displayName?.trim() || "Flex";
 }

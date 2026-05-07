@@ -23,13 +23,13 @@ export function greetingKind(date: Date = new Date()): GreetingKind {
 
 /**
  * Komplette Begrüßung inklusive Anzeigename.
- * @param name vom Nutzer gewählter Anzeigename ODER null/undefined für "Fighter"
+ * @param name vom Nutzer gewählter Anzeigename ODER null/undefined für "Flex"
  */
 export function greetingFor(
   name: string | null | undefined,
   date: Date = new Date(),
 ): string {
-  const fighter = (name && name.trim()) || "Fighter";
+  const fighter = (name && name.trim()) || "Flex";
   switch (greetingKind(date)) {
     case "morning":
       return `Guten Morgen, ${fighter}`;

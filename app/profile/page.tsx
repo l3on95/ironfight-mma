@@ -57,7 +57,7 @@ function ProfileContent() {
               </div>
               <p className="mt-2 text-sm text-foreground/70">
                 So heißt du in der App. Lass das Feld leer, wenn du einfach
-                „Fighter" bleiben willst.
+                „Flex" bleiben willst.
               </p>
               <form onSubmit={handleSaveName} className="mt-4 space-y-3">
                 <input
@@ -65,7 +65,7 @@ function ProfileContent() {
                   maxLength={30}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Fighter"
+                  placeholder="Flex"
                   className="w-full rounded-sm border border-carbon-400 bg-carbon-800 px-3 py-2 text-sm focus:border-blood focus:outline-none"
                 />
                 {error && (
@@ -111,7 +111,7 @@ function ProfileContent() {
                 <div className="flex justify-between gap-3">
                   <dt className="text-foreground/60">Angezeigter Name</dt>
                   <dd className="font-bold text-blood">
-                    {profile?.displayName?.trim() || "Fighter"}
+                    {profile?.displayName?.trim() || "Flex"}
                   </dd>
                 </div>
               </dl>
