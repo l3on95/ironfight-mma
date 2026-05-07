@@ -1,63 +1,101 @@
 /**
- * IronFight MMA — Audio Engine (Web Audio API)
+ * IronFight MMA — Audio Engine (Hybrid: MP3 + Web Audio API)
  *
- * Verwendet AudioContext statt HTMLAudioElement, um iOS-Probleme zu vermeiden:
- *  - Kein "Now Playing"-Eintrag im iOS-Lockscreen / Control Center
- *  - Keine dauerhafte AVAudioSession (war der Grund für Keep-Alive-Loop)
- *  - Spotify / externe Musik wird nur kurz unterbrochen (Dauer des Tons)
- *    und setzt danach automatisch wieder ein
- *  - Synthetische Sounds — keine externen MP3-Assets nötig
+ * Glocken-Sounds: HTMLAudioElement mit den Original-MP3-Dateien.
+ * Countdown-Tick: Web Audio API (kurz, kein Asset nötig).
+ * Kein Keep-Alive-Loop → kein dauerhafter Lockscreen-Medienplayer.
  *
- * iOS-Grenzen (technisch unvermeidbar aus Web-Apps):
- *  - Hardware-Stummschalter (silent switch) dämpft AudioContext-Töne
- *  - AVAudioSession-Ducking (30 % Lautstärke-Reduzierung externer Apps)
- *    ist aus einer Web-App nicht steuerbar — nur native iOS-Apps können das
- *  - Ganz kurze Unterbrechung anderer Musik beim Tonabspielen bleibt bestehen
+ * iOS-Verhalten:
+ *  - Lockscreen-Player erscheint nur kurz während des Glockentons (~1-2 Sek.)
+ *  - Spotify wird kurz unterbrochen, setzt danach automatisch wieder ein
+ *  - AVAudioSession wird nach dem Ton freigegeben (kein dauerhafter Loop mehr)
+ *
+ * iOS-Grenzen (technisch nicht aus Web-Apps steuerbar):
+ *  - AVAudioSession-Ducking (30 % Lautstärke) nur für native Apps
+ *  - Safari erzwingt Playback-Kategorie; kein Ambient-Mixing möglich
  */
 
-let _ctx: AudioContext | null = null;
-let _muted = false;
+const BELL_URL      = "/audio/cartoon-music-soundtrack-boxing-bell-hit-double-489811.mp3";
+const COUNTDOWN_URL = "/audio/lesiakower-countdown-sound-effect-8-bit-151797.mp3";
+
+// ─── State ────────────────────────────────────────────────────────────────────
+
+let _bell:      HTMLAudioElement | null = null;
+let _countdown: HTMLAudioElement | null = null;
+let _ctx:       AudioContext | null = null;
+
+let _unlocked = false;
+let _muted    = false;
 let _vibrateEnabled = true;
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 export function setAudioMuted(value: boolean) { _muted = value; }
-export function isAudioUnlocked(): boolean { return _ctx?.state === "running"; }
+export function isAudioUnlocked(): boolean    { return _unlocked; }
 
-/** No-op — rückwärtskompatibel mit bestehenden Importen */
+/** No-op — rückwärtskompatibel */
 export function initAudio(): void {}
 /** No-op — Keep-Alive wurde entfernt */
 export function stopKeepAlive(): void {}
 
-/**
- * Muss in einer User-Geste aufgerufen werden.
- * Resumt den AudioContext (iOS-Anforderung für Audio).
- */
-export async function unlockAudio(): Promise<boolean> {
-  if (typeof window === "undefined") return false;
-  if (!_ctx) {
-    _ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-  }
-  if (_ctx.state === "suspended") {
-    try { await _ctx.resume(); } catch { return false; }
-  }
-  return _ctx.state === "running";
-}
-
-// ─── AudioContext abrufen (nur wenn aktiv) ────────────────────────────────────
+// ─── AudioContext (für Countdown-Ticks) ───────────────────────────────────────
 
 function getCtx(): AudioContext | null {
   if (_muted || typeof window === "undefined") return null;
   if (!_ctx) {
     _ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
   }
-  if (_ctx.state === "suspended") {
-    _ctx.resume().catch(() => {});
-  }
+  if (_ctx.state === "suspended") _ctx.resume().catch(() => {});
   return _ctx.state === "running" ? _ctx : null;
 }
 
-// ─── Synth-Hilfsfunktionen ────────────────────────────────────────────────────
+// ─── Unlock ───────────────────────────────────────────────────────────────────
+
+/**
+ * Muss in einer User-Geste aufgerufen werden.
+ * Aktiviert AudioContext und pre-buffert die MP3-Elemente für iOS.
+ */
+export async function unlockAudio(): Promise<boolean> {
+  if (typeof window === "undefined") return false;
+  if (_unlocked) return true;
+
+  // AudioContext für Countdown-Ticks resume
+  if (!_ctx) {
+    _ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+  }
+  if (_ctx.state === "suspended") {
+    try { await _ctx.resume(); } catch { /* ignore */ }
+  }
+
+  // MP3-Elemente lazy anlegen und kurz anspielen+pausieren → iOS Pre-Buffer
+  if (!_bell) {
+    _bell = new Audio(BELL_URL);
+    _bell.preload = "auto";
+  }
+  if (!_countdown) {
+    _countdown = new Audio(COUNTDOWN_URL);
+    _countdown.preload = "auto";
+  }
+  for (const el of [_bell, _countdown]) {
+    try { await el.play(); el.pause(); el.currentTime = 0; } catch { /* ignore */ }
+  }
+
+  _unlocked = true;
+  return true;
+}
+
+// ─── MP3-Wiedergabe ───────────────────────────────────────────────────────────
+
+function playMp3(el: HTMLAudioElement | null, volume: number): void {
+  if (!el || !_unlocked || _muted) return;
+  try {
+    el.volume = Math.max(0, Math.min(1, volume));
+    el.currentTime = 0;
+    el.play().catch(() => {});
+  } catch { /* ignore */ }
+}
+
+// ─── Web Audio Synth-Hilfsfunktionen (für Countdown-Tick) ────────────────────
 
 function createGain(ctx: AudioContext, value: number): GainNode {
   const g = ctx.createGain();
@@ -107,59 +145,29 @@ function noiseBurst(ctx: AudioContext, output: GainNode, startTime: number, dura
 
 // ─── PUBLIC API ───────────────────────────────────────────────────────────────
 
-/** Rundenstart — aufsteigender Dreiklang + Punch (klingt wie Kampfglocke) */
-export function playRoundStart(): void {
-  const ctx = getCtx();
-  if (!ctx) return;
-  const master = createGain(ctx, 0.7);
-  const now = ctx.currentTime;
-  tone(ctx, master, 440, now,        0.18, "square", 0.005, 0.08);
-  tone(ctx, master, 554, now + 0.20, 0.18, "square", 0.005, 0.08);
-  tone(ctx, master, 660, now + 0.40, 0.35, "square", 0.005, 0.20);
-  tone(ctx, master, 80,  now,        0.10, "sine",   0.002, 0.08);
-  tone(ctx, master, 80,  now + 0.20, 0.10, "sine",   0.002, 0.08);
-  tone(ctx, master, 80,  now + 0.40, 0.10, "sine",   0.002, 0.08);
-  noiseBurst(ctx, master, now);
-  noiseBurst(ctx, master, now + 0.20);
-  noiseBurst(ctx, master, now + 0.40);
-}
+/** Rundenstart — Boxing Bell (MP3) */
+export function playRoundStart(): void { playMp3(_bell, 0.9); }
 
-/** Rundenende — absteigende Alarm-Sequenz */
-export function playRoundEnd(): void {
-  const ctx = getCtx();
-  if (!ctx) return;
-  const master = createGain(ctx, 0.75);
-  const now = ctx.currentTime;
-  const freqs = [880, 660, 880, 660, 440];
-  freqs.forEach((f, i) => {
-    tone(ctx, master, f, now + i * 0.15, 0.12, "sawtooth", 0.005, 0.06);
-    noiseBurst(ctx, master, now + i * 0.15, 0.03);
-  });
-  tone(ctx, master, 330, now + freqs.length * 0.15, 0.5, "square", 0.01, 0.35);
-}
+/** Rundenende — Boxing Bell (MP3) */
+export function playRoundEnd(): void { playMp3(_bell, 0.85); }
 
-/** Session-Ende — lauterer Abschluss-Sound */
-export function playSessionEnd(): void {
-  const ctx = getCtx();
-  if (!ctx) return;
-  const master = createGain(ctx, 0.8);
-  const now = ctx.currentTime;
-  const freqs = [880, 660, 880, 660, 440, 660, 880];
-  freqs.forEach((f, i) => {
-    tone(ctx, master, f, now + i * 0.15, 0.14, "sawtooth", 0.005, 0.07);
-    noiseBurst(ctx, master, now + i * 0.15, 0.035);
-  });
-  tone(ctx, master, 440, now + freqs.length * 0.15 + 0.1, 0.8, "square", 0.01, 0.6);
-}
+/** Session-Ende — Boxing Bell (MP3) */
+export function playSessionEnd(): void { playMp3(_bell, 0.85); }
 
 /**
- * Countdown-Tick — kurzer Klick (4 Sek. vor Kampfbeginn)
+ * Countdown-Ton — MP3 wenn freigeschaltet, sonst synthetisch
  * @param volume 0..1
  */
 export function playCountdownTick(volume = 1.0): void {
+  const vol = Math.max(0.2, Math.min(1, volume));
+  if (_unlocked && _countdown && !_muted) {
+    playMp3(_countdown, vol * 0.9);
+    return;
+  }
+  // Fallback: synthetischer Tick (funktioniert ohne vorherigen Unlock)
   const ctx = getCtx();
   if (!ctx) return;
-  const master = createGain(ctx, Math.max(0.2, Math.min(1, volume)) * 0.6);
+  const master = createGain(ctx, vol * 0.5);
   const now = ctx.currentTime;
   tone(ctx, master, 1200, now, 0.04, "sine", 0.001, 0.02);
   noiseBurst(ctx, master, now, 0.02);
