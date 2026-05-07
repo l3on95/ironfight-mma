@@ -46,16 +46,24 @@ export default function WorkoutPage() {
     );
   }
 
-  function handleGenerate() {
+  function buildPayload() {
     const workout = generateWorkout({
       category,
       difficulty,
       equipment,
       durationMinutes: duration,
     });
-    const params = new URLSearchParams();
-    params.set("payload", encodeURIComponent(JSON.stringify(workout)));
-    router.push(`/workout?${params.toString()}`);
+    const p = new URLSearchParams();
+    p.set("payload", encodeURIComponent(JSON.stringify(workout)));
+    return p.toString();
+  }
+
+  function handleGenerate() {
+    router.push(`/workout?${buildPayload()}`);
+  }
+
+  function handleSessionMode() {
+    router.push(`/workout/session?${buildPayload()}`);
   }
 
   const stats = useMemo(() => {
@@ -263,25 +271,48 @@ export default function WorkoutPage() {
           </Section>
 
           {/* Action */}
-          <div className="card">
-            <div className="flex items-center justify-between gap-4">
-              <div className="text-xs uppercase tracking-widest text-foreground/60">
-                <div>
-                  <strong className="text-foreground">{CATEGORY_LABEL[category]}</strong>{" "}
-                  · {DIFFICULTY_LABEL[difficulty]} · {duration} min
-                </div>
-                <div className="mt-1">Equipment: {stats.equipmentLabels}</div>
+          <div className="card space-y-4">
+            <div className="text-xs uppercase tracking-widest text-foreground/60">
+              <div>
+                <strong className="text-foreground">{CATEGORY_LABEL[category]}</strong>{" "}
+                · {DIFFICULTY_LABEL[difficulty]} · {duration} min
               </div>
+              <div className="mt-1">Equipment: {stats.equipmentLabels}</div>
+            </div>
+
+            {/* Zwei Modi */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              {/* Session-Modus: minimal, geführt, mit Animation + Sprache */}
+              <button
+                onClick={handleSessionMode}
+                disabled={equipment.length === 0}
+                className="flex flex-col gap-1 rounded-xl border border-blood bg-blood/10 px-4 py-4 text-left transition-all hover:bg-blood/20 disabled:opacity-40"
+              >
+                <span className="text-sm font-black uppercase tracking-widest text-blood">
+                  ▶ Training-Modus
+                </span>
+                <span className="text-[11px] text-foreground/60">
+                  Geführt · Animation · Sprachansagen
+                </span>
+              </button>
+
+              {/* Detail-Ansicht: klassisch mit allen Infos */}
               <button
                 onClick={handleGenerate}
-                className="btn-primary text-base"
                 disabled={equipment.length === 0}
+                className="flex flex-col gap-1 rounded-xl border border-carbon-400 bg-carbon-700/40 px-4 py-4 text-left transition-all hover:border-blood/60 disabled:opacity-40"
               >
-                Workout generieren →
+                <span className="text-sm font-black uppercase tracking-widest text-foreground">
+                  Detail-Ansicht →
+                </span>
+                <span className="text-[11px] text-foreground/60">
+                  Alle Infos · Technik-Links · Accordion
+                </span>
               </button>
             </div>
+
             {equipment.length === 0 && (
-              <div className="mt-3 text-xs text-yellow-300">
+              <div className="text-xs text-yellow-300">
                 Wähle mindestens ein Equipment (oder „Keine Geräte" für Bodyweight).
               </div>
             )}
