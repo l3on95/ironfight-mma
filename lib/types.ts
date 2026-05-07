@@ -220,6 +220,8 @@ export interface UserProfile {
   displayName: string | null;
   /** Reserviert für spätere Community-Funktionen — eindeutig, optional */
   username?: string | null;
+  /** Optionale Rolle — wird manuell in Firebase Console gesetzt */
+  role?: UserRole;
   settings: UserSettings;
   createdAt?: Date;
   /** Wurde der erste-Login-Onboarding-Flow durchlaufen? */
@@ -261,4 +263,44 @@ export interface Badge {
   label: string;
   description: string;
   unlockedAt?: Date;
+}
+
+// ─── Stundenplan & Bibliothek ──────────────────────────────────────────────
+
+export type UserRole = "user" | "trainer" | "admin";
+
+export interface TrainingBlock {
+  id: string;
+  /** 0=Montag … 6=Sonntag (europäische Konvention) */
+  weekday: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  title: string;
+  startTime: string; // "16:15"
+  endTime: string;   // "17:00"
+  category?: Category;
+  level?: "kids" | "teens" | "adult" | "advanced" | "mixed";
+}
+
+export interface TrainingSession {
+  id: string; // `${blockId}_${weekIdentifier}`
+  trainingBlockId: string;
+  weekIdentifier: string; // "2026-W19" — nur intern, nie im UI
+  exerciseIds: string[];
+  updatedAt?: Date;
+  updatedBy?: string;
+}
+
+export interface LibraryEntry {
+  exerciseId: string;
+  source: "training" | "manual";
+  trainingSessionId?: string;
+  contextLabel?: string;
+  addedAt: Date;
+}
+
+export interface Participation {
+  trainingSessionId: string;
+  trainingBlockId: string;
+  blockTitle: string;
+  weekIdentifier: string;
+  joinedAt: Date;
 }

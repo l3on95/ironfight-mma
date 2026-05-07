@@ -19,6 +19,8 @@ const links: NavLink[] = [
     label: "Workout",
     activePattern: /^\/(workout|training)/,
   },
+  { href: "/schedule", label: "Stundenplan" },
+  { href: "/library", label: "Bibliothek" },
   { href: "/techniques", label: "Techniken" },
   { href: "/regeln", label: "Regeln" },
   { href: "/timer", label: "Timer" },

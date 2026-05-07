@@ -11,6 +11,7 @@ import { getFirestoreDb } from "./firebase";
 import {
   DEFAULT_USER_SETTINGS,
   type UserProfile,
+  type UserRole,
   type UserSettings,
 } from "./types";
 
@@ -28,6 +29,7 @@ type ProfileDoc = {
   authProviderName: string | null;
   displayName: string | null;
   username?: string | null;
+  role?: UserRole;
   settings: UserSettings;
   onboarded: boolean;
   createdAt?: Timestamp;
@@ -50,6 +52,7 @@ export async function getUserProfile(
     authProviderName: data.authProviderName,
     displayName: data.displayName,
     username: data.username ?? null,
+    role: data.role,
     settings: { ...DEFAULT_USER_SETTINGS, ...(data.settings ?? {}) },
     onboarded: data.onboarded === true,
     createdAt: data.createdAt?.toDate(),
@@ -78,6 +81,7 @@ export async function ensureUserProfile(user: User): Promise<UserProfile> {
       authProviderName: user.displayName ?? data.authProviderName,
       displayName: data.displayName,
       username: data.username ?? null,
+      role: data.role,
       settings: { ...DEFAULT_USER_SETTINGS, ...(data.settings ?? {}) },
       onboarded: data.onboarded === true,
       createdAt: data.createdAt?.toDate(),
