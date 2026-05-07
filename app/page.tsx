@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
 import { greetingFor } from "@/lib/greeting";
 
@@ -267,20 +268,20 @@ function GuestHome() {
   return (
     <>
       {/* ── HERO ── */}
-      <section
-        className="relative"
-        style={{
-          backgroundImage: "url('/background_pictures/Gemini_Generated_Image_oxsx04oxsx04oxsx.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
-        }}
-      >
+      <section className="relative overflow-hidden">
+        <Image
+          src="/background_pictures/Gemini_Generated_Image_oxsx04oxsx04oxsx.png"
+          alt=""
+          fill
+          className="pointer-events-none object-cover object-center"
+          style={{ opacity: 0.8 }}
+          priority
+        />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.12), transparent 60%), radial-gradient(420px 260px at 0% 110%, rgba(255,45,120,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.30), rgba(5,7,9,.45) 70%)",
+              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.12), transparent 60%), radial-gradient(420px 260px at 0% 110%, rgba(255,45,120,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.50), rgba(5,7,9,.60) 70%)",
           }}
         />
         <div
@@ -373,7 +374,7 @@ function GuestHome() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="py-14 sm:py-20" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-14 sm:py-20" style={{ borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-10 text-center sm:text-left">
             <div
@@ -428,7 +429,7 @@ function GuestHome() {
       </section>
 
       {/* ── DISZIPLINEN ── */}
-      <section className="py-14 sm:py-20" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-14 sm:py-20" style={{ borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-6 flex items-end justify-between">
             <div>
@@ -459,7 +460,7 @@ function GuestHome() {
       </section>
 
       {/* ── QUICK ACCESS ── */}
-      <section className="py-10 sm:py-16" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-10 sm:py-16" style={{ borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div
             className="font-mono-ta mb-6 text-[10px] uppercase"
@@ -474,7 +475,7 @@ function GuestHome() {
       {/* ── CTA ── */}
       <section
         className="relative overflow-hidden py-16 sm:py-24"
-        style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}
+        style={{ borderTop: "1px solid var(--ink-4)" }}
       >
         <div
           className="pointer-events-none absolute inset-0"
@@ -527,20 +528,20 @@ function UserHome() {
   return (
     <>
       {/* ── GREETING HERO ── */}
-      <section
-        className="relative"
-        style={{
-          backgroundImage: "url('/background_pictures/Gemini_Generated_Image_oxsx04oxsx04oxsx.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
-        }}
-      >
+      <section className="relative overflow-hidden">
+        <Image
+          src="/background_pictures/Gemini_Generated_Image_oxsx04oxsx04oxsx.png"
+          alt=""
+          fill
+          className="pointer-events-none object-cover object-center"
+          style={{ opacity: 0.75 }}
+          priority
+        />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.35), rgba(5,7,9,.50) 70%)",
+              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.55), rgba(5,7,9,.65) 70%)",
           }}
         />
         <div
@@ -589,7 +590,7 @@ function UserHome() {
       </section>
 
       {/* ── QUICK ACTIONS ── */}
-      <section className="py-10 sm:py-14" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-10 sm:py-14" style={{ borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div
             className="font-mono-ta mb-6 text-[10px] uppercase"
@@ -602,7 +603,7 @@ function UserHome() {
       </section>
 
       {/* ── TRAININGSPLÄNE ── */}
-      <section className="py-14 sm:py-20" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-14 sm:py-20" style={{ borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-6 flex items-end justify-between">
             <div>
@@ -633,7 +634,7 @@ function UserHome() {
       </section>
 
       {/* ── DASHBOARD TEASER ── */}
-      <section className="py-8 sm:py-12" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-8 sm:py-12" style={{ borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div
             className="flex flex-col gap-4 rounded-2xl p-5 sm:flex-row sm:items-center sm:justify-between"
