@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
 import { greetingFor } from "@/lib/greeting";
 
@@ -268,20 +267,20 @@ function GuestHome() {
   return (
     <>
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden" style={{ position: "sticky", top: 0, zIndex: 0 }}>
-        <Image
-          src="/background_pictures/Gemini_Generated_Image_oxsx04oxsx04oxsx.png"
-          alt=""
-          fill
-          className="pointer-events-none object-cover object-center"
-          style={{ opacity: 0.8 }}
-          priority
-        />
+      <section
+        className="relative"
+        style={{
+          backgroundImage: "url('/background_pictures/Gemini_Generated_Image_oxsx04oxsx04oxsx.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }}
+      >
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.12), transparent 60%), radial-gradient(420px 260px at 0% 110%, rgba(255,45,120,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.50), rgba(5,7,9,.60) 70%)",
+              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.12), transparent 60%), radial-gradient(420px 260px at 0% 110%, rgba(255,45,120,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.30), rgba(5,7,9,.45) 70%)",
           }}
         />
         <div
@@ -528,20 +527,20 @@ function UserHome() {
   return (
     <>
       {/* ── GREETING HERO ── */}
-      <section className="relative overflow-hidden" style={{ position: "sticky", top: 0, zIndex: 0 }}>
-        <Image
-          src="/background_pictures/Gemini_Generated_Image_oxsx04oxsx04oxsx.png"
-          alt=""
-          fill
-          className="pointer-events-none object-cover object-center"
-          style={{ opacity: 0.75 }}
-          priority
-        />
+      <section
+        className="relative"
+        style={{
+          backgroundImage: "url('/background_pictures/Gemini_Generated_Image_oxsx04oxsx04oxsx.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }}
+      >
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.55), rgba(5,7,9,.65) 70%)",
+              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.35), rgba(5,7,9,.50) 70%)",
           }}
         />
         <div
