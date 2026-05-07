@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-carbon-500/60 bg-carbon-900/80">
+    <footer className="border-t border-carbon-500/60 bg-carbon-900" style={{ position: "relative", zIndex: 10 }}>
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
         {/* Brand */}
         <div>

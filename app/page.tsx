@@ -268,7 +268,7 @@ function GuestHome() {
   return (
     <>
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden" style={{ position: "sticky", top: 0, zIndex: 0 }}>
         <Image
           src="/background_pictures/Gemini_Generated_Image_oxsx04oxsx04oxsx.png"
           alt=""
@@ -374,7 +374,7 @@ function GuestHome() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="py-14 sm:py-20" style={{ borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-14 sm:py-20" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-10 text-center sm:text-left">
             <div
@@ -429,7 +429,7 @@ function GuestHome() {
       </section>
 
       {/* ── DISZIPLINEN ── */}
-      <section className="py-14 sm:py-20" style={{ borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-14 sm:py-20" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-6 flex items-end justify-between">
             <div>
@@ -460,7 +460,7 @@ function GuestHome() {
       </section>
 
       {/* ── QUICK ACCESS ── */}
-      <section className="py-10 sm:py-16" style={{ borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-10 sm:py-16" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div
             className="font-mono-ta mb-6 text-[10px] uppercase"
@@ -475,7 +475,7 @@ function GuestHome() {
       {/* ── CTA ── */}
       <section
         className="relative overflow-hidden py-16 sm:py-24"
-        style={{ borderTop: "1px solid var(--ink-4)" }}
+        style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}
       >
         <div
           className="pointer-events-none absolute inset-0"
@@ -528,7 +528,7 @@ function UserHome() {
   return (
     <>
       {/* ── GREETING HERO ── */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden" style={{ position: "sticky", top: 0, zIndex: 0 }}>
         <Image
           src="/background_pictures/Gemini_Generated_Image_oxsx04oxsx04oxsx.png"
           alt=""
@@ -590,7 +590,7 @@ function UserHome() {
       </section>
 
       {/* ── QUICK ACTIONS ── */}
-      <section className="py-10 sm:py-14" style={{ borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-10 sm:py-14" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div
             className="font-mono-ta mb-6 text-[10px] uppercase"
@@ -603,7 +603,7 @@ function UserHome() {
       </section>
 
       {/* ── TRAININGSPLÄNE ── */}
-      <section className="py-14 sm:py-20" style={{ borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-14 sm:py-20" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-6 flex items-end justify-between">
             <div>
@@ -634,7 +634,7 @@ function UserHome() {
       </section>
 
       {/* ── DASHBOARD TEASER ── */}
-      <section className="py-8 sm:py-12" style={{ borderTop: "1px solid var(--ink-4)" }}>
+      <section className="py-8 sm:py-12" style={{ position: "relative", zIndex: 10, background: "#050505", borderTop: "1px solid var(--ink-4)" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div
             className="flex flex-col gap-4 rounded-2xl p-5 sm:flex-row sm:items-center sm:justify-between"
