@@ -39,10 +39,12 @@ import {
   serverTimestamp,
   setDoc,
   Timestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { getFirestoreDb } from "./firebase";
-import type { LibraryEntry, TrainingSession } from "./types";
+import { TRAINING_BLOCKS, getWeekIdentifier } from "./schedule";
+import type { BlockSubscription, LibraryEntry, TrainingSession } from "./types";
 
 // ─── Training Sessions ─────────────────────────────────────────────────────
 
@@ -318,4 +320,108 @@ export async function getSessionCountForWeek(weekId: string): Promise<number> {
   );
   const snap = await getDocs(q);
   return snap.size;
+}
+
+// ─── Kurs-Abonnements ──────────────────────────────────────────────────────
+
+function subscriptionDocRef(uid: string, blockId: string) {
+  return doc(getFirestoreDb(), "users", uid, "subscriptions", blockId);
+}
+
+function subscriptionColRef(uid: string) {
+  return collection(getFirestoreDb(), "users", uid, "subscriptions");
+}
+
+/** Abonniert einen festen Wochenkurs. Idempotent. */
+export async function subscribeToBlock(
+  uid: string,
+  blockId: string,
+): Promise<void> {
+  const block = TRAINING_BLOCKS.find((b) => b.id === blockId);
+  if (!block) throw new Error(`Unknown training block: ${blockId}`);
+
+  const ref = subscriptionDocRef(uid, blockId);
+  const existing = await getDoc(ref);
+  if (existing.exists()) return;
+
+  await setDoc(ref, {
+    trainingBlockId: blockId,
+    blockTitle: block.title,
+    weekday: block.weekday,
+    startTime: block.startTime,
+    subscribedAt: serverTimestamp(),
+  });
+}
+
+/** Hebt das Abo eines Kurses auf. */
+export async function unsubscribeFromBlock(
+  uid: string,
+  blockId: string,
+): Promise<void> {
+  await deleteDoc(subscriptionDocRef(uid, blockId));
+}
+
+/** Prüft ob der User einen Kurs abonniert hat. */
+export async function isSubscribedToBlock(
+  uid: string,
+  blockId: string,
+): Promise<boolean> {
+  const snap = await getDoc(subscriptionDocRef(uid, blockId));
+  return snap.exists();
+}
+
+/** Listet alle Kurs-Abos eines Users. */
+export async function getSubscriptions(
+  uid: string,
+): Promise<BlockSubscription[]> {
+  const snap = await getDocs(subscriptionColRef(uid));
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      trainingBlockId: data.trainingBlockId as string,
+      blockTitle: data.blockTitle as string,
+      weekday: data.weekday as number,
+      startTime: data.startTime as string,
+      subscribedAt: (data.subscribedAt as Timestamp | undefined)?.toDate() ?? new Date(),
+      lastSyncedWeek: data.lastSyncedWeek as string | undefined,
+    };
+  });
+}
+
+/**
+ * Synchronisiert alle abonnierten Kurse für die aktuelle Woche.
+ * Holt zugewiesene Techniken und packt sie in die Library.
+ * `lastSyncedWeek` verhindert Doppelsync innerhalb derselben Woche.
+ *
+ * @returns Anzahl neu zur Bibliothek hinzugefügter Techniken
+ */
+export async function syncSubscribedBlocks(uid: string): Promise<number> {
+  const subs = await getSubscriptions(uid);
+  if (subs.length === 0) return 0;
+
+  const weekId = getWeekIdentifier();
+  let totalAdded = 0;
+
+  for (const sub of subs) {
+    if (sub.lastSyncedWeek === weekId) continue;
+
+    const session = await getTrainingSession(sub.trainingBlockId, weekId);
+    const hasTechniques = !!session && (session.techniqueIds?.length ?? 0) > 0;
+
+    if (hasTechniques && session) {
+      const added = await addSessionTechniquesToLibrary(uid, session, sub.blockTitle);
+      totalAdded += added;
+    }
+
+    // Nur als gesynct markieren wenn der Trainer schon Techniken hinterlegt hat —
+    // sonst verpasst der User Inhalte, die nach dem ersten App-Load der Woche
+    // hinzugefügt werden.
+    if (hasTechniques) {
+      await updateDoc(subscriptionDocRef(uid, sub.trainingBlockId), {
+        lastSyncedWeek: weekId,
+      });
+    }
+  }
+
+  return totalAdded;
 }

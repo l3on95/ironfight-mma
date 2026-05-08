@@ -10,10 +10,43 @@ import type { User } from "firebase/auth";
 import { getFirestoreDb } from "./firebase";
 import {
   DEFAULT_USER_SETTINGS,
+  type AthleteProfile,
   type UserProfile,
   type UserRole,
   type UserSettings,
 } from "./types";
+
+/** Firestore-Repräsentation des Athleten-Profils (Date → Timestamp) */
+type AthleteDoc = {
+  primaryDiscipline?: AthleteProfile["primaryDiscipline"];
+  level?: AthleteProfile["level"];
+  trainingStartDate?: Timestamp | null;
+  weightKg?: number | null;
+  heightCm?: number | null;
+  weightClass?: AthleteProfile["weightClass"];
+  bjjBelt?: AthleteProfile["bjjBelt"];
+  gymName?: string | null;
+  trainerName?: string | null;
+  nextCompetitionDate?: Timestamp | null;
+  nextCompetitionName?: string | null;
+};
+
+function athleteFromDoc(data?: AthleteDoc | null): AthleteProfile | undefined {
+  if (!data) return undefined;
+  return {
+    primaryDiscipline: data.primaryDiscipline ?? null,
+    level: data.level ?? null,
+    trainingStartDate: data.trainingStartDate?.toDate() ?? null,
+    weightKg: data.weightKg ?? null,
+    heightCm: data.heightCm ?? null,
+    weightClass: data.weightClass ?? null,
+    bjjBelt: data.bjjBelt ?? null,
+    gymName: data.gymName ?? null,
+    trainerName: data.trainerName ?? null,
+    nextCompetitionDate: data.nextCompetitionDate?.toDate() ?? null,
+    nextCompetitionName: data.nextCompetitionName ?? null,
+  };
+}
 
 /**
  * Firestore-Schema:
@@ -33,6 +66,7 @@ type ProfileDoc = {
   settings: UserSettings;
   onboarded: boolean;
   createdAt?: Timestamp;
+  athlete?: AthleteDoc;
 };
 
 function profileRef(uid: string) {
@@ -56,6 +90,7 @@ export async function getUserProfile(
     settings: { ...DEFAULT_USER_SETTINGS, ...(data.settings ?? {}) },
     onboarded: data.onboarded === true,
     createdAt: data.createdAt?.toDate(),
+    athlete: athleteFromDoc(data.athlete),
   };
 }
 
@@ -85,6 +120,7 @@ export async function ensureUserProfile(user: User): Promise<UserProfile> {
       settings: { ...DEFAULT_USER_SETTINGS, ...(data.settings ?? {}) },
       onboarded: data.onboarded === true,
       createdAt: data.createdAt?.toDate(),
+      athlete: athleteFromDoc(data.athlete),
     };
   }
 
@@ -135,6 +171,43 @@ export async function updateUserSettings(
     ? ((snap.data() as ProfileDoc).settings ?? DEFAULT_USER_SETTINGS)
     : DEFAULT_USER_SETTINGS;
   await updateDoc(ref, { settings: { ...current, ...patch } });
+}
+
+/** Patcht das Athleten-Profil (alle Felder optional). */
+export async function updateAthleteProfile(
+  uid: string,
+  patch: Partial<AthleteProfile>,
+) {
+  const ref = profileRef(uid);
+  const snap = await getDoc(ref);
+  const current =
+    (snap.exists() ? (snap.data() as ProfileDoc).athlete : undefined) ?? {};
+
+  // Date-Felder zu Timestamp konvertieren, undefined → existing, null → null (clear)
+  const next: AthleteDoc = { ...current };
+  if (patch.primaryDiscipline !== undefined) next.primaryDiscipline = patch.primaryDiscipline;
+  if (patch.level !== undefined) next.level = patch.level;
+  if (patch.trainingStartDate !== undefined) {
+    next.trainingStartDate = patch.trainingStartDate
+      ? Timestamp.fromDate(patch.trainingStartDate)
+      : null;
+  }
+  if (patch.weightKg !== undefined) next.weightKg = patch.weightKg;
+  if (patch.heightCm !== undefined) next.heightCm = patch.heightCm;
+  if (patch.weightClass !== undefined) next.weightClass = patch.weightClass;
+  if (patch.bjjBelt !== undefined) next.bjjBelt = patch.bjjBelt;
+  if (patch.gymName !== undefined) next.gymName = patch.gymName;
+  if (patch.trainerName !== undefined) next.trainerName = patch.trainerName;
+  if (patch.nextCompetitionDate !== undefined) {
+    next.nextCompetitionDate = patch.nextCompetitionDate
+      ? Timestamp.fromDate(patch.nextCompetitionDate)
+      : null;
+  }
+  if (patch.nextCompetitionName !== undefined) {
+    next.nextCompetitionName = patch.nextCompetitionName;
+  }
+
+  await updateDoc(ref, { athlete: next });
 }
 
 /**

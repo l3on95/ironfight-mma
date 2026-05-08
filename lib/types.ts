@@ -324,6 +324,88 @@ export interface TechniqueProgress {
   practiceCount: number;
 }
 
+// ─── Athlet-Profil-Felder ──────────────────────────────────────────────────
+
+/** UFC-Gewichtsklassen */
+export type WeightClass =
+  | "strawweight"
+  | "flyweight"
+  | "bantamweight"
+  | "featherweight"
+  | "lightweight"
+  | "welterweight"
+  | "middleweight"
+  | "light-heavyweight"
+  | "heavyweight";
+
+export const WEIGHT_CLASS_LABEL: Record<WeightClass, string> = {
+  strawweight: "Strawweight (≤ 52 kg)",
+  flyweight: "Flyweight (≤ 57 kg)",
+  bantamweight: "Bantamweight (≤ 61 kg)",
+  featherweight: "Featherweight (≤ 66 kg)",
+  lightweight: "Lightweight (≤ 70 kg)",
+  welterweight: "Welterweight (≤ 77 kg)",
+  middleweight: "Middleweight (≤ 84 kg)",
+  "light-heavyweight": "Light-Heavyweight (≤ 93 kg)",
+  heavyweight: "Heavyweight (> 93 kg)",
+};
+
+/** Gibt die passende Gewichtsklasse für ein Körpergewicht (kg) zurück */
+export function weightClassForKg(kg: number): WeightClass {
+  if (kg <= 52) return "strawweight";
+  if (kg <= 57) return "flyweight";
+  if (kg <= 61) return "bantamweight";
+  if (kg <= 66) return "featherweight";
+  if (kg <= 70) return "lightweight";
+  if (kg <= 77) return "welterweight";
+  if (kg <= 84) return "middleweight";
+  if (kg <= 93) return "light-heavyweight";
+  return "heavyweight";
+}
+
+export type AthleteLevel = "beginner" | "intermediate" | "advanced" | "competitor";
+
+export const ATHLETE_LEVEL_LABEL: Record<AthleteLevel, string> = {
+  beginner: "Anfänger",
+  intermediate: "Fortgeschritten",
+  advanced: "Erfahren",
+  competitor: "Wettkämpfer",
+};
+
+export type BjjBelt = "white" | "blue" | "purple" | "brown" | "black";
+
+export const BJJ_BELT_LABEL: Record<BjjBelt, string> = {
+  white: "Weißgurt",
+  blue: "Blaugurt",
+  purple: "Lilagurt",
+  brown: "Braungurt",
+  black: "Schwarzgurt",
+};
+
+export interface AthleteProfile {
+  /** Hauptdisziplin */
+  primaryDiscipline?: Discipline | null;
+  /** Selbsteinschätzung */
+  level?: AthleteLevel | null;
+  /** Trainingsbeginn — für "Trainingsjahre"-Anzeige */
+  trainingStartDate?: Date | null;
+  /** Körpergewicht in kg */
+  weightKg?: number | null;
+  /** Körpergröße in cm */
+  heightCm?: number | null;
+  /** Selbst gewählte Gewichtsklasse (sonst aus weightKg ableiten) */
+  weightClass?: WeightClass | null;
+  /** Optional: BJJ-Gurt */
+  bjjBelt?: BjjBelt | null;
+  /** Gym / Verein */
+  gymName?: string | null;
+  /** Hauptcoach */
+  trainerName?: string | null;
+  /** Nächster Wettkampf — Datum + optionaler Name */
+  nextCompetitionDate?: Date | null;
+  nextCompetitionName?: string | null;
+}
+
 // ─── User-Profil ───────────────────────────────────────────────────────────
 
 export interface UserSettings {
@@ -359,6 +441,8 @@ export interface UserProfile {
   createdAt?: Date;
   /** Wurde der erste-Login-Onboarding-Flow durchlaufen? */
   onboarded: boolean;
+  /** Athleten-Profil — alle Felder optional, nullable */
+  athlete?: AthleteProfile;
 }
 
 // ─── Nice-to-have-Vorbereitung ────────────────────────────────────────────
@@ -438,6 +522,20 @@ export interface Participation {
   blockTitle: string;
   weekIdentifier: string;
   joinedAt: Date;
+}
+
+/**
+ * Kurs-Abonnement: User folgt einem festen Wochenkurs (z. B. Mo 20:15 MMA Advanced).
+ * Auto-Sync übernimmt jede Woche neu zugewiesene Techniken automatisch in die Bibliothek.
+ */
+export interface BlockSubscription {
+  trainingBlockId: string;
+  blockTitle: string;
+  weekday: number;        // 0=Mo … 6=So
+  startTime: string;      // "20:15"
+  subscribedAt: Date;
+  /** Letzte Woche, für die schon synchronisiert wurde — verhindert Doppel-Sync */
+  lastSyncedWeek?: string;
 }
 
 // ─── Kurs-Technik-System ────────────────────────────────────────────────────

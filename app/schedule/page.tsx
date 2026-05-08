@@ -16,8 +16,11 @@ import {
   addSessionTechniquesToLibrary,
   getTrainingSession,
   hasParticipated,
+  isSubscribedToBlock,
   recordParticipation,
   setSessionTechniques,
+  subscribeToBlock,
+  unsubscribeFromBlock,
 } from "@/lib/training-sessions";
 import { ALL_TECHNIQUES, getTechniqueById } from "@/lib/techniques";
 import type {
@@ -183,6 +186,7 @@ type ModalState =
       block: TrainingBlock;
       session: TrainingSession | null;
       participated: boolean;
+      subscribed: boolean;
     };
 
 // ─── Hauptkomponente ───────────────────────────────────────────────────────
@@ -217,15 +221,36 @@ export default function SchedulePage() {
       const weekId = getWeekIdentifier();
       const sessionId = `${block.id}_${weekId}`;
 
-      const [session, participated] = await Promise.all([
+      const [session, participated, subscribed] = await Promise.all([
         getTrainingSession(block.id, weekId),
         user ? hasParticipated(user.uid, sessionId) : Promise.resolve(false),
+        user ? isSubscribedToBlock(user.uid, block.id) : Promise.resolve(false),
       ]);
 
-      setModal({ phase: "ready", block, session, participated });
+      setModal({ phase: "ready", block, session, participated, subscribed });
     },
     [user],
   );
+
+  const [subscribing, setSubscribing] = useState(false);
+
+  async function handleToggleSubscribe() {
+    if (!user || modal.phase !== "ready") return;
+    setSubscribing(true);
+    try {
+      const blockId = modal.block.id;
+      if (modal.subscribed) {
+        await unsubscribeFromBlock(user.uid, blockId);
+      } else {
+        await subscribeToBlock(user.uid, blockId);
+      }
+      setModal((prev) =>
+        prev.phase === "ready" ? { ...prev, subscribed: !prev.subscribed } : prev,
+      );
+    } finally {
+      setSubscribing(false);
+    }
+  }
 
   const closeModal = useCallback(() => {
     setModal({ phase: "idle" });
@@ -380,6 +405,8 @@ export default function SchedulePage() {
                 block={modal.block}
                 session={modal.session}
                 participated={modal.participated}
+                subscribed={modal.subscribed}
+                subscribing={subscribing}
                 attendResult={attendResult}
                 attending={attending}
                 isTrainer={isTrainer}
@@ -391,6 +418,7 @@ export default function SchedulePage() {
                 saving={saving}
                 onClose={closeModal}
                 onAttend={handleAttend}
+                onToggleSubscribe={handleToggleSubscribe}
                 onStartEdit={startEdit}
                 onToggleEditId={toggleEditId}
                 onEditSearchChange={setEditSearch}
@@ -524,6 +552,8 @@ function ModalReady({
   block,
   session,
   participated,
+  subscribed,
+  subscribing,
   attendResult,
   attending,
   isTrainer,
@@ -535,6 +565,7 @@ function ModalReady({
   saving,
   onClose,
   onAttend,
+  onToggleSubscribe,
   onStartEdit,
   onToggleEditId,
   onEditSearchChange,
@@ -545,6 +576,8 @@ function ModalReady({
   block: TrainingBlock;
   session: TrainingSession | null;
   participated: boolean;
+  subscribed: boolean;
+  subscribing: boolean;
   attendResult: number | null;
   attending: boolean;
   isTrainer: boolean;
@@ -556,6 +589,7 @@ function ModalReady({
   saving: boolean;
   onClose: () => void;
   onAttend: () => void;
+  onToggleSubscribe: () => void;
   onStartEdit: () => void;
   onToggleEditId: (id: string) => void;
   onEditSearchChange: (v: string) => void;
@@ -616,6 +650,40 @@ function ModalReady({
           </div>
 
           <div className="mt-5 flex flex-col gap-2">
+            {isLoggedIn && (
+              <button
+                onClick={onToggleSubscribe}
+                disabled={subscribing}
+                className="w-full rounded-xl py-2.5 text-xs font-bold uppercase transition-colors disabled:opacity-50"
+                style={
+                  subscribed
+                    ? {
+                        background: "rgba(0,212,230,0.08)",
+                        border: "1px solid rgba(0,212,230,0.3)",
+                        color: "var(--ta-cyan)",
+                        letterSpacing: "0.1em",
+                      }
+                    : {
+                        background: "var(--ink-4)",
+                        border: "1px solid var(--ink-5)",
+                        color: "var(--fg-2)",
+                        letterSpacing: "0.1em",
+                      }
+                }
+                title={
+                  subscribed
+                    ? "Du bekommst neue Techniken aus diesem Kurs automatisch in deine Bibliothek"
+                    : "Folge diesem Kurs — neue Techniken landen automatisch in deiner Bibliothek"
+                }
+              >
+                {subscribing
+                  ? "…"
+                  : subscribed
+                    ? "★ Kurs abonniert — Auto-Sync aktiv"
+                    : "☆ Kurs abonnieren (Auto-Sync)"}
+              </button>
+            )}
+
             {isTrainer && (
               <button
                 onClick={onStartEdit}
