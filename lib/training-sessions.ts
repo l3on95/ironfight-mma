@@ -39,6 +39,7 @@ import {
   serverTimestamp,
   setDoc,
   Timestamp,
+  where,
 } from "firebase/firestore";
 import { getFirestoreDb } from "./firebase";
 import type { LibraryEntry, TrainingSession } from "./types";
@@ -221,4 +222,14 @@ export async function hasParticipated(
 ): Promise<boolean> {
   const snap = await getDoc(participationDocRef(uid, sessionId));
   return snap.exists();
+}
+
+/** Zählt Trainingseinheiten, die in einer bestimmten Woche angelegt wurden (Trainer-Dashboard). */
+export async function getSessionCountForWeek(weekId: string): Promise<number> {
+  const q = query(
+    collection(getFirestoreDb(), "trainingSessions"),
+    where("weekIdentifier", "==", weekId),
+  );
+  const snap = await getDocs(q);
+  return snap.size;
 }

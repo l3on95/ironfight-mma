@@ -41,3 +41,24 @@ export function greetingFor(
       return `Ready for ur Night Workout, ${fighter}?`;
   }
 }
+
+/**
+ * Trainer-spezifische Begrüßung — professioneller, leadership-orientiert.
+ * @param name Trainername ODER null/undefined für "Coach"
+ */
+export function trainerGreetingFor(
+  name: string | null | undefined,
+  date: Date = new Date(),
+): string {
+  const coach = (name && name.trim()) || "Coach";
+  switch (greetingKind(date)) {
+    case "morning":
+      return `Guten Morgen, ${coach} — der Tag gehört dir.`;
+    case "day":
+      return `${coach} — forme dein Team.`;
+    case "evening":
+      return `${coach} — was hast du heute bewegt?`;
+    case "night":
+      return `${coach} — auch die Besten schlafen.`;
+  }
+}

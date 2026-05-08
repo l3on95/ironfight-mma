@@ -5,14 +5,24 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import { useAuth } from "@/lib/auth-context";
-import { greetingFor } from "@/lib/greeting";
+import { greetingFor, trainerGreetingFor } from "@/lib/greeting";
 import { CATEGORY_LABEL } from "@/lib/techniques";
+import { getTopTechniques, type TechniqueStatEntry } from "@/lib/technique-analytics";
+import { getTechniqueById } from "@/lib/techniques";
 import {
   computeStats,
   getRecentWorkouts,
   type WorkoutSession,
   type WorkoutStats,
 } from "@/lib/workouts";
+import {
+  TRAINING_BLOCKS,
+  getBlocksForDay,
+  getCurrentWeekday,
+  getWeekIdentifier,
+  WEEKDAY_LABELS,
+} from "@/lib/schedule";
+import { getSessionCountForWeek } from "@/lib/training-sessions";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -40,7 +50,8 @@ function formatHours(seconds: number) {
   return `${h}h ${m}m`;
 }
 
-// 7-day streak calendar
+// ─── Streak-Kalender (Schüler-Dashboard) ─────────────────────────────────────
+
 function StreakCalendar({ sessions }: { sessions: WorkoutSession[] }) {
   const days = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
   const today = new Date();
@@ -85,6 +96,8 @@ function StreakCalendar({ sessions }: { sessions: WorkoutSession[] }) {
     </div>
   );
 }
+
+// ─── Schüler-Dashboard ────────────────────────────────────────────────────────
 
 function DashboardContent() {
   const { user, profile } = useAuth();
@@ -133,24 +146,20 @@ function DashboardContent() {
     {
       label: "Diese Woche",
       value: stats ? String(stats.thisWeek) : null,
-      delta: null,
     },
     {
       label: "Streak",
       value: stats
         ? `${stats.streak} ${stats.streak === 1 ? "Tag" : "Tage"}`
         : null,
-      delta: null,
     },
     {
       label: "Workouts gesamt",
       value: stats ? String(stats.total) : null,
-      delta: null,
     },
     {
       label: "Trainingszeit",
       value: stats ? formatHours(stats.totalSeconds) : null,
-      delta: null,
     },
   ];
 
@@ -476,10 +485,526 @@ function DashboardContent() {
   );
 }
 
+// ─── Trainer-Dashboard ────────────────────────────────────────────────────────
+
+function TrainerDashboardContent() {
+  const { user, profile } = useAuth();
+  const greeting = trainerGreetingFor(profile?.displayName);
+  const isAdmin = profile?.role === "admin";
+
+  const weekId = getWeekIdentifier();
+  const todayWeekday = getCurrentWeekday();
+  const todayBlocks = getBlocksForDay(todayWeekday);
+
+  const [topTechniques, setTopTechniques] = useState<TechniqueStatEntry[] | null>(null);
+  const [sessionCount, setSessionCount] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    setError(null);
+
+    Promise.all([
+      getTopTechniques(10),
+      getSessionCountForWeek(weekId),
+    ])
+      .then(([techniques, count]) => {
+        setTopTechniques(techniques);
+        setSessionCount(count);
+      })
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : "Daten konnten nicht geladen werden";
+        setError(msg);
+        setTopTechniques([]);
+        setSessionCount(0);
+      });
+  }, [user, weekId]);
+
+  const today = new Date();
+  const todayLabel = today.toLocaleDateString("de-DE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
+  return (
+    <main className="min-h-screen" style={{ background: "var(--ink-1)" }}>
+      {/* Trainer-Header — visuell distinkt vom Schüler-Header */}
+      <div
+        className="relative overflow-hidden border-b px-4 py-10 sm:px-6"
+        style={{
+          borderColor: "rgba(255,45,120,.2)",
+          background:
+            "radial-gradient(500px 300px at 100% 50%, rgba(255,45,120,.12), transparent 60%), linear-gradient(160deg, #0d0608, #050505)",
+        }}
+      >
+        {/* Dekorativer Hintergrund-Akzent */}
+        <div
+          className="pointer-events-none absolute right-0 top-0 h-full w-1/2"
+          style={{
+            background:
+              "radial-gradient(400px 200px at 100% 0%, rgba(255,45,120,.08), transparent 70%)",
+          }}
+        />
+        <div className="relative mx-auto max-w-7xl">
+          {/* Rolle-Badges */}
+          <div className="mb-3 flex items-center gap-2">
+            <span
+              className="font-mono-ta rounded px-2 py-0.5 text-[10px] font-black uppercase"
+              style={{
+                letterSpacing: "0.2em",
+                background: "rgba(255,45,120,.15)",
+                border: "1px solid rgba(255,45,120,.4)",
+                color: "var(--ta-pink)",
+              }}
+            >
+              Trainer
+            </span>
+            {isAdmin && (
+              <span
+                className="font-mono-ta rounded px-2 py-0.5 text-[10px] font-black uppercase"
+                style={{
+                  letterSpacing: "0.2em",
+                  background: "rgba(251,191,36,.12)",
+                  border: "1px solid rgba(251,191,36,.4)",
+                  color: "#FBBF24",
+                }}
+              >
+                Admin
+              </span>
+            )}
+          </div>
+
+          {/* Trainer-Begrüßung */}
+          <h1
+            className="font-display-ta font-black uppercase leading-none"
+            style={{
+              fontSize: "clamp(28px, 5vw, 48px)",
+              letterSpacing: "0.02em",
+              color: "var(--fg-1)",
+            }}
+          >
+            {greeting}
+          </h1>
+          <p
+            className="font-mono-ta mt-2 text-[11px] uppercase"
+            style={{ letterSpacing: "0.2em", color: "var(--fg-4)" }}
+          >
+            Trainer-Dashboard · {todayLabel}
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        {error && (
+          <div className="mb-6">
+            <ErrorState
+              title="Daten konnten nicht geladen werden"
+              message={error}
+              hint="Prüfe deine Internetverbindung und lade die Seite neu."
+              onRetry={() => {
+                setTopTechniques(null);
+                setSessionCount(null);
+                setError(null);
+                if (!user) return;
+                Promise.all([getTopTechniques(10), getSessionCountForWeek(weekId)])
+                  .then(([t, c]) => { setTopTechniques(t); setSessionCount(c); })
+                  .catch(() => { setTopTechniques([]); setSessionCount(0); });
+              }}
+            />
+          </div>
+        )}
+
+        {/* KPI-Kacheln */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <TrainerStatCard
+            label="Einheiten diese Woche"
+            value={sessionCount !== null ? String(sessionCount) : null}
+            accent="var(--ta-pink)"
+            glow="rgba(255,45,120,.3)"
+          />
+          <TrainerStatCard
+            label="Trainingsblöcke"
+            value={String(TRAINING_BLOCKS.length)}
+            accent="var(--ta-cyan)"
+            glow="rgba(0,212,230,.3)"
+          />
+          <TrainerStatCard
+            label="Heute"
+            value={todayBlocks.length > 0 ? `${todayBlocks.length} Kurs${todayBlocks.length !== 1 ? "e" : ""}` : "Frei"}
+            accent={todayBlocks.length > 0 ? "#FBBF24" : "var(--fg-4)"}
+            glow={todayBlocks.length > 0 ? "rgba(251,191,36,.3)" : "none"}
+          />
+          <TrainerStatCard
+            label="Top Techniken"
+            value={topTechniques !== null ? String(topTechniques.length) : null}
+            accent="var(--ta-cyan)"
+            glow="rgba(0,212,230,.3)"
+          />
+        </div>
+
+        {/* Hauptbereich: Techniken-Ranking + Quick Actions */}
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
+
+          {/* Meistangesehene Techniken — 2 Spalten */}
+          <div
+            className="rounded-2xl p-5 lg:col-span-2"
+            style={{
+              background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+              border: "1px solid var(--ink-4)",
+            }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div
+                  className="font-mono-ta text-[9px] uppercase"
+                  style={{ letterSpacing: "0.2em", color: "var(--ta-cyan)" }}
+                >
+                  Aggregiert · Anonym
+                </div>
+                <h2
+                  className="font-display-ta mt-0.5 font-black uppercase"
+                  style={{ fontSize: "18px", letterSpacing: "0.06em" }}
+                >
+                  Meistangesehene Techniken
+                </h2>
+              </div>
+              <Link
+                href="/techniques"
+                className="font-mono-ta text-[10px] uppercase"
+                style={{ letterSpacing: "0.15em", color: "var(--ta-cyan)" }}
+              >
+                Alle →
+              </Link>
+            </div>
+
+            {topTechniques === null && (
+              <div className="space-y-2">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            )}
+
+            {topTechniques !== null && topTechniques.length === 0 && (
+              <div
+                className="rounded-xl p-6 text-center"
+                style={{
+                  border: "1px dashed var(--ink-5)",
+                  background: "var(--ink-2)",
+                }}
+              >
+                <p className="text-sm" style={{ color: "var(--fg-4)" }}>
+                  Noch keine Aufrufdaten vorhanden.
+                </p>
+                <p className="mt-1 text-xs" style={{ color: "var(--fg-4)" }}>
+                  Sobald Techniken aufgerufen werden, erscheinen sie hier.
+                </p>
+              </div>
+            )}
+
+            {topTechniques !== null && topTechniques.length > 0 && (
+              <div className="space-y-1.5">
+                {topTechniques.map((entry, idx) => {
+                  const technique = getTechniqueById(entry.id);
+                  const isTop3 = idx < 3;
+                  const rankColor =
+                    idx === 0 ? "#FBBF24" : idx === 1 ? "#9CA3AF" : idx === 2 ? "#B45309" : "var(--fg-4)";
+                  return (
+                    <Link
+                      key={entry.id}
+                      href={`/techniques/${entry.id}`}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors"
+                      style={{
+                        background: isTop3 ? "var(--ink-3)" : "transparent",
+                        border: isTop3 ? "1px solid var(--ink-4)" : "1px solid transparent",
+                        textDecoration: "none",
+                      }}
+                    >
+                      {/* Rang */}
+                      <span
+                        className="font-display-ta w-6 shrink-0 text-center font-black leading-none"
+                        style={{ fontSize: "18px", color: rankColor }}
+                      >
+                        {idx + 1}
+                      </span>
+                      {/* Name */}
+                      <div className="flex-1 min-w-0">
+                        <div
+                          className="font-bold truncate text-sm"
+                          style={{ color: "var(--fg-1)" }}
+                        >
+                          {technique?.name ?? entry.id}
+                        </div>
+                        {technique && (
+                          <div
+                            className="font-mono-ta text-[9px] uppercase mt-0.5"
+                            style={{ letterSpacing: "0.1em", color: "var(--fg-4)" }}
+                          >
+                            {technique.category}
+                          </div>
+                        )}
+                      </div>
+                      {/* View-Count */}
+                      <div className="shrink-0 text-right">
+                        <span
+                          className="font-mono-ta font-bold"
+                          style={{ fontSize: "15px", color: isTop3 ? "var(--ta-cyan)" : "var(--fg-3)" }}
+                        >
+                          {entry.viewCount}
+                        </span>
+                        <div
+                          className="font-mono-ta text-[8px] uppercase"
+                          style={{ letterSpacing: "0.15em", color: "var(--fg-4)" }}
+                        >
+                          Aufrufe
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Trainer Quick-Zugriff */}
+          <div className="flex flex-col gap-3">
+            {/* Stundenplan */}
+            <Link
+              href="/schedule"
+              className="group rounded-2xl p-5 transition-all"
+              style={{
+                background: "linear-gradient(135deg, rgba(255,45,120,.12), var(--ink-2))",
+                border: "1px solid rgba(255,45,120,.25)",
+                textDecoration: "none",
+              }}
+            >
+              <div
+                className="font-mono-ta text-[9px] uppercase"
+                style={{ letterSpacing: "0.2em", color: "var(--ta-pink)" }}
+              >
+                Verwalten
+              </div>
+              <div
+                className="font-display-ta mt-1 font-black uppercase"
+                style={{ fontSize: "18px", letterSpacing: "0.04em", color: "var(--fg-1)" }}
+              >
+                Stundenplan →
+              </div>
+              <p className="mt-2 text-xs" style={{ color: "var(--fg-3)" }}>
+                Übungen für Klassen hinterlegen, Wochenplan einsehen.
+              </p>
+            </Link>
+
+            {/* Technik-Bibliothek */}
+            <Link
+              href="/techniques"
+              className="rounded-2xl p-5 transition-all"
+              style={{
+                background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+                border: "1px solid var(--ink-4)",
+                textDecoration: "none",
+              }}
+            >
+              <div
+                className="font-mono-ta text-[9px] uppercase"
+                style={{ letterSpacing: "0.2em", color: "var(--ta-cyan)" }}
+              >
+                Bibliothek
+              </div>
+              <div
+                className="font-display-ta mt-1 font-black uppercase"
+                style={{ fontSize: "18px", letterSpacing: "0.04em", color: "var(--fg-1)" }}
+              >
+                Techniken →
+              </div>
+            </Link>
+
+            {/* Workout-Generator */}
+            <Link
+              href="/workout/generator"
+              className="rounded-2xl p-5 transition-all"
+              style={{
+                background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+                border: "1px solid var(--ink-4)",
+                textDecoration: "none",
+              }}
+            >
+              <div
+                className="font-mono-ta text-[9px] uppercase"
+                style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+              >
+                Training
+              </div>
+              <div
+                className="font-display-ta mt-1 font-black uppercase"
+                style={{ fontSize: "18px", letterSpacing: "0.04em", color: "var(--fg-1)" }}
+              >
+                Generator →
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Heutiger Stundenplan */}
+        <div
+          className="mt-5 rounded-2xl p-5"
+          style={{
+            background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+            border: "1px solid var(--ink-4)",
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div
+                className="font-mono-ta text-[9px] uppercase"
+                style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+              >
+                {WEEKDAY_LABELS[todayWeekday]}
+              </div>
+              <h2
+                className="font-display-ta mt-0.5 font-black uppercase"
+                style={{ fontSize: "18px", letterSpacing: "0.06em" }}
+              >
+                Heutiger Stundenplan
+              </h2>
+            </div>
+            <Link
+              href="/schedule"
+              className="font-mono-ta text-[10px] uppercase"
+              style={{ letterSpacing: "0.15em", color: "var(--ta-pink)" }}
+            >
+              Wochenplan →
+            </Link>
+          </div>
+
+          {todayBlocks.length === 0 ? (
+            <div
+              className="rounded-xl p-6 text-center"
+              style={{
+                border: "1px dashed var(--ink-5)",
+                background: "var(--ink-2)",
+              }}
+            >
+              <p className="text-sm" style={{ color: "var(--fg-4)" }}>
+                Heute keine Kurse geplant.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {todayBlocks.map((block) => (
+                <Link
+                  key={block.id}
+                  href="/schedule"
+                  className="rounded-xl px-4 py-3 transition-colors"
+                  style={{
+                    background: "var(--ink-2)",
+                    border: "1px solid var(--ink-4)",
+                    textDecoration: "none",
+                  }}
+                >
+                  <div
+                    className="font-mono-ta text-[10px]"
+                    style={{ color: "var(--fg-4)", letterSpacing: "0.08em" }}
+                  >
+                    {block.startTime}–{block.endTime}
+                  </div>
+                  <div
+                    className="font-display-ta mt-0.5 font-bold uppercase"
+                    style={{ fontSize: "14px", letterSpacing: "0.04em", color: "var(--fg-1)" }}
+                  >
+                    {block.title}
+                  </div>
+                  {block.level && (
+                    <div
+                      className="font-mono-ta mt-1 text-[9px] uppercase"
+                      style={{ letterSpacing: "0.1em", color: "var(--fg-4)" }}
+                    >
+                      {block.level}
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+// ─── Trainer-Stat-Kachel ──────────────────────────────────────────────────────
+
+function TrainerStatCard({
+  label,
+  value,
+  accent,
+  glow,
+}: {
+  label: string;
+  value: string | null;
+  accent: string;
+  glow: string;
+}) {
+  return (
+    <div
+      className="rounded-2xl p-4"
+      style={{
+        background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+        border: "1px solid var(--ink-4)",
+      }}
+    >
+      <div
+        className="font-mono-ta text-[9px] uppercase"
+        style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+      >
+        {label}
+      </div>
+      {value === null ? (
+        <Skeleton className="mt-2 h-8 w-20" />
+      ) : (
+        <div
+          className="font-display-ta mt-2 font-black leading-none"
+          style={{
+            fontSize: "28px",
+            color: accent,
+            textShadow: `0 0 16px ${glow}`,
+          }}
+        >
+          {value}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Entry Point ──────────────────────────────────────────────────────────────
+
+function DashboardRouter() {
+  const { profile, profileLoading } = useAuth();
+
+  if (profileLoading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div className="space-y-4">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-20 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const isTrainer =
+    profile?.role === "trainer" || profile?.role === "admin";
+
+  return isTrainer ? <TrainerDashboardContent /> : <DashboardContent />;
+}
+
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <DashboardContent />
+      <DashboardRouter />
     </ProtectedRoute>
   );
 }

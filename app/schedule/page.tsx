@@ -261,16 +261,16 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal — immer zentriert (kein Bottom-Sheet auf Mobile) */}
       {modal.phase !== "idle" && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(3,4,6,0.85)" }}
           onClick={(e) => e.target === e.currentTarget && closeModal()}
         >
           <div
             ref={modalRef}
-            className="w-full max-h-[90vh] overflow-y-auto rounded-t-2xl sm:max-w-lg sm:rounded-2xl"
+            className="w-full max-h-[90vh] overflow-y-auto rounded-2xl sm:max-w-lg"
             style={{
               background: "var(--ink-2)",
               border: "1px solid var(--ink-4)",
@@ -524,210 +524,238 @@ function ModalReady({
     <div className="p-5">
       <ModalHeader block={block} onClose={onClose} />
 
-      {/* Übungen der Einheit */}
-      <div className="mt-4">
-        {exercises.length === 0 ? (
-          <p className="text-sm" style={{ color: "var(--fg-4)" }}>
-            {isTrainer
-              ? "Noch keine Übungen für diese Einheit — füge sie über den Button unten hinzu."
-              : "Für diese Einheit wurden noch keine Übungen hinterlegt."}
-          </p>
-        ) : (
-          <div className="space-y-2">
+      {/* Im Edit-Modus: Bearbeitungsbereich direkt nach dem Header (kein Scrollen nötig) */}
+      {isTrainer && editMode ? (
+        <>
+          <div
+            className="mt-4 rounded-xl p-3"
+            style={{
+              background: "var(--ink-3)",
+              border: "1px solid rgba(0,212,230,.3)",
+            }}
+          >
             <p
               className="mb-2 text-xs font-bold uppercase"
               style={{
-                color: "var(--fg-3)",
+                color: "var(--ta-cyan)",
                 letterSpacing: "0.1em",
                 fontFamily: "var(--font-mono)",
               }}
             >
-              Übungen dieser Einheit
+              Übungen auswählen · {editIds.length} gewählt
             </p>
-            {exercises.map((ex) => (
-              <ExerciseRow key={ex.id} exercise={ex} />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Trainer: Edit-Bereich */}
-      {isTrainer && editMode && (
-        <div
-          className="mt-4 rounded-xl p-3"
-          style={{
-            background: "var(--ink-3)",
-            border: "1px solid var(--ink-5)",
-          }}
-        >
-          <p
-            className="mb-2 text-xs font-bold uppercase"
-            style={{
-              color: "var(--ta-cyan)",
-              letterSpacing: "0.1em",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            Übungen auswählen
-          </p>
-          <input
-            type="text"
-            placeholder="Übung suchen…"
-            value={editSearch}
-            onChange={(e) => onEditSearchChange(e.target.value)}
-            className="mb-2 w-full rounded-lg px-3 py-2 text-sm"
-            style={{
-              background: "var(--ink-2)",
-              border: "1px solid var(--ink-5)",
-              color: "var(--fg-1)",
-              outline: "none",
-            }}
-          />
-          <div className="max-h-52 space-y-1 overflow-y-auto pr-1">
-            {filteredAll.map((ex) => {
-              const selected = editIds.includes(ex.id);
-              return (
-                <button
-                  key={ex.id}
-                  onClick={() => onToggleEditId(ex.id)}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors"
-                  style={{
-                    background: selected
-                      ? "rgba(0,212,230,.12)"
-                      : "transparent",
-                    border: `1px solid ${selected ? "rgba(0,212,230,.4)" : "transparent"}`,
-                    color: "var(--fg-2)",
-                  }}
-                >
-                  <span
-                    className="flex h-4 w-4 shrink-0 items-center justify-center rounded"
+            <input
+              type="text"
+              placeholder="Übung suchen…"
+              value={editSearch}
+              onChange={(e) => onEditSearchChange(e.target.value)}
+              className="mb-2 w-full rounded-lg px-3 py-2 text-sm"
+              style={{
+                background: "var(--ink-2)",
+                border: "1px solid var(--ink-5)",
+                color: "var(--fg-1)",
+                outline: "none",
+              }}
+              autoFocus
+            />
+            <div className="max-h-52 space-y-1 overflow-y-auto pr-1">
+              {filteredAll.map((ex) => {
+                const selected = editIds.includes(ex.id);
+                return (
+                  <button
+                    key={ex.id}
+                    onClick={() => onToggleEditId(ex.id)}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors"
                     style={{
-                      background: selected
-                        ? "var(--ta-cyan)"
-                        : "var(--ink-4)",
-                      color: selected ? "var(--ink-1)" : "transparent",
-                      fontSize: "10px",
+                      background: selected ? "rgba(0,212,230,.12)" : "transparent",
+                      border: `1px solid ${selected ? "rgba(0,212,230,.4)" : "transparent"}`,
+                      color: "var(--fg-2)",
                     }}
                   >
-                    {selected ? "✓" : ""}
-                  </span>
-                  <span className="flex-1 truncate">{ex.name}</span>
-                  <span
-                    className="text-[10px]"
-                    style={{ color: "var(--fg-4)" }}
-                  >
-                    {KIND_LABEL[ex.kind] ?? ex.kind}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={onSaveExercises}
-              disabled={saving}
-              className="flex-1 rounded-xl py-2 text-xs font-bold uppercase transition-opacity"
-              style={{
-                background: "var(--ta-cyan)",
-                color: "var(--ink-1)",
-                letterSpacing: "0.1em",
-                opacity: saving ? 0.6 : 1,
-              }}
-            >
-              {saving ? "Speichern…" : `Speichern (${editIds.length})`}
-            </button>
-            <button
-              onClick={onCancelEdit}
-              className="rounded-xl px-4 py-2 text-xs font-bold uppercase"
-              style={{
-                background: "var(--ink-4)",
-                color: "var(--fg-3)",
-                letterSpacing: "0.1em",
-              }}
-            >
-              Abbrechen
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Aktions-Buttons */}
-      <div className="mt-5 flex flex-col gap-2">
-        {/* Trainer: Bearbeiten */}
-        {isTrainer && !editMode && (
-          <button
-            onClick={onStartEdit}
-            className="w-full rounded-xl py-2.5 text-xs font-bold uppercase transition-colors"
-            style={{
-              background: "var(--ink-4)",
-              border: "1px solid var(--ta-cyan)",
-              color: "var(--ta-cyan)",
-              letterSpacing: "0.1em",
-            }}
-          >
-            Übungen bearbeiten
-          </button>
-        )}
-
-        {/* Nutzer: Teilnahme */}
-        {isLoggedIn ? (
-          participated ? (
-            <div
-              className="rounded-xl py-2.5 text-center text-xs font-bold uppercase"
-              style={{
-                background: "rgba(0,212,230,.08)",
-                border: "1px solid rgba(0,212,230,.3)",
-                color: "var(--ta-cyan)",
-                letterSpacing: "0.1em",
-              }}
-            >
-              ✓ Teilgenommen
-              {attendResult !== null && attendResult > 0 && (
-                <span style={{ color: "var(--fg-3)" }}>
-                  {" "}— {attendResult} Übung{attendResult !== 1 ? "en" : ""} zur Bibliothek hinzugefügt
-                </span>
-              )}
-              {attendResult === 0 && (
-                <span style={{ color: "var(--fg-4)" }}>
-                  {" "}(alle Übungen bereits in deiner Bibliothek)
-                </span>
-              )}
+                    <span
+                      className="flex h-4 w-4 shrink-0 items-center justify-center rounded"
+                      style={{
+                        background: selected ? "var(--ta-cyan)" : "var(--ink-4)",
+                        color: selected ? "var(--ink-1)" : "transparent",
+                        fontSize: "10px",
+                      }}
+                    >
+                      {selected ? "✓" : ""}
+                    </span>
+                    <span className="flex-1 truncate">{ex.name}</span>
+                    <span className="text-[10px]" style={{ color: "var(--fg-4)" }}>
+                      {KIND_LABEL[ex.kind] ?? ex.kind}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-          ) : (
-            <button
-              onClick={onAttend}
-              disabled={attending}
-              className="w-full rounded-xl py-2.5 text-xs font-bold uppercase transition-opacity"
-              style={{
-                background: "var(--ta-cyan)",
-                color: "var(--ink-1)",
-                letterSpacing: "0.1em",
-                opacity: attending ? 0.6 : 1,
-              }}
-            >
-              {attending
-                ? "Wird gespeichert…"
-                : exercises.length > 0
-                  ? `Ich nehme teil — ${exercises.length} Übung${exercises.length !== 1 ? "en" : ""} übernehmen`
-                  : "Ich nehme teil"}
-            </button>
-          )
-        ) : (
-          <Link
-            href="/login"
-            className="block w-full rounded-xl py-2.5 text-center text-xs font-bold uppercase"
-            style={{
-              background: "var(--ta-cyan)",
-              color: "var(--ink-1)",
-              letterSpacing: "0.1em",
-              textDecoration: "none",
-            }}
-            onClick={onClose}
-          >
-            Anmelden zum Teilnehmen
-          </Link>
-        )}
-      </div>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={onSaveExercises}
+                disabled={saving}
+                className="flex-1 rounded-xl py-2 text-xs font-bold uppercase transition-opacity"
+                style={{
+                  background: "var(--ta-cyan)",
+                  color: "var(--ink-1)",
+                  letterSpacing: "0.1em",
+                  opacity: saving ? 0.6 : 1,
+                }}
+              >
+                {saving ? "Speichern…" : `Speichern (${editIds.length})`}
+              </button>
+              <button
+                onClick={onCancelEdit}
+                className="rounded-xl px-4 py-2 text-xs font-bold uppercase"
+                style={{
+                  background: "var(--ink-4)",
+                  color: "var(--fg-3)",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+
+          {/* Vorschau der bereits ausgewählten Übungen */}
+          {editIds.length > 0 && (
+            <div className="mt-3">
+              <p
+                className="mb-1.5 text-[10px] font-bold uppercase"
+                style={{ color: "var(--fg-4)", letterSpacing: "0.1em", fontFamily: "var(--font-mono)" }}
+              >
+                Aktuelle Auswahl
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {editIds.map((id) => {
+                  const ex = filteredAll.find((e) => e.id === id);
+                  return (
+                    <span
+                      key={id}
+                      className="rounded-lg px-2 py-1 text-[11px]"
+                      style={{
+                        background: "rgba(0,212,230,.1)",
+                        border: "1px solid rgba(0,212,230,.3)",
+                        color: "var(--ta-cyan)",
+                      }}
+                    >
+                      {ex?.name ?? id}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Normal-Ansicht: Übungen der Einheit */}
+          <div className="mt-4">
+            {exercises.length === 0 ? (
+              <p className="text-sm" style={{ color: "var(--fg-4)" }}>
+                {isTrainer
+                  ? "Noch keine Übungen für diese Einheit — füge sie über den Button unten hinzu."
+                  : "Für diese Einheit wurden noch keine Übungen hinterlegt."}
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <p
+                  className="mb-2 text-xs font-bold uppercase"
+                  style={{
+                    color: "var(--fg-3)",
+                    letterSpacing: "0.1em",
+                    fontFamily: "var(--font-mono)",
+                  }}
+                >
+                  Übungen dieser Einheit
+                </p>
+                {exercises.map((ex) => (
+                  <ExerciseRow key={ex.id} exercise={ex} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Aktions-Buttons */}
+          <div className="mt-5 flex flex-col gap-2">
+            {/* Trainer: Bearbeiten */}
+            {isTrainer && (
+              <button
+                onClick={onStartEdit}
+                className="w-full rounded-xl py-2.5 text-xs font-bold uppercase transition-colors"
+                style={{
+                  background: "var(--ink-4)",
+                  border: "1px solid var(--ta-cyan)",
+                  color: "var(--ta-cyan)",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                Übungen bearbeiten
+              </button>
+            )}
+
+            {/* Nutzer: Teilnahme */}
+            {isLoggedIn ? (
+              participated ? (
+                <div
+                  className="rounded-xl py-2.5 text-center text-xs font-bold uppercase"
+                  style={{
+                    background: "rgba(0,212,230,.08)",
+                    border: "1px solid rgba(0,212,230,.3)",
+                    color: "var(--ta-cyan)",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  ✓ Teilgenommen
+                  {attendResult !== null && attendResult > 0 && (
+                    <span style={{ color: "var(--fg-3)" }}>
+                      {" "}— {attendResult} Übung{attendResult !== 1 ? "en" : ""} zur Bibliothek hinzugefügt
+                    </span>
+                  )}
+                  {attendResult === 0 && (
+                    <span style={{ color: "var(--fg-4)" }}>
+                      {" "}(alle Übungen bereits in deiner Bibliothek)
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={onAttend}
+                  disabled={attending}
+                  className="w-full rounded-xl py-2.5 text-xs font-bold uppercase transition-opacity"
+                  style={{
+                    background: "var(--ta-cyan)",
+                    color: "var(--ink-1)",
+                    letterSpacing: "0.1em",
+                    opacity: attending ? 0.6 : 1,
+                  }}
+                >
+                  {attending
+                    ? "Wird gespeichert…"
+                    : exercises.length > 0
+                      ? `Ich nehme teil — ${exercises.length} Übung${exercises.length !== 1 ? "en" : ""} übernehmen`
+                      : "Ich nehme teil"}
+                </button>
+              )
+            ) : (
+              <Link
+                href="/login"
+                className="block w-full rounded-xl py-2.5 text-center text-xs font-bold uppercase"
+                style={{
+                  background: "var(--ta-cyan)",
+                  color: "var(--ink-1)",
+                  letterSpacing: "0.1em",
+                  textDecoration: "none",
+                }}
+                onClick={onClose}
+              >
+                Anmelden zum Teilnehmen
+              </Link>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

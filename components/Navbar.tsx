@@ -52,6 +52,14 @@ function IconChevron({ size = 12 }: { size?: number }) {
   );
 }
 
+function IconAdmin() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  );
+}
+
 // ── Types ──────────────────────────────────────────────────────
 interface NavChild {
   href: string;
@@ -106,6 +114,16 @@ const navGroups: NavGroup[] = [
   },
 ];
 
+const adminNavGroup: NavGroup = {
+  id: "admin",
+  label: "Admin",
+  icon: <IconAdmin />,
+  children: [
+    { href: "/admin/users", label: "Nutzer" },
+    { href: "/dashboard", label: "Dashboard" },
+  ],
+};
+
 // ── Helpers ────────────────────────────────────────────────────
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -116,8 +134,9 @@ function initialsOf(name: string): string {
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logOut } = useAuth();
+  const { user, loading, logOut, profile } = useAuth();
   const fighterName = useFighterName();
+  const isAdmin = profile?.role === "admin";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMobileGroups, setOpenMobileGroups] = useState<Set<string>>(new Set());
   const [openDesktopGroup, setOpenDesktopGroup] = useState<string | null>(null);
@@ -200,7 +219,7 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-0.5 md:flex">
-          {navGroups.map((group) => {
+          {[...navGroups, ...(isAdmin ? [adminNavGroup] : [])].map((group) => {
             const active = isGroupActive(group);
             const isOpen = openDesktopGroup === group.id;
 
@@ -393,7 +412,7 @@ export default function Navbar() {
           style={{ borderColor: "var(--ink-4)", background: "var(--ink-1)" }}
         >
           <div className="flex flex-col p-4">
-            {navGroups.map((group) => {
+            {[...navGroups, ...(isAdmin ? [adminNavGroup] : [])].map((group) => {
               const groupActive = isGroupActive(group);
               const groupMobileOpen = openMobileGroups.has(group.id);
 

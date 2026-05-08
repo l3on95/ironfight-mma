@@ -1,4 +1,5 @@
 import PageHeader from "@/components/PageHeader";
+import { TechniqueViewTracker } from "@/components/TechniqueViewTracker";
 import {
   ALL_TECHNIQUES,
   CATEGORY_LABEL,
@@ -50,6 +51,7 @@ export default function TechniqueDetailPage({
 
   return (
     <>
+      <TechniqueViewTracker techniqueId={t.id} />
       <PageHeader
         eyebrow={`${CATEGORY_LABEL[t.category]} · ${DIFFICULTY_LABEL[t.difficulty]}`}
         title={t.name}
