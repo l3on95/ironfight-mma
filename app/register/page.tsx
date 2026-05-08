@@ -99,7 +99,12 @@ export default function RegisterPage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="text-center">
-          <div className="mb-4 text-2xl">🔄</div>
+          <div className="mb-4 flex justify-center">
+            <div
+              className="h-9 w-9 animate-spin rounded-full border-2"
+              style={{ borderColor: "var(--ink-5)", borderTopColor: "var(--blood)" }}
+            />
+          </div>
           <p className="font-mono-ta text-sm uppercase" style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}>
             Weiterleitung zu Google…
           </p>
@@ -109,17 +114,22 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center px-4 py-12 sm:px-6">
+    <div
+      className="flex min-h-[90vh] items-center justify-center px-4 py-12 sm:px-6"
+      style={{
+        background: "radial-gradient(700px 450px at 50% -5%, rgba(220,38,38,.07), transparent 65%)",
+      }}
+    >
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="mb-8 flex flex-col items-center gap-3">
+        <div className="mb-8 flex flex-col items-center gap-4">
           <div
             className="flex h-20 w-20 items-center justify-center rounded-2xl font-display-ta text-2xl font-black"
             style={{
-              background: "linear-gradient(135deg, var(--blood), #991b1b)",
+              background: "linear-gradient(135deg, var(--blood), var(--blood-deep))",
               color: "#fff",
               boxShadow:
-                "0 0 40px rgba(220,38,38,.25), 0 0 80px rgba(245,158,11,.1)",
+                "0 0 0 1px rgba(220,38,38,.3), 0 0 32px rgba(220,38,38,.35), 0 0 80px rgba(220,38,38,.12), inset 0 1px 0 rgba(255,255,255,.15)",
             }}
           >
             IF
@@ -127,13 +137,13 @@ export default function RegisterPage() {
           <div>
             <h1
               className="font-display-ta text-center font-black uppercase leading-none"
-              style={{ fontSize: "32px", letterSpacing: "0.04em" }}
+              style={{ fontSize: "34px", letterSpacing: "0.05em" }}
             >
               IronFight MMA
             </h1>
             <div
-              className="font-mono-ta mt-1.5 text-center text-[10px] uppercase"
-              style={{ letterSpacing: "0.25em", color: "var(--ta-cyan)" }}
+              className="font-mono-ta mt-2 text-center text-[10px] uppercase"
+              style={{ letterSpacing: "0.3em", color: "var(--blood)" }}
             >
               Konto erstellen
             </div>
@@ -146,6 +156,7 @@ export default function RegisterPage() {
           style={{
             background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
             border: "1px solid var(--ink-4)",
+            boxShadow: "0 24px 60px rgba(0,0,0,.4)",
           }}
         >
           {/* Google SSO */}

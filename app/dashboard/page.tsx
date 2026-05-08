@@ -146,20 +146,28 @@ function DashboardContent() {
     {
       label: "Diese Woche",
       value: stats ? String(stats.thisWeek) : null,
+      accent: "var(--blood)",
+      glow: "rgba(220,38,38,.35)",
     },
     {
       label: "Streak",
       value: stats
         ? `${stats.streak} ${stats.streak === 1 ? "Tag" : "Tage"}`
         : null,
+      accent: "var(--amber)",
+      glow: "rgba(245,158,11,.35)",
     },
     {
       label: "Workouts gesamt",
       value: stats ? String(stats.total) : null,
+      accent: "var(--blood)",
+      glow: "rgba(220,38,38,.35)",
     },
     {
       label: "Trainingszeit",
       value: stats ? formatHours(stats.totalSeconds) : null,
+      accent: "var(--amber)",
+      glow: "rgba(245,158,11,.35)",
     },
   ];
 
@@ -188,50 +196,65 @@ function DashboardContent() {
 
         {/* Streak hero card */}
         <div
-          className="mb-6 rounded-2xl p-5 relative overflow-hidden"
+          className="mb-6 rounded-2xl relative overflow-hidden"
           style={{
             background:
-              "radial-gradient(300px 200px at 90% -20%, rgba(220,38,38,.22), transparent 60%), linear-gradient(160deg, #0B1218, #050709)",
-            border: "1px solid var(--ink-5)",
+              "radial-gradient(500px 300px at 100% 0%, rgba(220,38,38,.18), transparent 55%), radial-gradient(300px 200px at 0% 100%, rgba(245,158,11,.06), transparent 60%), linear-gradient(160deg, #0E1016, #050709)",
+            border: "1px solid rgba(220,38,38,.15)",
           }}
         >
+          {/* Decorative glow orb */}
           <div
-            className="pointer-events-none absolute right-[-20px] top-[-20px] h-48 w-48 rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(220,38,38,.15), transparent 60%)",
-            }}
+            className="pointer-events-none absolute right-[-60px] top-[-60px] h-72 w-72 rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(220,38,38,.12), transparent 65%)" }}
           />
+          {/* Top accent line */}
           <div
-            className="font-mono-ta text-[10px] uppercase"
-            style={{ letterSpacing: "0.25em", color: "var(--fg-3)" }}
-          >
-            Trainings-Streak
-          </div>
-          {stats === null ? (
-            <Skeleton className="mt-2 h-16 w-24" />
-          ) : (
+            className="absolute top-0 left-6 right-6 h-px"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(220,38,38,.4), transparent)" }}
+          />
+          <div className="relative p-6 sm:p-8">
             <div
-              className="font-display-ta mt-1 font-black leading-none"
-              style={{
-                fontSize: "72px",
-                color: "var(--ta-cyan)",
-                textShadow: "0 0 20px rgba(220,38,38,.5)",
-                letterSpacing: "-0.01em",
-              }}
+              className="font-mono-ta text-[10px] uppercase"
+              style={{ letterSpacing: "0.28em", color: "var(--fg-4)" }}
             >
-              {stats.streak}
-              <span
-                className="font-mono-ta ml-2 text-base"
-                style={{ color: "var(--fg-3)", letterSpacing: "0.2em" }}
-              >
-                {stats.streak === 1 ? "Tag" : "Tage"}
-              </span>
+              Trainings-Streak
             </div>
-          )}
-          {sessions !== null && (
-            <StreakCalendar sessions={sessions} />
-          )}
+            {stats === null ? (
+              <Skeleton className="mt-3 h-20 w-32" />
+            ) : (
+              <div className="mt-2 flex items-end gap-3">
+                <div
+                  className="font-display-ta font-black leading-none"
+                  style={{
+                    fontSize: "clamp(72px, 12vw, 104px)",
+                    color: stats.streak > 0 ? "var(--blood)" : "var(--fg-3)",
+                    textShadow: stats.streak > 0 ? "0 0 40px rgba(220,38,38,.45)" : "none",
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {stats.streak}
+                </div>
+                <div className="mb-3">
+                  <div
+                    className="font-mono-ta text-sm font-bold uppercase"
+                    style={{ color: "var(--fg-2)", letterSpacing: "0.15em" }}
+                  >
+                    {stats.streak === 1 ? "Tag" : "Tage"}
+                  </div>
+                  <div
+                    className="font-mono-ta text-[9px] uppercase mt-0.5"
+                    style={{ color: "var(--fg-4)", letterSpacing: "0.15em" }}
+                  >
+                    in Folge
+                  </div>
+                </div>
+              </div>
+            )}
+            {sessions !== null && (
+              <StreakCalendar sessions={sessions} />
+            )}
+          </div>
         </div>
 
         {/* Stat grid */}
@@ -239,25 +262,29 @@ function DashboardContent() {
           {statCards.map((stat) => (
             <div
               key={stat.label}
-              className="rounded-2xl p-4"
+              className="rounded-2xl p-5 relative overflow-hidden transition-all duration-300"
               style={{
-                background:
-                  "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+                background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
                 border: "1px solid var(--ink-4)",
+                borderLeft: `2px solid ${stat.accent}`,
               }}
             >
               <div
                 className="font-mono-ta text-[9px] uppercase"
-                style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+                style={{ letterSpacing: "0.22em", color: "var(--fg-4)" }}
               >
                 {stat.label}
               </div>
               {stat.value === null ? (
-                <Skeleton className="mt-2 h-8 w-20" />
+                <Skeleton className="mt-2.5 h-9 w-20" />
               ) : (
                 <div
-                  className="font-display-ta mt-2 font-black leading-none"
-                  style={{ fontSize: "28px", color: "var(--fg)" }}
+                  className="font-display-ta mt-2.5 font-black leading-none"
+                  style={{
+                    fontSize: "clamp(24px, 3.5vw, 32px)",
+                    color: "var(--fg)",
+                    textShadow: `0 0 20px ${stat.glow}`,
+                  }}
                 >
                   {stat.value}
                 </div>
@@ -381,7 +408,15 @@ function DashboardContent() {
                 background: "var(--ink-2)",
               }}
             >
-              <div className="text-3xl">🥊</div>
+              <div className="flex justify-center">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--ink-6)" }} aria-hidden="true">
+                  <path d="M20 8.5V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2.5" />
+                  <path d="M4 8.5h16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2Z" />
+                  <path d="M6 12.5v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-7" />
+                  <path d="M9 8.5V6" />
+                  <path d="M15 8.5V6" />
+                </svg>
+              </div>
               <p className="mt-3 text-sm font-bold" style={{ color: "var(--fg-3)" }}>
                 Noch keine Sessions.
               </p>
@@ -404,73 +439,68 @@ function DashboardContent() {
               {sessions.slice(0, 10).map((s) => (
                 <div
                   key={s.id}
-                  className="flex items-center gap-3 rounded-xl p-3"
+                  className="flex items-center gap-4 rounded-xl px-4 py-3.5 transition-all duration-200"
                   style={{
                     background: "var(--ink-2)",
                     border: "1px solid var(--ink-4)",
+                    borderLeft: `2px solid ${s.status === "aborted" ? "rgba(245,158,11,.5)" : "rgba(220,38,38,.4)"}`,
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "var(--ink-3)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "var(--ink-2)";
                   }}
                 >
                   {/* Date block */}
-                  <div className="font-display-ta min-w-[44px] text-center leading-tight">
+                  <div className="font-display-ta min-w-[40px] text-center leading-tight flex-shrink-0">
                     <span
-                      className="block"
-                      style={{ fontSize: "22px", color: "var(--ta-cyan)", lineHeight: 1 }}
+                      className="block font-black"
+                      style={{ fontSize: "24px", color: "var(--blood)", lineHeight: 1 }}
                     >
                       {s.completedAt.getDate()}
                     </span>
                     <span
-                      className="font-mono-ta text-[9px] uppercase"
-                      style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}
+                      className="font-mono-ta text-[8px] uppercase"
+                      style={{ letterSpacing: "0.2em", color: "var(--fg-4)" }}
                     >
                       {s.completedAt.toLocaleDateString("de-DE", { month: "short" })}
                     </span>
                   </div>
                   {/* Divider */}
-                  <div
-                    className="h-10 w-px flex-shrink-0"
-                    style={{ background: "var(--ink-5)" }}
-                  />
+                  <div className="h-10 w-px flex-shrink-0" style={{ background: "var(--ink-5)" }} />
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <div
-                      className="font-display-ta font-bold uppercase truncate"
-                      style={{ fontSize: "14px", letterSpacing: "0.04em" }}
-                    >
-                      {s.label ?? "Freies Workout"}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="font-display-ta font-bold uppercase truncate"
+                        style={{ fontSize: "14px", letterSpacing: "0.04em" }}
+                      >
+                        {s.label ?? "Freies Workout"}
+                      </div>
                       {s.status === "aborted" && (
-                        <span
-                          className="ml-2 rounded px-1.5 py-0.5 text-[9px] uppercase"
-                          style={{
-                            border: "1px solid rgba(245,158,11,.3)",
-                            background: "rgba(245,158,11,.08)",
-                            color: "var(--ta-pink)",
-                            letterSpacing: "0.15em",
-                          }}
-                        >
-                          abgebrochen
-                        </span>
+                        <span className="badge-amber flex-shrink-0">abgeb.</span>
                       )}
                     </div>
                     <div
-                      className="font-mono-ta mt-0.5 text-[9px] uppercase"
-                      style={{ letterSpacing: "0.15em", color: "var(--fg-3)" }}
+                      className="font-mono-ta mt-1 text-[9px] uppercase"
+                      style={{ letterSpacing: "0.12em", color: "var(--fg-4)" }}
                     >
                       {s.category ? CATEGORY_LABEL[s.category] : "—"} ·{" "}
-                      {s.rounds}× {Math.round(s.workSeconds / 60)} min · Pause{" "}
-                      {s.restSeconds}s
+                      {s.rounds}× {Math.round(s.workSeconds / 60)} min
                     </div>
                   </div>
                   {/* Duration + time */}
                   <div className="text-right flex-shrink-0">
                     <div
                       className="font-display-ta font-bold"
-                      style={{ fontSize: "16px", color: "var(--ta-pink)" }}
+                      style={{ fontSize: "17px", color: "var(--amber)" }}
                     >
                       {formatMinutes(s.totalWorkSeconds)}
                     </div>
                     <div
                       className="font-mono-ta text-[9px] uppercase"
-                      style={{ letterSpacing: "0.15em", color: "var(--fg-4)" }}
+                      style={{ letterSpacing: "0.12em", color: "var(--fg-4)" }}
                     >
                       {formatRelative(s.completedAt)}
                     </div>
