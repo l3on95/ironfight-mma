@@ -155,12 +155,12 @@ function DisciplineGrid() {
             height: "160px",
             border: "1px solid var(--ink-5)",
             background: d.cyanAccent
-              ? "radial-gradient(160px 120px at 80% 10%, rgba(0,212,230,.3), transparent 60%), linear-gradient(160deg, #0E1A22, #06090C)"
-              : "radial-gradient(160px 120px at 80% 10%, rgba(255,45,120,.25), transparent 60%), linear-gradient(160deg, #1A0E16, #08050A)",
+              ? "radial-gradient(160px 120px at 80% 10%, rgba(220,38,38,.25), transparent 60%), linear-gradient(160deg, #1C0A0A, #06040A)"
+              : "radial-gradient(160px 120px at 80% 10%, rgba(245,158,11,.2), transparent 60%), linear-gradient(160deg, #1A150A, #08060A)",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,212,230,.6)";
-            (e.currentTarget as HTMLElement).style.boxShadow = "0 0 28px rgba(0,212,230,.2)";
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(220,38,38,.5)";
+            (e.currentTarget as HTMLElement).style.boxShadow = "0 0 28px rgba(220,38,38,.18)";
             (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
           }}
           onMouseLeave={(e) => {
@@ -184,7 +184,7 @@ function DisciplineGrid() {
           />
           <div
             className="absolute right-[-10px] top-[-10px] h-28 w-28 opacity-30"
-            style={{ color: d.cyanAccent ? "var(--ta-cyan)" : "var(--ta-pink)" }}
+            style={{ color: d.cyanAccent ? "var(--blood)" : "var(--amber)" }}
           >
             {d.glyph}
           </div>
@@ -224,8 +224,8 @@ function QuickActionCards({ actions }: { actions: QuickAction[] }) {
             background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,212,230,.5)";
-            (e.currentTarget as HTMLElement).style.boxShadow = "0 0 24px rgba(0,212,230,.12)";
+            (e.currentTarget as HTMLElement).style.borderColor = "rgba(220,38,38,.4)";
+            (e.currentTarget as HTMLElement).style.boxShadow = "0 0 24px rgba(220,38,38,.1)";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.borderColor = "var(--ink-4)";
@@ -237,7 +237,7 @@ function QuickActionCards({ actions }: { actions: QuickAction[] }) {
             style={{
               background: "var(--ink-1)",
               border: "1px solid var(--ink-5)",
-              color: qa.pink ? "var(--ta-pink)" : "var(--ta-cyan)",
+              color: qa.pink ? "var(--amber)" : "var(--blood)",
             }}
           >
             {qa.icon}
@@ -281,14 +281,14 @@ function GuestHome() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.12), transparent 60%), radial-gradient(420px 260px at 0% 110%, rgba(255,45,120,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.50), rgba(5,7,9,.60) 70%)",
+              "radial-gradient(420px 260px at 90% -10%, rgba(220,38,38,.1), transparent 60%), radial-gradient(420px 260px at 0% 110%, rgba(245,158,11,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.50), rgba(5,7,9,.60) 70%)",
           }}
         />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(0,212,230,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,230,.06) 1px, transparent 1px)",
+              "linear-gradient(rgba(220,38,38,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(220,38,38,.04) 1px, transparent 1px)",
             backgroundSize: "26px 26px",
             WebkitMaskImage:
               "radial-gradient(ellipse 80% 60% at 30% 30%, #000, transparent 80%)",
@@ -299,9 +299,9 @@ function GuestHome() {
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:py-32">
           <div
             className="font-mono-ta mb-4 text-[10px] uppercase"
-            style={{ letterSpacing: "0.3em", color: "var(--ta-cyan)" }}
+            style={{ letterSpacing: "0.3em", color: "var(--blood)" }}
           >
-            Tidal Athletics — MMA Training App
+            IronFight MMA — Training Platform
           </div>
           <h1
             className="font-display-ta font-black uppercase leading-none"
@@ -313,11 +313,11 @@ function GuestHome() {
           >
             Train
             <br />
-            <span style={{ color: "var(--ta-cyan)" }}>Hard.</span>
+            <span style={{ color: "var(--blood)" }}>Hard.</span>
             <br />
             <span
               style={{
-                WebkitTextStroke: "2px var(--ta-pink)",
+                WebkitTextStroke: "2px var(--amber)",
                 color: "transparent",
               }}
             >
@@ -357,7 +357,7 @@ function GuestHome() {
               >
                 <div
                   className="font-display-ta font-black text-3xl leading-none"
-                  style={{ color: "var(--ta-cyan)", textShadow: "0 0 12px rgba(0,212,230,.45)" }}
+                  style={{ color: "var(--blood)", textShadow: "0 0 12px rgba(220,38,38,.5)" }}
                 >
                   {stat.v}
                 </div>
@@ -379,7 +379,7 @@ function GuestHome() {
           <div className="mb-10 text-center sm:text-left">
             <div
               className="font-mono-ta text-[10px] uppercase"
-              style={{ letterSpacing: "0.25em", color: "var(--ta-pink)" }}
+              style={{ letterSpacing: "0.25em", color: "var(--amber)" }}
             >
               Was dich erwartet
             </div>
@@ -388,7 +388,7 @@ function GuestHome() {
               style={{ letterSpacing: "0.06em" }}
             >
               Alles für dein Training.
-              <span style={{ color: "var(--ta-cyan)" }}> An einem Ort.</span>
+              <span style={{ color: "var(--blood)" }}> An einem Ort.</span>
             </h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -398,17 +398,17 @@ function GuestHome() {
                 className="rounded-2xl p-6"
                 style={{
                   background: f.cyan
-                    ? "radial-gradient(200px 150px at 90% 0%, rgba(0,212,230,.08), transparent 60%), linear-gradient(180deg, var(--ink-3), var(--ink-2))"
-                    : "radial-gradient(200px 150px at 90% 0%, rgba(255,45,120,.07), transparent 60%), linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+                    ? "radial-gradient(200px 150px at 90% 0%, rgba(220,38,38,.08), transparent 60%), linear-gradient(180deg, var(--ink-3), var(--ink-2))"
+                    : "radial-gradient(200px 150px at 90% 0%, rgba(245,158,11,.06), transparent 60%), linear-gradient(180deg, var(--ink-3), var(--ink-2))",
                   border: "1px solid var(--ink-4)",
                 }}
               >
                 <div
                   className="flex h-11 w-11 items-center justify-center rounded-xl"
                   style={{
-                    background: f.cyan ? "rgba(0,212,230,.1)" : "rgba(255,45,120,.1)",
-                    border: `1px solid ${f.cyan ? "rgba(0,212,230,.2)" : "rgba(255,45,120,.2)"}`,
-                    color: f.cyan ? "var(--ta-cyan)" : "var(--ta-pink)",
+                    background: f.cyan ? "rgba(220,38,38,.1)" : "rgba(245,158,11,.1)",
+                    border: `1px solid ${f.cyan ? "rgba(220,38,38,.2)" : "rgba(245,158,11,.2)"}`,
+                    color: f.cyan ? "var(--blood)" : "var(--amber)",
                   }}
                 >
                   {f.icon}
@@ -435,7 +435,7 @@ function GuestHome() {
             <div>
               <div
                 className="font-mono-ta text-[10px] uppercase"
-                style={{ letterSpacing: "0.25em", color: "var(--ta-cyan)" }}
+                style={{ letterSpacing: "0.25em", color: "var(--blood)" }}
               >
                 Disziplinen
               </div>
@@ -444,13 +444,13 @@ function GuestHome() {
                 style={{ letterSpacing: "0.06em" }}
               >
                 Jede Distanz.
-                <span style={{ color: "var(--ta-cyan)" }}> Jede Position.</span>
+                <span style={{ color: "var(--blood)" }}> Jede Position.</span>
               </h2>
             </div>
             <Link
               href="/workout/generator"
               className="hidden font-mono-ta text-[10px] uppercase transition-colors md:block"
-              style={{ letterSpacing: "0.2em", color: "var(--ta-cyan)" }}
+              style={{ letterSpacing: "0.2em", color: "var(--blood)" }}
             >
               Alle Workouts →
             </Link>
@@ -480,13 +480,13 @@ function GuestHome() {
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            background: "radial-gradient(600px 300px at 50% 50%, rgba(0,212,230,.05), transparent 70%)",
+            background: "radial-gradient(600px 300px at 50% 50%, rgba(220,38,38,.05), transparent 70%)",
           }}
         />
         <div className="relative mx-auto max-w-2xl px-4 text-center sm:px-6">
           <div
             className="font-mono-ta text-[10px] uppercase"
-            style={{ letterSpacing: "0.3em", color: "var(--ta-cyan)" }}
+            style={{ letterSpacing: "0.3em", color: "var(--blood)" }}
           >
             Kostenlos · Kein Abo
           </div>
@@ -500,7 +500,7 @@ function GuestHome() {
           >
             Bereit für die
             <br />
-            <span style={{ color: "var(--ta-cyan)" }}>erste Runde?</span>
+            <span style={{ color: "var(--blood)" }}>erste Runde?</span>
           </h2>
           <p className="mt-5 text-base" style={{ color: "var(--fg-3)" }}>
             Erstelle deinen kostenlosen Account und starte heute mit dem Training.
@@ -541,14 +541,14 @@ function UserHome() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(420px 260px at 90% -10%, rgba(0,212,230,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.55), rgba(5,7,9,.65) 70%)",
+              "radial-gradient(420px 260px at 90% -10%, rgba(220,38,38,.1), transparent 60%), linear-gradient(160deg, rgba(10,18,24,.55), rgba(5,7,9,.65) 70%)",
           }}
         />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(0,212,230,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,230,.04) 1px, transparent 1px)",
+              "linear-gradient(rgba(220,38,38,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(220,38,38,.03) 1px, transparent 1px)",
             backgroundSize: "26px 26px",
             WebkitMaskImage:
               "radial-gradient(ellipse 70% 50% at 20% 50%, #000, transparent 80%)",
@@ -567,7 +567,7 @@ function UserHome() {
             <>
               <div
                 className="font-mono-ta text-[10px] uppercase"
-                style={{ letterSpacing: "0.25em", color: "var(--ta-cyan)" }}
+                style={{ letterSpacing: "0.25em", color: "var(--blood)" }}
               >
                 Willkommen zurück
               </div>
@@ -609,7 +609,7 @@ function UserHome() {
             <div>
               <div
                 className="font-mono-ta text-[10px] uppercase"
-                style={{ letterSpacing: "0.25em", color: "var(--ta-cyan)" }}
+                style={{ letterSpacing: "0.25em", color: "var(--blood)" }}
               >
                 Trainingspläne
               </div>
@@ -618,13 +618,13 @@ function UserHome() {
                 style={{ letterSpacing: "0.06em" }}
               >
                 Jede Distanz.
-                <span style={{ color: "var(--ta-cyan)" }}> Jede Position.</span>
+                <span style={{ color: "var(--blood)" }}> Jede Position.</span>
               </h2>
             </div>
             <Link
               href="/workout/generator"
               className="hidden font-mono-ta text-[10px] uppercase transition-colors md:block"
-              style={{ letterSpacing: "0.2em", color: "var(--ta-cyan)" }}
+              style={{ letterSpacing: "0.2em", color: "var(--blood)" }}
             >
               Alle Workouts →
             </Link>
@@ -640,7 +640,7 @@ function UserHome() {
             className="flex flex-col gap-4 rounded-2xl p-5 sm:flex-row sm:items-center sm:justify-between"
             style={{
               background:
-                "radial-gradient(300px 200px at 90% -20%, rgba(0,212,230,.1), transparent 60%), linear-gradient(180deg, var(--ink-3), var(--ink-2))",
+                "radial-gradient(300px 200px at 90% -20%, rgba(220,38,38,.1), transparent 60%), linear-gradient(180deg, var(--ink-3), var(--ink-2))",
               border: "1px solid var(--ink-4)",
             }}
           >

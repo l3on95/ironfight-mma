@@ -2,17 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Tidal Athletics Design Tokens ─────────────────────────────────────── */
+/* ─── IronFight MMA — Design Tokens ─────────────────────────────────────── */
 :root {
-  /* Primary palette */
-  --ta-cyan:        #00D4E6;
-  --ta-cyan-bright: #4DEEFF;
-  --ta-cyan-deep:   #008FA0;
-  --ta-pink:        #FF2D78;
-  --ta-pink-bright: #FF5C99;
-  --ta-pink-deep:   #B81E58;
+  /* Primary: Blood Red */
+  --blood:       #dc2626;
+  --blood-bright:#ef4444;
+  --blood-deep:  #991b1b;
 
-  /* Ink scale */
+  /* Secondary: Amber / Gold */
+  --amber:       #f59e0b;
+  --amber-bright:#fbbf24;
+  --amber-deep:  #d97706;
+
+  /* ── Legacy aliases (keep for backward-compat across all pages) ── */
+  --ta-cyan:        var(--blood);
+  --ta-cyan-bright: var(--blood-bright);
+  --ta-cyan-deep:   var(--blood-deep);
+  --ta-pink:        var(--amber);
+  --ta-pink-bright: var(--amber-bright);
+  --ta-pink-deep:   var(--amber-deep);
+  --blood-dark:     var(--blood-deep);
+  --blood-glow:     rgba(220, 38, 38, 0.4);
+
+  /* ── Ink scale (dark backgrounds) ── */
   --ink-0: #030406;
   --ink-1: #07090C;
   --ink-2: #0C1014;
@@ -21,26 +33,23 @@
   --ink-5: #232A33;
   --ink-6: #313B47;
 
-  /* Foreground scale */
+  /* ── Foreground scale ── */
   --fg:   #FFFFFF;
   --fg-2: #C9D1DA;
   --fg-3: #8893A1;
   --fg-4: #5A6573;
 
-  /* Semantic aliases */
+  /* ── Semantic aliases ── */
   --background: var(--ink-0);
   --foreground: var(--fg);
-  --primary: var(--ta-cyan);
-  --accent:  var(--ta-pink);
+  --primary:    var(--blood);
+  --accent:     var(--amber);
 
-  /* Glow shadows */
-  --glow-cyan: 0 0 0 1px rgba(0,212,230,.4), 0 0 24px rgba(0,212,230,.35), 0 0 60px rgba(0,212,230,.15);
-  --glow-pink: 0 0 0 1px rgba(255,45,120,.4), 0 0 24px rgba(255,45,120,.35);
-
-  /* Legacy compat */
-  --blood: var(--ta-cyan);
-  --blood-dark: var(--ta-cyan-deep);
-  --blood-glow: rgba(0, 212, 230, 0.4);
+  /* ── Glow shadows ── */
+  --glow-blood: 0 0 0 1px rgba(220,38,38,.4), 0 0 24px rgba(220,38,38,.35), 0 0 60px rgba(220,38,38,.15);
+  --glow-amber: 0 0 0 1px rgba(245,158,11,.4), 0 0 24px rgba(245,158,11,.35);
+  --glow-cyan:  var(--glow-blood);
+  --glow-pink:  var(--glow-amber);
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
@@ -52,8 +61,8 @@ html, body {
 
 body {
   background-image:
-    radial-gradient(420px 260px at 90% -5%, rgba(0,212,230,.12), transparent 60%),
-    radial-gradient(420px 260px at 0% 100%, rgba(255,45,120,.08), transparent 60%),
+    radial-gradient(500px 300px at 85% -5%, rgba(220,38,38,.08), transparent 60%),
+    radial-gradient(400px 280px at 0% 100%, rgba(245,158,11,.05), transparent 60%),
     linear-gradient(180deg, #030406 0%, #07090C 100%);
   background-attachment: fixed;
   min-height: 100vh;
@@ -63,41 +72,41 @@ body {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--ink-1); }
 ::-webkit-scrollbar-thumb { background: var(--ink-5); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--ta-cyan); }
+::-webkit-scrollbar-thumb:hover { background: var(--blood); }
 * { scrollbar-color: var(--ink-5) transparent; scrollbar-width: thin; }
 
 /* ─── Selection ──────────────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(0, 212, 230, 0.25);
+  background: rgba(220, 38, 38, 0.25);
   color: #fff;
 }
 
 /* ─── Components ─────────────────────────────────────────────────────────── */
 @layer components {
 
-  /* Primary CTA — cyan glow button */
+  /* Primary CTA — blood red glow button */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl font-display font-black uppercase tracking-widest transition-all duration-200;
     @apply px-6 py-3 text-sm;
-    background: var(--ta-cyan);
-    color: #001417;
+    background: var(--blood);
+    color: #fff;
     box-shadow:
-      0 0 0 1px rgba(0,212,230,.6),
-      0 0 24px rgba(0,212,230,.45),
-      inset 0 1px 0 rgba(255,255,255,.4);
+      0 0 0 1px rgba(220,38,38,.6),
+      0 0 24px rgba(220,38,38,.4),
+      inset 0 1px 0 rgba(255,255,255,.15);
   }
   .btn-primary:hover {
-    background: var(--ta-cyan-bright);
+    background: var(--blood-bright);
     box-shadow:
-      0 0 0 1px rgba(77,238,255,.7),
-      0 0 36px rgba(0,212,230,.6),
-      inset 0 1px 0 rgba(255,255,255,.5);
+      0 0 0 1px rgba(239,68,68,.7),
+      0 0 36px rgba(220,38,38,.55),
+      inset 0 1px 0 rgba(255,255,255,.2);
     transform: translateY(-1px);
   }
   .btn-primary:active { transform: scale(.97); }
   .btn-primary:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(0,212,230,.5);
+    box-shadow: 0 0 0 3px rgba(220,38,38,.5);
   }
 
   /* Secondary — transparent border button */
@@ -109,27 +118,27 @@ body {
     color: var(--fg);
   }
   .btn-secondary:hover {
-    border-color: var(--ta-cyan);
-    color: var(--ta-cyan);
-    box-shadow: 0 0 24px rgba(0,212,230,.2);
+    border-color: var(--blood);
+    color: var(--blood);
+    box-shadow: 0 0 20px rgba(220,38,38,.18);
   }
   .btn-secondary:active { transform: scale(.97); }
   .btn-secondary:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(0,212,230,.3);
+    box-shadow: 0 0 0 3px rgba(220,38,38,.3);
   }
 
-  /* Ghost pink — cancel/danger */
+  /* Ghost amber — cancel/alt action */
   .btn-ghost-pink {
     @apply inline-flex items-center justify-center gap-2 rounded-xl font-display font-black uppercase tracking-widest transition-all duration-200;
     @apply px-6 py-3 text-sm;
     background: transparent;
-    border: 1px solid rgba(255,45,120,.4);
-    color: var(--ta-pink);
+    border: 1px solid rgba(245,158,11,.4);
+    color: var(--amber);
   }
   .btn-ghost-pink:hover {
-    background: rgba(255,45,120,.08);
-    box-shadow: 0 0 24px rgba(255,45,120,.25);
+    background: rgba(245,158,11,.08);
+    box-shadow: 0 0 24px rgba(245,158,11,.2);
   }
 
   /* Display-Headline */
@@ -139,15 +148,28 @@ body {
     letter-spacing: 0.02em;
   }
 
-  /* Card — dark layered */
+  /* Card — dark layered with glass option */
   .card {
     background: linear-gradient(180deg, var(--ink-3), var(--ink-2));
     border: 1px solid var(--ink-4);
     @apply rounded-xl p-4 transition-all duration-300 relative overflow-hidden;
   }
   .card:hover {
-    border-color: rgba(0,212,230,.4);
-    box-shadow: 0 0 30px rgba(0,212,230,.12);
+    border-color: rgba(220,38,38,.35);
+    box-shadow: 0 0 30px rgba(220,38,38,.1);
+  }
+
+  /* Glass card — frosted panel */
+  .card-glass {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background: rgba(17, 22, 28, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    @apply rounded-xl p-4 transition-all duration-300 relative overflow-hidden;
+  }
+  .card-glass:hover {
+    border-color: rgba(220,38,38,.3);
+    box-shadow: 0 0 28px rgba(220,38,38,.1);
   }
 
   /* Input field */
@@ -158,23 +180,23 @@ body {
     color: var(--fg);
   }
   .input-field:focus {
-    border-color: var(--ta-cyan);
-    box-shadow: 0 0 0 3px rgba(0,212,230,.18), 0 0 24px rgba(0,212,230,.15);
+    border-color: var(--blood);
+    box-shadow: 0 0 0 3px rgba(220,38,38,.15), 0 0 20px rgba(220,38,38,.12);
     outline: none;
   }
   .input-field::placeholder { color: var(--fg-4); }
 
   /* Badge variants */
   .badge-cyan {
-    background: rgba(0,212,230,.12);
-    color: var(--ta-cyan);
-    border: 1px solid rgba(0,212,230,.3);
+    background: rgba(220,38,38,.12);
+    color: var(--blood);
+    border: 1px solid rgba(220,38,38,.3);
     @apply rounded text-[9px] font-mono uppercase tracking-widest px-2 py-0.5;
   }
   .badge-pink {
-    background: rgba(255,45,120,.12);
-    color: var(--ta-pink);
-    border: 1px solid rgba(255,45,120,.3);
+    background: rgba(245,158,11,.12);
+    color: var(--amber);
+    border: 1px solid rgba(245,158,11,.3);
     @apply rounded text-[9px] font-mono uppercase tracking-widest px-2 py-0.5;
   }
   .badge-grey {
@@ -183,21 +205,35 @@ body {
     border: 1px solid var(--ink-5);
     @apply rounded text-[9px] font-mono uppercase tracking-widest px-2 py-0.5;
   }
+  .badge-red {
+    background: rgba(220,38,38,.12);
+    color: var(--blood);
+    border: 1px solid rgba(220,38,38,.3);
+    @apply rounded text-[9px] font-mono uppercase tracking-widest px-2 py-0.5;
+  }
+  .badge-amber {
+    background: rgba(245,158,11,.12);
+    color: var(--amber);
+    border: 1px solid rgba(245,158,11,.3);
+    @apply rounded text-[9px] font-mono uppercase tracking-widest px-2 py-0.5;
+  }
 }
 
 /* ─── Utilities ──────────────────────────────────────────────────────────── */
 @layer utilities {
   .text-balance { text-wrap: balance; }
 
-  .text-glow-cyan {
-    text-shadow: 0 0 20px rgba(0,212,230,.5);
+  .text-glow-blood {
+    text-shadow: 0 0 20px rgba(220,38,38,.55);
   }
-  .text-glow-pink {
-    text-shadow: 0 0 20px rgba(255,45,120,.5);
+  .text-glow-amber {
+    text-shadow: 0 0 20px rgba(245,158,11,.5);
   }
   /* legacy */
-  .text-glow { text-shadow: 0 0 20px rgba(0,212,230,.5); }
-  .ring-blood { box-shadow: inset 0 0 0 1px var(--ta-cyan); }
+  .text-glow      { text-shadow: 0 0 20px rgba(220,38,38,.55); }
+  .text-glow-cyan { text-shadow: 0 0 20px rgba(220,38,38,.55); }
+  .text-glow-pink { text-shadow: 0 0 20px rgba(245,158,11,.5); }
+  .ring-blood     { box-shadow: inset 0 0 0 1px var(--blood); }
 
   .font-display-ta {
     font-family: var(--font-display), "Barlow Condensed", Impact, sans-serif;
@@ -205,12 +241,20 @@ body {
   .font-mono-ta {
     font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
   }
+
+  /* Glassmorphism helper */
+  .glass {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background: rgba(7, 9, 12, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
 }
 
 /* ─── Animations ─────────────────────────────────────────────────────────── */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(0,212,230,.3); }
-  50%       { box-shadow: 0 0 24px rgba(0,212,230,.7); }
+  0%, 100% { box-shadow: 0 0 8px rgba(220,38,38,.3); }
+  50%       { box-shadow: 0 0 24px rgba(220,38,38,.7); }
 }
 
 @keyframes slide-up {
@@ -229,8 +273,8 @@ body {
 
 /* ─── Timer Phase-Pulse ──────────────────────────────────────────────────── */
 @keyframes prep-pulse {
-  0%, 100% { filter: drop-shadow(0 0 0 rgba(255,140,0,0)); }
-  50%       { filter: drop-shadow(0 0 28px rgba(255,140,0,.65)); }
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(245,158,11,0)); }
+  50%       { filter: drop-shadow(0 0 28px rgba(245,158,11,.65)); }
 }
 
 @keyframes work-pulse {
@@ -249,9 +293,9 @@ body {
 
 /* ─── Countdown tick flash ───────────────────────────────────────────────── */
 @keyframes tick-flash {
-  0%   { background-color: rgba(0,212,230,0); }
-  20%  { background-color: rgba(0,212,230,.08); }
-  100% { background-color: rgba(0,212,230,0); }
+  0%   { background-color: rgba(220,38,38,0); }
+  20%  { background-color: rgba(220,38,38,.08); }
+  100% { background-color: rgba(220,38,38,0); }
 }
 
 .tick-flash { animation: tick-flash 0.4s ease-out; }
@@ -263,3 +307,14 @@ body {
 }
 
 .animate-dot-pulse { animation: dotPulse 1.6s infinite; }
+
+/* ─── Accent line slide-in ───────────────────────────────────────────────── */
+@keyframes lineExpand {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.animate-line-expand {
+  animation: lineExpand 0.25s ease-out forwards;
+  transform-origin: left;
+}

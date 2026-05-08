@@ -115,24 +115,24 @@ export default function LoginPage() {
           <div
             className="flex h-20 w-20 items-center justify-center rounded-2xl font-display-ta text-2xl font-black"
             style={{
-              background: "linear-gradient(135deg, var(--ta-cyan), var(--ta-cyan-deep))",
-              color: "#001417",
+              background: "linear-gradient(135deg, var(--blood), var(--blood-deep))",
+              color: "#fff",
               boxShadow:
-                "0 0 40px rgba(0,212,230,.25), 0 0 80px rgba(255,45,120,.1)",
+                "0 0 40px rgba(220,38,38,.3), 0 0 80px rgba(220,38,38,.1)",
             }}
           >
-            TA
+            IF
           </div>
           <div>
             <h1
               className="font-display-ta text-center font-black uppercase leading-none"
               style={{ fontSize: "32px", letterSpacing: "0.04em" }}
             >
-              Tidal Athletics
+              IronFight MMA
             </h1>
             <div
               className="font-mono-ta mt-1.5 text-center text-[10px] uppercase"
-              style={{ letterSpacing: "0.25em", color: "var(--ta-cyan)" }}
+              style={{ letterSpacing: "0.25em", color: "var(--blood)" }}
             >
               Einloggen
             </div>
@@ -163,7 +163,7 @@ export default function LoginPage() {
               <>
                 <div
                   className="h-4 w-4 animate-spin rounded-full border-2"
-                  style={{ borderColor: "var(--fg-4)", borderTopColor: "var(--ta-cyan)" }}
+                  style={{ borderColor: "var(--fg-4)", borderTopColor: "var(--blood)" }}
                 />
                 Verbinde…
               </>
@@ -230,9 +230,9 @@ export default function LoginPage() {
               <div
                 className="rounded-xl px-4 py-3 text-sm"
                 style={{
-                  border: "1px solid rgba(255,45,120,.4)",
-                  background: "rgba(255,45,120,.08)",
-                  color: "var(--ta-pink)",
+                  border: "1px solid rgba(245,158,11,.4)",
+                  background: "rgba(245,158,11,.08)",
+                  color: "var(--amber)",
                 }}
               >
                 {error}
@@ -274,7 +274,7 @@ export default function LoginPage() {
               <Link
                 href="/register"
                 className="font-bold transition-colors"
-                style={{ color: "var(--ta-cyan)" }}
+                style={{ color: "var(--blood)" }}
               >
                 Registrieren
               </Link>

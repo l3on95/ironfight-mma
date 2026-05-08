@@ -23,9 +23,9 @@ export function generateStaticParams() {
 
 export function generateMetadata({ params }: { params: { id: string } }) {
   const t = getTechniqueById(params.id);
-  if (!t) return { title: "Technik nicht gefunden — Tidal Athletics" };
+  if (!t) return { title: "Technik nicht gefunden — IronFight MMA" };
   return {
-    title: `${t.name} — Tidal Athletics Techniken`,
+    title: `${t.name} — IronFight MMA Techniken`,
     description: t.description,
   };
 }

@@ -83,9 +83,9 @@ function StreakCalendar({ sessions }: { sessions: WorkoutSession[] }) {
                 : "var(--ink-4)",
               color: isToday ? "#fff" : done ? "#001417" : "var(--fg-3)",
               boxShadow: isToday
-                ? "0 0 12px rgba(255,45,120,.5)"
+                ? "0 0 12px rgba(245,158,11,.5)"
                 : done
-                ? "0 0 12px rgba(0,212,230,.4)"
+                ? "0 0 12px rgba(220,38,38,.4)"
                 : "none",
             }}
           >
@@ -191,7 +191,7 @@ function DashboardContent() {
           className="mb-6 rounded-2xl p-5 relative overflow-hidden"
           style={{
             background:
-              "radial-gradient(300px 200px at 90% -20%, rgba(0,212,230,.22), transparent 60%), linear-gradient(160deg, #0B1218, #050709)",
+              "radial-gradient(300px 200px at 90% -20%, rgba(220,38,38,.22), transparent 60%), linear-gradient(160deg, #0B1218, #050709)",
             border: "1px solid var(--ink-5)",
           }}
         >
@@ -199,7 +199,7 @@ function DashboardContent() {
             className="pointer-events-none absolute right-[-20px] top-[-20px] h-48 w-48 rounded-full"
             style={{
               background:
-                "radial-gradient(circle, rgba(0,212,230,.15), transparent 60%)",
+                "radial-gradient(circle, rgba(220,38,38,.15), transparent 60%)",
             }}
           />
           <div
@@ -216,7 +216,7 @@ function DashboardContent() {
               style={{
                 fontSize: "72px",
                 color: "var(--ta-cyan)",
-                textShadow: "0 0 20px rgba(0,212,230,.5)",
+                textShadow: "0 0 20px rgba(220,38,38,.5)",
                 letterSpacing: "-0.01em",
               }}
             >
@@ -441,8 +441,8 @@ function DashboardContent() {
                         <span
                           className="ml-2 rounded px-1.5 py-0.5 text-[9px] uppercase"
                           style={{
-                            border: "1px solid rgba(255,45,120,.3)",
-                            background: "rgba(255,45,120,.08)",
+                            border: "1px solid rgba(245,158,11,.3)",
+                            background: "rgba(245,158,11,.08)",
                             color: "var(--ta-pink)",
                             letterSpacing: "0.15em",
                           }}
@@ -533,9 +533,9 @@ function TrainerDashboardContent() {
       <div
         className="relative overflow-hidden border-b px-4 py-10 sm:px-6"
         style={{
-          borderColor: "rgba(255,45,120,.2)",
+          borderColor: "rgba(245,158,11,.2)",
           background:
-            "radial-gradient(500px 300px at 100% 50%, rgba(255,45,120,.12), transparent 60%), linear-gradient(160deg, #0d0608, #050505)",
+            "radial-gradient(500px 300px at 100% 50%, rgba(245,158,11,.12), transparent 60%), linear-gradient(160deg, #0d0608, #050505)",
         }}
       >
         {/* Dekorativer Hintergrund-Akzent */}
@@ -543,7 +543,7 @@ function TrainerDashboardContent() {
           className="pointer-events-none absolute right-0 top-0 h-full w-1/2"
           style={{
             background:
-              "radial-gradient(400px 200px at 100% 0%, rgba(255,45,120,.08), transparent 70%)",
+              "radial-gradient(400px 200px at 100% 0%, rgba(245,158,11,.08), transparent 70%)",
           }}
         />
         <div className="relative mx-auto max-w-7xl">
@@ -553,8 +553,8 @@ function TrainerDashboardContent() {
               className="font-mono-ta rounded px-2 py-0.5 text-[10px] font-black uppercase"
               style={{
                 letterSpacing: "0.2em",
-                background: "rgba(255,45,120,.15)",
-                border: "1px solid rgba(255,45,120,.4)",
+                background: "rgba(245,158,11,.15)",
+                border: "1px solid rgba(245,158,11,.4)",
                 color: "var(--ta-pink)",
               }}
             >
@@ -621,13 +621,13 @@ function TrainerDashboardContent() {
             label="Einheiten diese Woche"
             value={sessionCount !== null ? String(sessionCount) : null}
             accent="var(--ta-pink)"
-            glow="rgba(255,45,120,.3)"
+            glow="rgba(245,158,11,.3)"
           />
           <TrainerStatCard
             label="Trainingsblöcke"
             value={String(TRAINING_BLOCKS.length)}
             accent="var(--ta-cyan)"
-            glow="rgba(0,212,230,.3)"
+            glow="rgba(220,38,38,.3)"
           />
           <TrainerStatCard
             label="Heute"
@@ -639,7 +639,7 @@ function TrainerDashboardContent() {
             label="Top Techniken"
             value={topTechniques !== null ? String(topTechniques.length) : null}
             accent="var(--ta-cyan)"
-            glow="rgba(0,212,230,.3)"
+            glow="rgba(220,38,38,.3)"
           />
         </div>
 
@@ -774,8 +774,8 @@ function TrainerDashboardContent() {
               href="/schedule"
               className="group rounded-2xl p-5 transition-all"
               style={{
-                background: "linear-gradient(135deg, rgba(255,45,120,.12), var(--ink-2))",
-                border: "1px solid rgba(255,45,120,.25)",
+                background: "linear-gradient(135deg, rgba(245,158,11,.12), var(--ink-2))",
+                border: "1px solid rgba(245,158,11,.25)",
                 textDecoration: "none",
               }}
             >

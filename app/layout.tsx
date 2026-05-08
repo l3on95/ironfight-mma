@@ -29,7 +29,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tidal Athletics — Train Hard. Fight Smart.",
+  title: "IronFight MMA — Train Hard. Fight Smart.",
   description:
     "Deine MMA Trainings-App. Boxing, Wrestling, BJJ, Muay Thai. Strukturierte Pläne, Workout-Timer und Fortschritts-Tracking.",
   manifest: "/manifest.json",
@@ -43,12 +43,12 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Tidal Athletics",
+    title: "IronFight MMA",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#00D4E6",
+  themeColor: "#dc2626",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
