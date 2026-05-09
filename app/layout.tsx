@@ -7,6 +7,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import PwaRegister from "@/components/PwaRegister";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import FighterNameModal from "@/components/auth/FighterNameModal";
+import TrainerOnboardingModal from "@/components/auth/TrainerOnboardingModal";
 import SubscriptionAutoSync from "@/components/SubscriptionAutoSync";
 
 const barlowCondensed = Barlow_Condensed({
@@ -72,6 +73,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <Footer />
           <FighterNameModal />
+          <TrainerOnboardingModal />
           <SubscriptionAutoSync />
         </AuthProvider>
       </body>

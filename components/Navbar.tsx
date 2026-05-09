@@ -60,6 +60,26 @@ function IconAdmin() {
   );
 }
 
+function IconWhistle() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M16 5l5 1-2 5" />
+      <path d="M14 13a5 5 0 1 1-9 1 5 5 0 0 1 9-1z" />
+      <path d="M14 11l5-3" />
+    </svg>
+  );
+}
+
+function IconHelp() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.7" />
+      <path d="M12 17h.01" />
+    </svg>
+  );
+}
+
 // ── Types ──────────────────────────────────────────────────────
 interface NavChild {
   href: string;
@@ -114,6 +134,23 @@ const navGroups: NavGroup[] = [
   },
 ];
 
+const helpNavGroup: NavGroup = {
+  id: "help",
+  label: "Hilfe",
+  icon: <IconHelp />,
+  href: "/help",
+};
+
+const trainerNavGroup: NavGroup = {
+  id: "trainer",
+  label: "Trainer",
+  icon: <IconWhistle />,
+  children: [
+    { href: "/trainer/students", label: "Schüler" },
+    { href: "/schedule", label: "Stundenplan" },
+  ],
+};
+
 const adminNavGroup: NavGroup = {
   id: "admin",
   label: "Admin",
@@ -137,6 +174,13 @@ export default function Navbar() {
   const { user, loading, logOut, profile } = useAuth();
   const fighterName = useFighterName();
   const isAdmin = profile?.role === "admin";
+  const isTrainer = profile?.role === "trainer" || isAdmin;
+  const visibleGroups: NavGroup[] = [
+    ...navGroups,
+    ...(isTrainer ? [trainerNavGroup] : []),
+    helpNavGroup,
+    ...(isAdmin ? [adminNavGroup] : []),
+  ];
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMobileGroups, setOpenMobileGroups] = useState<Set<string>>(new Set());
   const [openDesktopGroup, setOpenDesktopGroup] = useState<string | null>(null);
@@ -219,7 +263,7 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-0.5 md:flex">
-          {[...navGroups, ...(isAdmin ? [adminNavGroup] : [])].map((group) => {
+          {visibleGroups.map((group) => {
             const active = isGroupActive(group);
             const isOpen = openDesktopGroup === group.id;
 
@@ -412,7 +456,7 @@ export default function Navbar() {
           style={{ borderColor: "var(--ink-4)", background: "var(--ink-1)" }}
         >
           <div className="flex flex-col p-4">
-            {[...navGroups, ...(isAdmin ? [adminNavGroup] : [])].map((group) => {
+            {visibleGroups.map((group) => {
               const groupActive = isGroupActive(group);
               const groupMobileOpen = openMobileGroups.has(group.id);
 

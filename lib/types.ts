@@ -441,6 +441,8 @@ export interface UserProfile {
   createdAt?: Date;
   /** Wurde der erste-Login-Onboarding-Flow durchlaufen? */
   onboarded: boolean;
+  /** Wurde das Trainer-spezifische Erst-Onboarding gesehen? Nur relevant für Trainer/Admins. */
+  trainerOnboarded?: boolean;
   /** Athleten-Profil — alle Felder optional, nullable */
   athlete?: AthleteProfile;
 }

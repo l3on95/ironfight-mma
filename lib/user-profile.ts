@@ -65,6 +65,7 @@ type ProfileDoc = {
   role?: UserRole;
   settings: UserSettings;
   onboarded: boolean;
+  trainerOnboarded?: boolean;
   createdAt?: Timestamp;
   athlete?: AthleteDoc;
 };
@@ -89,6 +90,7 @@ export async function getUserProfile(
     role: data.role,
     settings: { ...DEFAULT_USER_SETTINGS, ...(data.settings ?? {}) },
     onboarded: data.onboarded === true,
+    trainerOnboarded: data.trainerOnboarded === true,
     createdAt: data.createdAt?.toDate(),
     athlete: athleteFromDoc(data.athlete),
   };
@@ -119,6 +121,7 @@ export async function ensureUserProfile(user: User): Promise<UserProfile> {
       role: data.role,
       settings: { ...DEFAULT_USER_SETTINGS, ...(data.settings ?? {}) },
       onboarded: data.onboarded === true,
+      trainerOnboarded: data.trainerOnboarded === true,
       createdAt: data.createdAt?.toDate(),
       athlete: athleteFromDoc(data.athlete),
     };
@@ -158,6 +161,11 @@ export async function setDisplayName(uid: string, displayName: string | null) {
 /** Markiert den Onboarding-Flow als abgeschlossen, ohne Namen zu setzen. */
 export async function markOnboarded(uid: string) {
   await updateDoc(profileRef(uid), { onboarded: true });
+}
+
+/** Markiert das Trainer-Erst-Onboarding als gesehen. */
+export async function markTrainerOnboarded(uid: string) {
+  await updateDoc(profileRef(uid), { trainerOnboarded: true });
 }
 
 /** Aktualisiert User-Settings teilweise. */

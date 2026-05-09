@@ -31,6 +31,7 @@ import type {
   TrainingSession,
 } from "@/lib/types";
 import { TRAINING_AREA_LABEL, TECHNIQUE_LEVEL_LABEL } from "@/lib/types";
+import TrainerHint from "@/components/TrainerHint";
 
 // ─── Visuelle Hilfskonstanten ──────────────────────────────────────────────
 
@@ -188,6 +189,9 @@ type ModalState =
       participated: boolean;
       subscribed: boolean;
     };
+
+const TRAINER_BLOCK_DESCRIPTION =
+  "Füge diesem Kurs Techniken für diese Woche hinzu. Deine Schüler erhalten die Inhalte anschließend automatisch in ihrer Bibliothek.";
 
 // ─── Hauptkomponente ───────────────────────────────────────────────────────
 
@@ -361,10 +365,23 @@ export default function SchedulePage() {
             Stundenplan
           </h1>
           <p className="mt-1 text-sm" style={{ color: "var(--fg-3)" }}>
-            Klicke auf ein Training um teilzunehmen und Techniken in deine Bibliothek zu übernehmen.
+            {isTrainer
+              ? "Klicke auf einen Kurs, um Details zu öffnen und Techniken für diese Woche hinzuzufügen."
+              : "Klicke auf ein Training um teilzunehmen und Techniken in deine Bibliothek zu übernehmen."}
           </p>
         </div>
       </div>
+
+      {/* Trainer-Hinweis: Übersicht (nur einmal pro Browser) */}
+      {isTrainer && (
+        <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
+          <TrainerHint id="schedule-overview" title="Stundenplan">
+            Klicke auf einen Kurs, um Details zu sehen und Techniken für diese
+            Woche hinzuzufügen — sie landen automatisch in den Bibliotheken
+            deiner Schüler.
+          </TrainerHint>
+        </div>
+      )}
 
       {/* Wochengitter */}
       <div className="mx-auto max-w-7xl px-2 py-6 sm:px-4">
@@ -614,22 +631,56 @@ function ModalReady({
 
       {isTrainer && editMode ? (
         // ── EDIT-MODUS: Strukturierter Technik-Picker ──────────────────────
-        <TechniquePicker
-          block={block}
-          relevantDisciplines={relevantDisciplines}
-          activeDiscipline={editDiscipline}
-          selectedIds={editIds}
-          search={editSearch}
-          saving={saving}
-          onDisciplineChange={onDisciplineChange}
-          onSearchChange={onEditSearchChange}
-          onToggle={onToggleEditId}
-          onSave={onSaveTechniques}
-          onCancel={onCancelEdit}
-        />
+        <>
+          <TrainerHint id="course-edit-techniques" title="Techniken auswählen">
+            Wähle hier die Techniken aus, die deine Schüler diese Woche üben
+            sollen. Mit „Speichern" landen sie in den Bibliotheken aller
+            abonnierten Schüler.
+          </TrainerHint>
+          <TechniquePicker
+            block={block}
+            relevantDisciplines={relevantDisciplines}
+            activeDiscipline={editDiscipline}
+            selectedIds={editIds}
+            search={editSearch}
+            saving={saving}
+            onDisciplineChange={onDisciplineChange}
+            onSearchChange={onEditSearchChange}
+            onToggle={onToggleEditId}
+            onSave={onSaveTechniques}
+            onCancel={onCancelEdit}
+          />
+        </>
       ) : (
         // ── ANZEIGE-MODUS ─────────────────────────────────────────────────
         <>
+          {isTrainer && (
+            <div
+              className="mt-4 rounded-xl px-3 py-2.5 text-xs"
+              style={{
+                background: "rgba(0,212,230,0.06)",
+                border: "1px solid rgba(0,212,230,0.25)",
+                color: "var(--fg-2)",
+                lineHeight: 1.5,
+              }}
+            >
+              <span
+                className="mr-1.5 font-mono-ta font-bold uppercase"
+                style={{ letterSpacing: "0.15em", color: "var(--ta-cyan)" }}
+              >
+                Trainer-Aktion:
+              </span>
+              {TRAINER_BLOCK_DESCRIPTION}
+            </div>
+          )}
+
+          {isTrainer && (
+            <TrainerHint id="course-detail" title="Kurs-Details">
+              Hier siehst du alle Infos zu diesem Kurs. Über „Techniken
+              bearbeiten" weist du Inhalte für diese Woche zu.
+            </TrainerHint>
+          )}
+
           <div className="mt-4">
             {techniques.length === 0 ? (
               <p className="text-sm" style={{ color: "var(--fg-4)" }}>
@@ -650,7 +701,8 @@ function ModalReady({
           </div>
 
           <div className="mt-5 flex flex-col gap-2">
-            {isLoggedIn && (
+            {/* Schüler-Funktion: Kurs-Abo (nur für Nicht-Trainer) */}
+            {isLoggedIn && !isTrainer && (
               <button
                 onClick={onToggleSubscribe}
                 disabled={subscribing}
@@ -694,45 +746,48 @@ function ModalReady({
               </button>
             )}
 
-            {isLoggedIn ? (
-              participated ? (
-                <div
-                  className="rounded-xl py-2.5 text-center text-xs font-bold uppercase"
-                  style={{ background: "rgba(0,212,230,.08)", border: "1px solid rgba(0,212,230,.3)", color: "var(--ta-cyan)", letterSpacing: "0.1em" }}
-                >
-                  ✓ Teilgenommen
-                  {attendResult !== null && attendResult > 0 && (
-                    <span style={{ color: "var(--fg-3)" }}>
-                      {" "}— {attendResult} Technik{attendResult !== 1 ? "en" : ""} zur Bibliothek hinzugefügt
-                    </span>
-                  )}
-                  {attendResult === 0 && (
-                    <span style={{ color: "var(--fg-4)" }}>{" "}(alle bereits in deiner Bibliothek)</span>
-                  )}
-                </div>
+            {/* Schüler-Funktion: Teilnahme (nur für Nicht-Trainer) */}
+            {!isTrainer && (
+              isLoggedIn ? (
+                participated ? (
+                  <div
+                    className="rounded-xl py-2.5 text-center text-xs font-bold uppercase"
+                    style={{ background: "rgba(0,212,230,.08)", border: "1px solid rgba(0,212,230,.3)", color: "var(--ta-cyan)", letterSpacing: "0.1em" }}
+                  >
+                    ✓ Teilgenommen
+                    {attendResult !== null && attendResult > 0 && (
+                      <span style={{ color: "var(--fg-3)" }}>
+                        {" "}— {attendResult} Technik{attendResult !== 1 ? "en" : ""} zur Bibliothek hinzugefügt
+                      </span>
+                    )}
+                    {attendResult === 0 && (
+                      <span style={{ color: "var(--fg-4)" }}>{" "}(alle bereits in deiner Bibliothek)</span>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    onClick={onAttend}
+                    disabled={attending}
+                    className="w-full rounded-xl py-2.5 text-xs font-bold uppercase transition-opacity"
+                    style={{ background: "var(--ta-cyan)", color: "var(--ink-1)", letterSpacing: "0.1em", opacity: attending ? 0.6 : 1 }}
+                  >
+                    {attending
+                      ? "Wird gespeichert…"
+                      : displayCount > 0
+                        ? `Ich nehme teil — ${displayCount} Technik${displayCount !== 1 ? "en" : ""} übernehmen`
+                        : "Ich nehme teil"}
+                  </button>
+                )
               ) : (
-                <button
-                  onClick={onAttend}
-                  disabled={attending}
-                  className="w-full rounded-xl py-2.5 text-xs font-bold uppercase transition-opacity"
-                  style={{ background: "var(--ta-cyan)", color: "var(--ink-1)", letterSpacing: "0.1em", opacity: attending ? 0.6 : 1 }}
+                <Link
+                  href="/login"
+                  className="block w-full rounded-xl py-2.5 text-center text-xs font-bold uppercase"
+                  style={{ background: "var(--ta-cyan)", color: "var(--ink-1)", letterSpacing: "0.1em", textDecoration: "none" }}
+                  onClick={onClose}
                 >
-                  {attending
-                    ? "Wird gespeichert…"
-                    : displayCount > 0
-                      ? `Ich nehme teil — ${displayCount} Technik${displayCount !== 1 ? "en" : ""} übernehmen`
-                      : "Ich nehme teil"}
-                </button>
+                  Anmelden zum Teilnehmen
+                </Link>
               )
-            ) : (
-              <Link
-                href="/login"
-                className="block w-full rounded-xl py-2.5 text-center text-xs font-bold uppercase"
-                style={{ background: "var(--ta-cyan)", color: "var(--ink-1)", letterSpacing: "0.1em", textDecoration: "none" }}
-                onClick={onClose}
-              >
-                Anmelden zum Teilnehmen
-              </Link>
             )}
           </div>
         </>

@@ -1,6 +1,9 @@
 /**
  * Admin-Funktionen — nur für Nutzer mit role = "admin" aufrufbar.
  * Firestore-Regeln erzwingen dies serverseitig.
+ *
+ * Trainer-Lesefunktionen (z. B. `listAllStudents`) erfordern, dass die
+ * Firestore-Regeln Trainer-Lesezugriff auf die `users`-Collection erlauben.
  */
 
 import {
@@ -9,10 +12,11 @@ import {
   getDocs,
   orderBy,
   query,
+  Timestamp,
   updateDoc,
 } from "firebase/firestore";
 import { getFirestoreDb } from "./firebase";
-import type { UserRole } from "./types";
+import type { AthleteProfile, UserRole } from "./types";
 
 export type AdminUserEntry = {
   uid: string;
@@ -21,6 +25,10 @@ export type AdminUserEntry = {
   authProviderName: string | null;
   role: UserRole | undefined;
   createdAt: Date | undefined;
+};
+
+export type StudentEntry = AdminUserEntry & {
+  athlete?: AthleteProfile;
 };
 
 /** Lädt alle registrierten Nutzer (absteigend nach Registrierungsdatum). */
@@ -46,4 +54,62 @@ export async function listAllUsers(): Promise<AdminUserEntry[]> {
 /** Setzt die Rolle eines Nutzers. */
 export async function setUserRole(uid: string, role: UserRole): Promise<void> {
   await updateDoc(doc(getFirestoreDb(), "users", uid), { role });
+}
+
+/**
+ * Lädt alle Schüler/Mitglieder inkl. Athleten-Profil.
+ * Trainer und Admins sehen die gesamte Mitgliederliste; Trainer-/Admin-Accounts
+ * werden ausgefiltert, da der Fokus auf Schülern liegt.
+ */
+export async function listAllStudents(): Promise<StudentEntry[]> {
+  const q = query(
+    collection(getFirestoreDb(), "users"),
+    orderBy("createdAt", "desc"),
+  );
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => {
+      const data = d.data() as Record<string, unknown>;
+      const athleteData = data.athlete as
+        | {
+            primaryDiscipline?: AthleteProfile["primaryDiscipline"];
+            level?: AthleteProfile["level"];
+            trainingStartDate?: Timestamp | null;
+            weightKg?: number | null;
+            heightCm?: number | null;
+            weightClass?: AthleteProfile["weightClass"];
+            bjjBelt?: AthleteProfile["bjjBelt"];
+            gymName?: string | null;
+            trainerName?: string | null;
+            nextCompetitionDate?: Timestamp | null;
+            nextCompetitionName?: string | null;
+          }
+        | undefined;
+      const athlete: AthleteProfile | undefined = athleteData
+        ? {
+            primaryDiscipline: athleteData.primaryDiscipline ?? null,
+            level: athleteData.level ?? null,
+            trainingStartDate: athleteData.trainingStartDate?.toDate() ?? null,
+            weightKg: athleteData.weightKg ?? null,
+            heightCm: athleteData.heightCm ?? null,
+            weightClass: athleteData.weightClass ?? null,
+            bjjBelt: athleteData.bjjBelt ?? null,
+            gymName: athleteData.gymName ?? null,
+            trainerName: athleteData.trainerName ?? null,
+            nextCompetitionDate:
+              athleteData.nextCompetitionDate?.toDate() ?? null,
+            nextCompetitionName: athleteData.nextCompetitionName ?? null,
+          }
+        : undefined;
+      return {
+        uid: d.id,
+        email: (data.email as string | null) ?? null,
+        displayName: (data.displayName as string | null) ?? null,
+        authProviderName: (data.authProviderName as string | null) ?? null,
+        role: data.role as UserRole | undefined,
+        createdAt: (data.createdAt as Timestamp | undefined)?.toDate(),
+        athlete,
+      } satisfies StudentEntry;
+    })
+    .filter((u) => (u.role ?? "user") === "user");
 }

@@ -28,6 +28,7 @@ import {
   getUserProfile,
   setDisplayName as setProfileDisplayName,
   markOnboarded as markProfileOnboarded,
+  markTrainerOnboarded as markProfileTrainerOnboarded,
 } from "./user-profile";
 import type { UserProfile } from "./types";
 
@@ -45,6 +46,7 @@ type AuthContextValue = {
   logOut: () => Promise<void>;
   updateDisplayName: (name: string | null) => Promise<void>;
   finishOnboarding: () => Promise<void>;
+  finishTrainerOnboarding: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
 
@@ -127,6 +129,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await refreshProfile();
   }, [user, refreshProfile]);
 
+  const finishTrainerOnboarding = useCallback(async () => {
+    if (!user) return;
+    await markProfileTrainerOnboarded(user.uid);
+    await refreshProfile();
+  }, [user, refreshProfile]);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -199,6 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logOut: () => signOut(getFirebaseAuth()),
       updateDisplayName,
       finishOnboarding,
+      finishTrainerOnboarding,
       refreshProfile,
     }),
     [
@@ -209,6 +218,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       redirectError,
       updateDisplayName,
       finishOnboarding,
+      finishTrainerOnboarding,
       refreshProfile,
     ],
   );
