@@ -9,6 +9,7 @@
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
@@ -30,6 +31,56 @@ export type AdminUserEntry = {
 export type StudentEntry = AdminUserEntry & {
   athlete?: AthleteProfile;
 };
+
+/**
+ * Lädt einen einzelnen Schüler inkl. Athleten-Profil (Trainer-Detailansicht).
+ * Wirft, wenn das Profil nicht existiert oder Lese-Zugriff fehlt.
+ */
+export async function getStudentEntry(uid: string): Promise<StudentEntry | null> {
+  const ref = doc(getFirestoreDb(), "users", uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  const data = snap.data() as Record<string, unknown>;
+  const athleteData = data.athlete as
+    | {
+        primaryDiscipline?: AthleteProfile["primaryDiscipline"];
+        level?: AthleteProfile["level"];
+        trainingStartDate?: Timestamp | null;
+        weightKg?: number | null;
+        heightCm?: number | null;
+        weightClass?: AthleteProfile["weightClass"];
+        bjjBelt?: AthleteProfile["bjjBelt"];
+        gymName?: string | null;
+        trainerName?: string | null;
+        nextCompetitionDate?: Timestamp | null;
+        nextCompetitionName?: string | null;
+      }
+    | undefined;
+  const athlete: AthleteProfile | undefined = athleteData
+    ? {
+        primaryDiscipline: athleteData.primaryDiscipline ?? null,
+        level: athleteData.level ?? null,
+        trainingStartDate: athleteData.trainingStartDate?.toDate() ?? null,
+        weightKg: athleteData.weightKg ?? null,
+        heightCm: athleteData.heightCm ?? null,
+        weightClass: athleteData.weightClass ?? null,
+        bjjBelt: athleteData.bjjBelt ?? null,
+        gymName: athleteData.gymName ?? null,
+        trainerName: athleteData.trainerName ?? null,
+        nextCompetitionDate: athleteData.nextCompetitionDate?.toDate() ?? null,
+        nextCompetitionName: athleteData.nextCompetitionName ?? null,
+      }
+    : undefined;
+  return {
+    uid: snap.id,
+    email: (data.email as string | null) ?? null,
+    displayName: (data.displayName as string | null) ?? null,
+    authProviderName: (data.authProviderName as string | null) ?? null,
+    role: data.role as UserRole | undefined,
+    createdAt: (data.createdAt as Timestamp | undefined)?.toDate(),
+    athlete,
+  } satisfies StudentEntry;
+}
 
 /** Lädt alle registrierten Nutzer (absteigend nach Registrierungsdatum). */
 export async function listAllUsers(): Promise<AdminUserEntry[]> {

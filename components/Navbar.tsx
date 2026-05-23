@@ -157,6 +157,7 @@ const adminNavGroup: NavGroup = {
   icon: <IconAdmin />,
   children: [
     { href: "/admin/users", label: "Nutzer" },
+    { href: "/admin/seed", label: "Demo-Daten" },
     { href: "/dashboard", label: "Dashboard" },
   ],
 };

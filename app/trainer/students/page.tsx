@@ -19,6 +19,7 @@ import {
   DISCIPLINE_LABEL,
   WEIGHT_CLASS_LABEL,
 } from "@/lib/types";
+import Link from "next/link";
 
 // ─── Helper ────────────────────────────────────────────────────────────────
 
@@ -350,6 +351,22 @@ function StudentCard({ entry }: { entry: StudentEntry }) {
               )}
             </dl>
           )}
+
+          {/* Detail-Link: Analyse + Fight-Camp */}
+          <div className="mt-4 flex justify-end">
+            <Link
+              href={`/trainer/students/${entry.uid}`}
+              className="font-mono-ta rounded-lg px-3 py-1.5 text-[10px] uppercase transition-colors"
+              style={{
+                letterSpacing: "0.18em",
+                background: "rgba(0,212,230,0.08)",
+                border: "1px solid rgba(0,212,230,0.35)",
+                color: "var(--ta-cyan)",
+              }}
+            >
+              Detail + Fight-Camp →
+            </Link>
+          </div>
         </div>
       )}
     </div>
