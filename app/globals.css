@@ -41,6 +41,46 @@
   --blood: var(--ta-cyan);
   --blood-dark: var(--ta-cyan-deep);
   --blood-glow: rgba(0, 212, 230, 0.4);
+
+  /* Surface helpers — overridden per theme */
+  --nav-surface:          linear-gradient(180deg, rgba(7,9,12,.95), rgba(3,4,6,.92));
+  --dropdown-surface:     rgba(7,9,12,0.98);
+  --dropdown-shadow:      0 8px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,212,230,0.06);
+  --hover-overlay:        rgba(255,255,255,0.04);
+  --active-overlay-cyan:  rgba(0,212,230,0.07);
+}
+
+/* ─── Light Theme ─────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  /* Surface scale — cool light greys */
+  --ink-0: #EEF2F8;
+  --ink-1: #E3EAF4;
+  --ink-2: #FFFFFF;
+  --ink-3: #F5F8FC;
+  --ink-4: #D1DAE8;
+  --ink-5: #B4BFD0;
+  --ink-6: #8E9DB4;
+
+  /* Foreground scale — dark text */
+  --fg:   #0C1014;
+  --fg-2: #2D3748;
+  --fg-3: #4A5A72;
+  --fg-4: #8893A1;
+
+  /* Semantic */
+  --background: var(--ink-0);
+  --foreground: var(--fg);
+
+  /* Adjusted glows for light surfaces */
+  --glow-cyan: 0 0 0 1px rgba(0,143,160,.35), 0 2px 20px rgba(0,143,160,.18);
+  --glow-pink: 0 0 0 1px rgba(184,30,88,.35), 0 2px 20px rgba(184,30,88,.18);
+
+  /* Surface helpers */
+  --nav-surface:          linear-gradient(180deg, rgba(248,250,253,.97), rgba(238,242,248,.96));
+  --dropdown-surface:     rgba(255,255,255,0.99);
+  --dropdown-shadow:      0 4px 24px rgba(0,0,0,0.11), 0 0 0 1px rgba(0,143,160,0.12);
+  --hover-overlay:        rgba(0,0,0,0.04);
+  --active-overlay-cyan:  rgba(0,143,160,0.09);
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
@@ -59,6 +99,13 @@ body {
   min-height: 100vh;
 }
 
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(420px 260px at 90% -5%, rgba(0,212,230,.07), transparent 60%),
+    radial-gradient(420px 260px at 0% 100%, rgba(255,45,120,.05), transparent 60%),
+    linear-gradient(180deg, #EEF2F8 0%, #E8EEF6 100%);
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--ink-1); }
@@ -66,10 +113,17 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: var(--ta-cyan); }
 * { scrollbar-color: var(--ink-5) transparent; scrollbar-width: thin; }
 
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: var(--ta-cyan-deep); }
+
 /* ─── Selection ──────────────────────────────────────────────────────────── */
 ::selection {
   background: rgba(0, 212, 230, 0.25);
   color: #fff;
+}
+
+[data-theme="light"] ::selection {
+  background: rgba(0, 143, 160, 0.18);
+  color: var(--fg);
 }
 
 /* ─── Components ─────────────────────────────────────────────────────────── */
@@ -77,7 +131,8 @@ body {
 
   /* Primary CTA — cyan glow button */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl font-display font-black uppercase tracking-widest transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-display font-extrabold uppercase transition-all duration-200;
+    letter-spacing: 0.12em;
     @apply px-6 py-3 text-sm;
     background: var(--ta-cyan);
     color: #001417;
@@ -102,7 +157,8 @@ body {
 
   /* Secondary — transparent border button */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl font-display font-black uppercase tracking-widest transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-display font-extrabold uppercase transition-all duration-200;
+    letter-spacing: 0.12em;
     @apply px-6 py-3 text-sm;
     background: transparent;
     border: 1px solid var(--ink-5);
@@ -121,7 +177,8 @@ body {
 
   /* Ghost pink — cancel/danger */
   .btn-ghost-pink {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl font-display font-black uppercase tracking-widest transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-display font-extrabold uppercase transition-all duration-200;
+    letter-spacing: 0.12em;
     @apply px-6 py-3 text-sm;
     background: transparent;
     border: 1px solid rgba(255,45,120,.4);
@@ -132,11 +189,26 @@ body {
     box-shadow: 0 0 24px rgba(255,45,120,.25);
   }
 
-  /* Display-Headline */
+  /* Display-Headline — relaxed weight + breathing letter-spacing */
   .heading-display {
     font-family: var(--font-display), "Barlow Condensed", Impact, sans-serif;
     @apply uppercase;
-    letter-spacing: 0.02em;
+    font-weight: 800;
+    letter-spacing: 0.045em;
+  }
+
+  /* Display-Font Utilities — einheitlich entspannter:
+     - leicht weiter auseinander stehende Buchstaben
+     - bei Kombination mit .font-black auf weight 800 begrenzen (bleibt massiv,
+       aber wirkt weniger gepresst). */
+  .font-display-ta,
+  .font-display {
+    letter-spacing: 0.045em;
+  }
+  .font-display-ta.font-black,
+  .font-display.font-black,
+  .heading-display.font-black {
+    font-weight: 800;
   }
 
   /* Card — dark layered */
@@ -263,3 +335,56 @@ body {
 }
 
 .animate-dot-pulse { animation: dotPulse 1.6s infinite; }
+
+/* ─── Light Theme Component Overrides ───────────────────────────────────── */
+[data-theme="light"] .card {
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 2px 10px rgba(0,0,0,.04);
+}
+[data-theme="light"] .card:hover {
+  border-color: rgba(0,143,160,.4);
+  box-shadow: 0 4px 20px rgba(0,143,160,.1), 0 0 0 1px rgba(0,143,160,.2);
+}
+
+[data-theme="light"] .btn-secondary:hover {
+  border-color: var(--ta-cyan-deep);
+  color: var(--ta-cyan-deep);
+  box-shadow: 0 0 16px rgba(0,143,160,.12);
+}
+
+[data-theme="light"] .btn-ghost-pink:hover {
+  background: rgba(255,45,120,.06);
+  box-shadow: 0 0 16px rgba(255,45,120,.15);
+}
+
+[data-theme="light"] .input-field {
+  background: #FFFFFF;
+  border-color: var(--ink-5);
+}
+[data-theme="light"] .input-field:focus {
+  border-color: var(--ta-cyan-deep);
+  box-shadow: 0 0 0 3px rgba(0,143,160,.14), 0 0 16px rgba(0,143,160,.1);
+}
+
+[data-theme="light"] .badge-grey {
+  background: var(--ink-3);
+  border-color: var(--ink-4);
+  color: var(--fg-3);
+}
+[data-theme="light"] .badge-cyan {
+  background: rgba(0,143,160,.1);
+  border-color: rgba(0,143,160,.3);
+}
+[data-theme="light"] .badge-pink {
+  background: rgba(184,30,88,.08);
+  border-color: rgba(184,30,88,.28);
+}
+
+[data-theme="light"] .text-glow-cyan {
+  text-shadow: 0 0 14px rgba(0,143,160,.4);
+}
+[data-theme="light"] .text-glow-pink {
+  text-shadow: 0 0 14px rgba(184,30,88,.4);
+}
+[data-theme="light"] .text-glow {
+  text-shadow: 0 0 14px rgba(0,143,160,.4);
+}

@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/lib/auth-context";
+import { ThemeProvider } from "@/lib/theme-context";
 import PwaRegister from "@/components/PwaRegister";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import FighterNameModal from "@/components/auth/FighterNameModal";
@@ -62,20 +63,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className="dark">
+    <html lang="de" className="dark" suppressHydrationWarning>
+      <head>
+        {/* Prevents flash of wrong theme on reload */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('ta-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}` }} />
+      </head>
       <body
         className={`${barlowCondensed.variable} ${inter.variable} ${jetbrainsMono.variable} flex min-h-screen flex-col antialiased`}
       >
-        <AuthProvider>
-          <PwaRegister />
-          <PwaInstallPrompt />
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <FighterNameModal />
-          <TrainerOnboardingModal />
-          <SubscriptionAutoSync />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <PwaRegister />
+            <PwaInstallPrompt />
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <FighterNameModal />
+            <TrainerOnboardingModal />
+            <SubscriptionAutoSync />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
