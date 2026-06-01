@@ -440,7 +440,7 @@ function SeedContent() {
               isDemo: true
             </code>{" "}
             — &bdquo;Demo löschen&ldquo; entfernt nur diese Einträge und tastet echte Daten
-            nicht an. Trainer können dann im Schülerprofil + Fight-Camp-Bereich
+            nicht an. Trainer können dann im Schülerprofil + Wettkampfbereich
             sehen, wie Analysen mit echten Daten aussehen würden.
           </p>
           <p className="mt-2 text-xs" style={{ color: "var(--fg-4)" }}>

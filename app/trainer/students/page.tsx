@@ -352,7 +352,7 @@ function StudentCard({ entry }: { entry: StudentEntry }) {
             </dl>
           )}
 
-          {/* Detail-Link: Analyse + Fight-Camp */}
+          {/* Detail-Link: Analyse + Wettkämpfe */}
           <div className="mt-4 flex justify-end">
             <Link
               href={`/trainer/students/${entry.uid}`}
@@ -364,7 +364,7 @@ function StudentCard({ entry }: { entry: StudentEntry }) {
                 color: "var(--ta-cyan)",
               }}
             >
-              Detail + Fight-Camp →
+              Detail + Wettkämpfe →
             </Link>
           </div>
         </div>

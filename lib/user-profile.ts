@@ -63,6 +63,7 @@ type ProfileDoc = {
   displayName: string | null;
   username?: string | null;
   role?: UserRole;
+  gymId?: string | null;
   settings: UserSettings;
   onboarded: boolean;
   trainerOnboarded?: boolean;
@@ -88,6 +89,7 @@ export async function getUserProfile(
     displayName: data.displayName,
     username: data.username ?? null,
     role: data.role,
+    gymId: data.gymId ?? null,
     settings: { ...DEFAULT_USER_SETTINGS, ...(data.settings ?? {}) },
     onboarded: data.onboarded === true,
     trainerOnboarded: data.trainerOnboarded === true,
@@ -119,6 +121,7 @@ export async function ensureUserProfile(user: User): Promise<UserProfile> {
       displayName: data.displayName,
       username: data.username ?? null,
       role: data.role,
+      gymId: data.gymId ?? null,
       settings: { ...DEFAULT_USER_SETTINGS, ...(data.settings ?? {}) },
       onboarded: data.onboarded === true,
       trainerOnboarded: data.trainerOnboarded === true,
@@ -152,20 +155,17 @@ export async function ensureUserProfile(user: User): Promise<UserProfile> {
 /** Setzt den vom User gewählten FighterName. */
 export async function setDisplayName(uid: string, displayName: string | null) {
   const trimmed = displayName?.trim() || null;
-  await updateDoc(profileRef(uid), {
-    displayName: trimmed,
-    onboarded: true,
-  });
+  await setDoc(profileRef(uid), { displayName: trimmed, onboarded: true }, { merge: true });
 }
 
 /** Markiert den Onboarding-Flow als abgeschlossen, ohne Namen zu setzen. */
 export async function markOnboarded(uid: string) {
-  await updateDoc(profileRef(uid), { onboarded: true });
+  await setDoc(profileRef(uid), { onboarded: true }, { merge: true });
 }
 
 /** Markiert das Trainer-Erst-Onboarding als gesehen. */
 export async function markTrainerOnboarded(uid: string) {
-  await updateDoc(profileRef(uid), { trainerOnboarded: true });
+  await setDoc(profileRef(uid), { trainerOnboarded: true }, { merge: true });
 }
 
 /** Aktualisiert User-Settings teilweise. */
@@ -178,7 +178,7 @@ export async function updateUserSettings(
   const current = snap.exists()
     ? ((snap.data() as ProfileDoc).settings ?? DEFAULT_USER_SETTINGS)
     : DEFAULT_USER_SETTINGS;
-  await updateDoc(ref, { settings: { ...current, ...patch } });
+  await setDoc(ref, { settings: { ...current, ...patch } }, { merge: true });
 }
 
 /** Patcht das Athleten-Profil (alle Felder optional). */
@@ -215,7 +215,7 @@ export async function updateAthleteProfile(
     next.nextCompetitionName = patch.nextCompetitionName;
   }
 
-  await updateDoc(ref, { athlete: next });
+  await setDoc(ref, { athlete: next }, { merge: true });
 }
 
 /**
@@ -225,7 +225,5 @@ export async function updateAthleteProfile(
  */
 export async function reserveUsername(uid: string, username: string) {
   // TODO: Uniqueness via separate `usernames`-Collection (Transaction)
-  await updateDoc(profileRef(uid), {
-    username: username.trim().toLowerCase(),
-  });
+  await setDoc(profileRef(uid), { username: username.trim().toLowerCase() }, { merge: true });
 }

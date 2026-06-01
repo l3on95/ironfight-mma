@@ -171,8 +171,13 @@ const trainerNavGroup: NavGroup = {
   label: "Trainer",
   icon: <IconClipboard />,
   children: [
-    { href: "/trainer/students", label: "Schüler" },
+    { href: "/trainer/students", label: "Schüler", activePattern: /^\/trainer\/students/ },
     { href: "/schedule", label: "Stundenplan" },
+    {
+      href: "/trainer/competitions",
+      label: "Wettkampf",
+      activePattern: /^\/trainer\/(competitions|opponents)/,
+    },
   ],
 };
 

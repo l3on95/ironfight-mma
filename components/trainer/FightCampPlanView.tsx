@@ -47,9 +47,13 @@ const PHASE_ACCENT_BORDER: Record<FightCampPhase, string> = {
 export default function FightCampPlanView({
   camp,
   onDelete,
+  showOpponent = true,
 }: {
   camp: FightCamp;
   onDelete?: () => void;
+  /** Gegner-Zusammenfassung anzeigen. Im Wettkampf-Detail aus, da dort die
+   *  vollständige Gegner-DNA bereits separat dargestellt wird. */
+  showOpponent?: boolean;
 }) {
   const progress = fightCampProgress(camp);
 
@@ -145,6 +149,7 @@ export default function FightCampPlanView({
         </div>
 
         {/* Opponent summary */}
+        {showOpponent && (
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           <div
             className="rounded-xl p-3"
@@ -235,6 +240,7 @@ export default function FightCampPlanView({
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {/* Phasen */}

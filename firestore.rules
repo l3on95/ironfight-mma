@@ -30,10 +30,24 @@ service cloud.firestore {
         allow write: if request.auth != null && isAdmin();
       }
 
-      // Trainer + Admin verwalten Fight-Camps fuer ihre Schueler
+      // Trainer + Admin verwalten Wettkaempfe (fightCamps) fuer ihre Schueler
       match /fightCamps/{campId} {
         allow read, write: if request.auth != null && isTrainerOrAdmin();
       }
+    }
+
+    // CollectionGroup-Query: zentraler Wettkampfbereich liest alle fightCamps
+    // gym-weit ueber alle Schueler. Schreiben bleibt ueber den users-Pfad oben.
+    match /{path=**}/fightCamps/{campId} {
+      allow read: if request.auth != null && isTrainerOrAdmin();
+    }
+
+    // Gegner-DNA-Bibliothek (gym-weit geteilte Gegnerprofile).
+    // Single-Gym: Trainer/Admins lesen + schreiben. Die Gym-Trennung erfolgt
+    // ueber das gymId-Feld + belongsToGym (lib/gym.ts). Fuer echtes Multi-Gym
+    // hier zusaetzlich auf das Gym des Trainers einschraenken.
+    match /opponents/{opponentId} {
+      allow read, write: if request.auth != null && isTrainerOrAdmin();
     }
 
     match /trainingSessions/{document=**} {

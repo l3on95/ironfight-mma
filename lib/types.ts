@@ -437,6 +437,13 @@ export interface UserProfile {
   username?: string | null;
   /** Optionale Rolle — wird manuell in Firebase Console gesetzt */
   role?: UserRole;
+  /**
+   * Gym-Zugehörigkeit (Slug, z. B. "tidal-athletics"). Steuert, welche
+   * gym-geteilten Daten (Gegner-DNA, Wettkämpfe) ein Trainer sieht.
+   * Aktuell betreibt die App genau ein Gym — fehlt das Feld, gilt das
+   * Default-Gym (siehe lib/gym.ts). Für späteres Multi-Gym vorbereitet.
+   */
+  gymId?: string | null;
   settings: UserSettings;
   createdAt?: Date;
   /** Wurde der erste-Login-Onboarding-Flow durchlaufen? */

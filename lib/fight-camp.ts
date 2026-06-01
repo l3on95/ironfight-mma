@@ -18,6 +18,7 @@
 
 import {
   collection,
+  collectionGroup,
   deleteDoc,
   doc,
   getDoc,
@@ -27,9 +28,12 @@ import {
   serverTimestamp,
   setDoc,
   Timestamp,
+  updateDoc,
+  type QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { getFirestoreDb } from "./firebase";
 import type { Category, TrainingArea } from "./types";
+import type { GegnerDnaAnswers } from "./gegner-dna";
 
 // ─── Gegner-Stil ───────────────────────────────────────────────────────────
 
@@ -102,6 +106,14 @@ export interface OpponentProfile {
   favoriteAttacks: string[];
   /** Frei-Notizen */
   notes?: string;
+  /**
+   * Strukturierte Gegner-DNA (Scouting-Antworten je Frage). Optional —
+   * Altbestände ohne DNA bleiben gültig. In einem Wettkampf ist dies der
+   * eingefrorene Snapshot, der auch bei alten Wettkämpfen erhalten bleibt.
+   */
+  dna?: GegnerDnaAnswers;
+  /** Verweis auf das geteilte Gegner-DNA-Profil (lib/opponents.ts), falls verknüpft. */
+  opponentId?: string | null;
 }
 
 export interface FightCampPhaseBlock {
@@ -131,6 +143,10 @@ export interface FightCampPhaseBlock {
 export interface FightCamp {
   id: string;
   studentUid: string;
+  /** Gym-Zugehörigkeit — für die zentrale, gym-weite Wettkampfliste. */
+  gymId?: string;
+  /** Verknüpftes geteiltes Gegner-DNA-Profil (lib/opponents.ts), falls vorhanden. */
+  opponentId?: string | null;
   /** Wer das Camp angelegt hat (uid) */
   createdBy: string;
   createdAt: Date;
@@ -179,6 +195,8 @@ type PhaseDoc = {
 
 type FightCampDoc = {
   studentUid: string;
+  gymId?: string;
+  opponentId?: string | null;
   createdBy: string;
   createdAt?: Timestamp;
   competitionDate: Timestamp;
@@ -197,6 +215,8 @@ function decode(snap: { id: string; data: () => FightCampDoc }): FightCamp {
   return {
     id: snap.id,
     studentUid: d.studentUid,
+    gymId: d.gymId,
+    opponentId: d.opponentId ?? null,
     createdBy: d.createdBy,
     createdAt: d.createdAt?.toDate() ?? new Date(),
     competitionDate: d.competitionDate.toDate(),
@@ -224,33 +244,70 @@ function decode(snap: { id: string; data: () => FightCampDoc }): FightCamp {
   };
 }
 
+/**
+ * Baut eine Firestore-sichere Kopie des Gegner-Snapshots — entfernt
+ * undefined-Werte (Firestore lehnt sie ab) und kappt leere Antworten.
+ */
+export function cleanOpponentProfile(o: OpponentProfile): OpponentProfile {
+  const clean: OpponentProfile = {
+    name: o.name,
+    style: o.style,
+    stance: o.stance,
+    heightCm: o.heightCm ?? null,
+    weightKg: o.weightKg ?? null,
+    reachCm: o.reachCm ?? null,
+    strengths: o.strengths ?? [],
+    weaknesses: o.weaknesses ?? [],
+    favoriteAttacks: o.favoriteAttacks ?? [],
+  };
+  if (o.notes && o.notes.trim()) clean.notes = o.notes.trim();
+  if (o.dna) {
+    const dna: Record<string, string> = {};
+    for (const [k, v] of Object.entries(o.dna)) {
+      if (typeof v === "string" && v.trim()) dna[k] = v.trim();
+    }
+    if (Object.keys(dna).length > 0) clean.dna = dna;
+  }
+  if (o.opponentId) clean.opponentId = o.opponentId;
+  return clean;
+}
+
+function encodePhase(p: FightCampPhaseBlock): PhaseDoc {
+  const out: PhaseDoc = {
+    phase: p.phase,
+    startsAt: Timestamp.fromDate(p.startsAt),
+    endsAt: Timestamp.fromDate(p.endsAt),
+    weeks: p.weeks,
+    focus: p.focus,
+    techniqueIds: p.techniqueIds,
+    exerciseIds: p.exerciseIds,
+    trainingAreas: p.trainingAreas,
+    categories: p.categories,
+    sessionsPerWeek: p.sessionsPerWeek,
+    sparringRatio: p.sparringRatio,
+  };
+  if (p.notes && p.notes.trim()) out.notes = p.notes.trim();
+  return out;
+}
+
 function encode(camp: Omit<FightCamp, "id" | "createdAt">): FightCampDoc {
-  return {
+  const out: FightCampDoc = {
     studentUid: camp.studentUid,
     createdBy: camp.createdBy,
     competitionDate: Timestamp.fromDate(camp.competitionDate),
     competitionName: camp.competitionName,
     weeksTotal: camp.weeksTotal,
     startedAt: Timestamp.fromDate(camp.startedAt),
-    opponent: camp.opponent,
-    phases: camp.phases.map((p) => ({
-      phase: p.phase,
-      startsAt: Timestamp.fromDate(p.startsAt),
-      endsAt: Timestamp.fromDate(p.endsAt),
-      weeks: p.weeks,
-      focus: p.focus,
-      techniqueIds: p.techniqueIds,
-      exerciseIds: p.exerciseIds,
-      trainingAreas: p.trainingAreas,
-      categories: p.categories,
-      sessionsPerWeek: p.sessionsPerWeek,
-      sparringRatio: p.sparringRatio,
-      notes: p.notes,
-    })),
+    opponent: cleanOpponentProfile(camp.opponent),
+    phases: camp.phases.map(encodePhase),
     status: camp.status,
-    trainerNotes: camp.trainerNotes,
-    isDemo: camp.isDemo,
   };
+  if (camp.gymId) out.gymId = camp.gymId;
+  if (camp.opponentId) out.opponentId = camp.opponentId;
+  if (camp.trainerNotes && camp.trainerNotes.trim())
+    out.trainerNotes = camp.trainerNotes.trim();
+  if (camp.isDemo) out.isDemo = camp.isDemo;
+  return out;
 }
 
 // ─── CRUD ──────────────────────────────────────────────────────────────────
@@ -273,6 +330,8 @@ export async function updateFightCamp(
 ): Promise<void> {
   const data: Partial<FightCampDoc> = {};
   if (patch.createdBy !== undefined) data.createdBy = patch.createdBy;
+  if (patch.gymId !== undefined) data.gymId = patch.gymId;
+  if (patch.opponentId !== undefined) data.opponentId = patch.opponentId ?? null;
   if (patch.competitionDate !== undefined)
     data.competitionDate = Timestamp.fromDate(patch.competitionDate);
   if (patch.competitionName !== undefined)
@@ -280,27 +339,17 @@ export async function updateFightCamp(
   if (patch.weeksTotal !== undefined) data.weeksTotal = patch.weeksTotal;
   if (patch.startedAt !== undefined)
     data.startedAt = Timestamp.fromDate(patch.startedAt);
-  if (patch.opponent !== undefined) data.opponent = patch.opponent;
+  if (patch.opponent !== undefined)
+    data.opponent = cleanOpponentProfile(patch.opponent);
   if (patch.phases !== undefined) {
-    data.phases = patch.phases.map((p) => ({
-      phase: p.phase,
-      startsAt: Timestamp.fromDate(p.startsAt),
-      endsAt: Timestamp.fromDate(p.endsAt),
-      weeks: p.weeks,
-      focus: p.focus,
-      techniqueIds: p.techniqueIds,
-      exerciseIds: p.exerciseIds,
-      trainingAreas: p.trainingAreas,
-      categories: p.categories,
-      sessionsPerWeek: p.sessionsPerWeek,
-      sparringRatio: p.sparringRatio,
-      notes: p.notes,
-    }));
+    data.phases = patch.phases.map(encodePhase);
   }
   if (patch.status !== undefined) data.status = patch.status;
   if (patch.trainerNotes !== undefined) data.trainerNotes = patch.trainerNotes;
   if (patch.isDemo !== undefined) data.isDemo = patch.isDemo;
-  await setDoc(fightCampDoc(uid, campId), data, { merge: true });
+  // updateDoc statt setDoc(merge): ersetzt das `opponent`-Feld komplett, damit
+  // gelöschte Gegner-DNA-Antworten nicht durch Deep-Merge erhalten bleiben.
+  await updateDoc(fightCampDoc(uid, campId), data);
 }
 
 export async function getFightCamp(
@@ -333,6 +382,37 @@ export async function deleteFightCamp(
   campId: string,
 ): Promise<void> {
   await deleteDoc(fightCampDoc(uid, campId));
+}
+
+/** Decodiert ein collectionGroup-Dokument und sichert studentUid aus dem Pfad. */
+function decodeGroupDoc(d: QueryDocumentSnapshot): FightCamp {
+  const camp = decode({ id: d.id, data: () => d.data() as FightCampDoc });
+  const parentUid = d.ref.parent.parent?.id;
+  if (parentUid && !camp.studentUid) camp.studentUid = parentUid;
+  return camp;
+}
+
+/**
+ * Lädt ALLE Wettkämpfe gym-weit (über alle Schüler hinweg) für den zentralen
+ * Wettkampfbereich — via collectionGroup-Query über `fightCamps`.
+ *
+ * Single-Gym: liefert alle Camps zurück; die gym-Filterung erfolgt über
+ * `belongsToGym` (lib/gym.ts) in der UI. Fehlt der Firestore-Index für die
+ * Sortierung, wird unsortiert geladen und clientseitig sortiert.
+ */
+export async function listAllFightCamps(): Promise<FightCamp[]> {
+  const cg = collectionGroup(getFirestoreDb(), "fightCamps");
+  try {
+    const snap = await getDocs(query(cg, orderBy("competitionDate", "desc")));
+    return snap.docs.map(decodeGroupDoc);
+  } catch {
+    const snap = await getDocs(cg);
+    const camps = snap.docs.map(decodeGroupDoc);
+    camps.sort(
+      (a, b) => b.competitionDate.getTime() - a.competitionDate.getTime(),
+    );
+    return camps;
+  }
 }
 
 // ─── Hilfsmittel: Phasen-Zeitachse ─────────────────────────────────────────

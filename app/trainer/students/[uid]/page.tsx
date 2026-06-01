@@ -5,15 +5,12 @@ import TrainerHint from "@/components/TrainerHint";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import AreaCoverageChart from "@/components/trainer/AreaCoverageChart";
-import FightCampForm from "@/components/trainer/FightCampForm";
-import FightCampPlanView from "@/components/trainer/FightCampPlanView";
-import { useAuth } from "@/lib/auth-context";
+import CompetitionCard from "@/components/trainer/CompetitionCard";
 import { getStudentEntry, type StudentEntry } from "@/lib/admin";
 import { getRecentWorkouts, type WorkoutSession } from "@/lib/workouts";
 import { getAllProgress } from "@/lib/extensions/technique-progress";
 import {
   analyzeTrainingHistory,
-  recommendFocus,
   type TrainingHistoryAnalysis,
 } from "@/lib/fight-camp-analysis";
 import {
@@ -24,13 +21,7 @@ import {
   WEIGHT_CLASS_LABEL,
   type TechniqueProgress,
 } from "@/lib/types";
-import {
-  createFightCamp,
-  deleteFightCamp,
-  listFightCamps,
-  type FightCamp,
-} from "@/lib/fight-camp";
-import { generateFightCamp } from "@/lib/fight-camp-generator";
+import { listFightCamps, type FightCamp } from "@/lib/fight-camp";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -116,14 +107,10 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 function StudentDetailContent({ uid }: { uid: string }) {
-  const { user } = useAuth();
   const [entry, setEntry] = useState<StudentEntry | null>(null);
   const [workouts, setWorkouts] = useState<WorkoutSession[] | null>(null);
   const [progress, setProgress] = useState<TechniqueProgress[] | null>(null);
   const [camps, setCamps] = useState<FightCamp[] | null>(null);
-  const [selectedCampId, setSelectedCampId] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [formBusy, setFormBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -144,7 +131,6 @@ function StudentDetailContent({ uid }: { uid: string }) {
       setWorkouts(w);
       setProgress(p);
       setCamps(c);
-      if (c.length > 0) setSelectedCampId(c[0].id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unbekannter Fehler");
     }
@@ -158,62 +144,6 @@ function StudentDetailContent({ uid }: { uid: string }) {
     if (workouts === null || progress === null) return null;
     return analyzeTrainingHistory(workouts, progress);
   }, [workouts, progress]);
-
-  const selectedCamp = useMemo(
-    () => camps?.find((c) => c.id === selectedCampId) ?? null,
-    [camps, selectedCampId],
-  );
-
-  const focus = useMemo(() => {
-    if (!analysis || !selectedCamp) return null;
-    return recommendFocus(analysis, selectedCamp.opponent);
-  }, [analysis, selectedCamp]);
-
-  const highlightAreas = useMemo(() => {
-    if (!focus) return new Set<string>();
-    return new Set<string>([...focus.criticalGaps]);
-  }, [focus]);
-
-  async function handleCreateCamp(value: {
-    competitionName: string;
-    competitionDate: string;
-    opponent: import("@/lib/fight-camp").OpponentProfile;
-  }) {
-    if (!user || !entry || !analysis) return;
-    setFormBusy(true);
-    try {
-      const camp = generateFightCamp({
-        studentUid: uid,
-        createdBy: user.uid,
-        competitionDate: new Date(value.competitionDate),
-        competitionName: value.competitionName,
-        athleteLevel: entry.athlete?.level ?? null,
-        analysis,
-        opponent: value.opponent,
-      });
-      const created = await createFightCamp(camp);
-      setCamps((prev) => [created, ...(prev ?? [])]);
-      setSelectedCampId(created.id);
-      setShowForm(false);
-    } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Camp konnte nicht erstellt werden";
-      setError(msg);
-    } finally {
-      setFormBusy(false);
-    }
-  }
-
-  async function handleDeleteCamp(campId: string) {
-    if (!confirm("Camp wirklich löschen? Diese Aktion ist endgültig.")) return;
-    try {
-      await deleteFightCamp(uid, campId);
-      setCamps((prev) => (prev ?? []).filter((c) => c.id !== campId));
-      setSelectedCampId(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Löschen fehlgeschlagen");
-    }
-  }
 
   if (error && !entry) {
     return (
@@ -351,10 +281,10 @@ function StudentDetailContent({ uid }: { uid: string }) {
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <TrainerHint id="student-detail" title="Schüler-Detail">
-          Hier siehst du das volle Athleten-Profil, die Trainings-Analyse aus
-          der App-Historie und kannst eine Wettkampfvorbereitung anlegen. Der
-          Plan wird automatisch aus echten Techniken/Übungen der App generiert
-          — Trainer-Notizen pro Phase sind möglich.
+          Hier siehst du das volle Athleten-Profil und die Trainings-Analyse aus
+          der App-Historie. Wettkämpfe inkl. Gegner-DNA werden zentral im
+          Wettkampfbereich verwaltet — unten kannst du direkt einen neuen
+          Wettkampf für diesen Schüler anlegen.
         </TrainerHint>
 
         {/* KPI-Kacheln */}
@@ -539,18 +469,9 @@ function StudentDetailContent({ uid }: { uid: string }) {
                 className="font-mono-ta mb-2 text-[10px] font-bold uppercase"
                 style={{ letterSpacing: "0.18em", color: "var(--fg-3)" }}
               >
-                Kampfbereiche · Abdeckung{" "}
-                {selectedCamp && (
-                  <span style={{ color: "var(--ta-pink)", marginLeft: 8 }}>
-                    (gegnerspezifische Lücken markiert)
-                  </span>
-                )}
+                Kampfbereiche · Abdeckung
               </div>
-              <AreaCoverageChart
-                scores={analysis.areaScores}
-                highlightWeak
-                highlightAreas={highlightAreas}
-              />
+              <AreaCoverageChart scores={analysis.areaScores} highlightWeak />
             </div>
 
             {/* Strong / Weak summary */}
@@ -612,85 +533,35 @@ function StudentDetailContent({ uid }: { uid: string }) {
           </div>
         </div>
 
-        {/* Fight Camps */}
+        {/* Wettkämpfe — zentral im Wettkampfbereich verwaltet */}
         <div className="mt-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2
-              className="font-display-ta font-black uppercase"
-              style={{ fontSize: "20px", letterSpacing: "0.06em" }}
-            >
-              Wettkampfvorbereitung
-            </h2>
-            {!showForm && (
-              <button
-                onClick={() => setShowForm(true)}
-                className="btn-primary px-4 py-2 text-xs"
+            <div>
+              <h2
+                className="font-display-ta font-black uppercase"
+                style={{ fontSize: "20px", letterSpacing: "0.06em" }}
               >
-                + Neues Fight-Camp
-              </button>
-            )}
+                Wettkämpfe
+              </h2>
+              <p
+                className="font-mono-ta mt-1 text-[10px] uppercase"
+                style={{ letterSpacing: "0.18em", color: "var(--fg-4)" }}
+              >
+                Zentral im Wettkampfbereich verwaltet · Gegner-DNA inklusive
+              </p>
+            </div>
+            <Link
+              href={`/trainer/competitions/new?student=${uid}`}
+              className="btn-primary px-4 py-2 text-xs"
+            >
+              + Neuer Wettkampf
+            </Link>
           </div>
 
-          {/* Camp-Auswahl */}
-          {camps && camps.length > 0 && !showForm && (
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {camps.map((c) => {
-                const active = c.id === selectedCampId;
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedCampId(c.id)}
-                    className="font-mono-ta rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase transition-all"
-                    style={{
-                      letterSpacing: "0.12em",
-                      background: active
-                        ? "rgba(255,45,120,0.12)"
-                        : "var(--ink-3)",
-                      border: `1px solid ${active ? "rgba(255,45,120,0.4)" : "var(--ink-5)"}`,
-                      color: active ? "var(--ta-pink)" : "var(--fg-3)",
-                    }}
-                  >
-                    {c.competitionName} · {formatDate(c.competitionDate)}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Form oder Camp-View */}
           <div className="mt-4">
-            {showForm && (
-              <div
-                className="rounded-2xl p-5"
-                style={{
-                  background:
-                    "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
-                  border: "1px solid var(--ink-4)",
-                }}
-              >
-                <h3
-                  className="font-display-ta mb-4 font-black uppercase"
-                  style={{ fontSize: "16px", letterSpacing: "0.04em" }}
-                >
-                  Neues Fight-Camp anlegen
-                </h3>
-                <FightCampForm
-                  initial={{
-                    competitionName:
-                      athlete?.nextCompetitionName ?? "",
-                    competitionDate:
-                      athlete?.nextCompetitionDate
-                        ?.toISOString()
-                        .slice(0, 10) ?? undefined,
-                  }}
-                  busy={formBusy}
-                  onSubmit={handleCreateCamp}
-                  onCancel={() => setShowForm(false)}
-                />
-              </div>
-            )}
-
-            {!showForm && camps && camps.length === 0 && (
+            {camps === null ? (
+              <Skeleton className="h-24 w-full rounded-2xl" />
+            ) : camps.length === 0 ? (
               <div
                 className="rounded-2xl p-10 text-center"
                 style={{
@@ -698,24 +569,25 @@ function StudentDetailContent({ uid }: { uid: string }) {
                   border: "1px dashed var(--ink-5)",
                 }}
               >
-                <p
-                  className="text-sm font-bold"
-                  style={{ color: "var(--fg-3)" }}
-                >
-                  Noch kein Fight-Camp angelegt.
+                <p className="text-sm font-bold" style={{ color: "var(--fg-3)" }}>
+                  Noch kein Wettkampf für diesen Schüler.
                 </p>
                 <p className="mt-1 text-xs" style={{ color: "var(--fg-4)" }}>
-                  Klicke auf &bdquo;Neues Fight-Camp&ldquo;, um auf Basis der
-                  Trainings-Daten einen 4-Phasen-Plan zu erzeugen.
+                  Lege einen Wettkampf an, wähle einen Gegner aus der Gegner-DNA
+                  oder erstelle ein neues Gegnerprofil.
                 </p>
               </div>
-            )}
-
-            {!showForm && selectedCamp && (
-              <FightCampPlanView
-                camp={selectedCamp}
-                onDelete={() => handleDeleteCamp(selectedCamp.id)}
-              />
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {camps.map((c) => (
+                  <CompetitionCard
+                    key={c.id}
+                    camp={c}
+                    studentLabel={displayLabel(entry)}
+                    href={`/trainer/competitions/${uid}/${c.id}`}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>
