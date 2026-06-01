@@ -9,6 +9,50 @@ import {
 import type { GegnerDnaAnswers } from "@/lib/gegner-dna";
 import GegnerDnaAccordion from "./GegnerDnaAccordion";
 
+// ── Kleine Marker-Icons (keine Emoji) ──────────────────────────────────────
+function MarkUp() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M12 19V6" />
+      <path d="M5 12l7-7 7 7" />
+    </svg>
+  );
+}
+function MarkDown() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M12 5v13" />
+      <path d="M5 12l7 7 7-7" />
+    </svg>
+  );
+}
+function MarkStar() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden>
+      <path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z" />
+    </svg>
+  );
+}
+
+function MarkerRow({
+  icon,
+  color,
+  text,
+}: {
+  icon: React.ReactNode;
+  color: string;
+  text: string;
+}) {
+  return (
+    <div className="flex items-start gap-1.5">
+      <span style={{ color, flexShrink: 0, marginTop: "2px", lineHeight: 0 }}>
+        {icon}
+      </span>
+      <span style={{ color: "var(--fg-2)" }}>{text}</span>
+    </div>
+  );
+}
+
 export interface OpponentView {
   name: string;
   style: FightStyle;
@@ -89,30 +133,27 @@ export default function OpponentProfileView({
             weaknesses.length > 0 ||
             favorites.length > 0 ||
             opponent.notes) && (
-            <div className="mt-3 flex flex-col gap-1 text-xs">
+            <div className="mt-3 flex flex-col gap-1.5 text-xs">
               {strengths.length > 0 && (
-                <div>
-                  <span style={{ color: "var(--ta-cyan)" }}>+ </span>
-                  <span style={{ color: "var(--fg-2)" }}>
-                    {strengths.join(", ")}
-                  </span>
-                </div>
+                <MarkerRow
+                  icon={<MarkUp />}
+                  color="var(--ta-cyan)"
+                  text={strengths.join(", ")}
+                />
               )}
               {weaknesses.length > 0 && (
-                <div>
-                  <span style={{ color: "var(--ta-pink)" }}>− </span>
-                  <span style={{ color: "var(--fg-2)" }}>
-                    {weaknesses.join(", ")}
-                  </span>
-                </div>
+                <MarkerRow
+                  icon={<MarkDown />}
+                  color="var(--ta-pink)"
+                  text={weaknesses.join(", ")}
+                />
               )}
               {favorites.length > 0 && (
-                <div>
-                  <span style={{ color: "#FBBF24" }}>★ </span>
-                  <span style={{ color: "var(--fg-2)" }}>
-                    {favorites.join(", ")}
-                  </span>
-                </div>
+                <MarkerRow
+                  icon={<MarkStar />}
+                  color="#FBBF24"
+                  text={favorites.join(", ")}
+                />
               )}
               {opponent.notes && (
                 <div

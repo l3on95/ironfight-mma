@@ -8,6 +8,7 @@ import {
   type DnaCategory,
   type GegnerDnaAnswers,
 } from "@/lib/gegner-dna";
+import DnaCategoryIcon from "./DnaCategoryIcon";
 
 function IconChevron({ open }: { open: boolean }) {
   return (
@@ -108,14 +109,15 @@ export default function GegnerDnaAccordion({
               aria-expanded={open}
             >
               <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
                 style={{
                   background: "var(--ink-4)",
                   border: `1px solid ${category.accent}`,
+                  color: category.accent,
                 }}
                 aria-hidden
               >
-                {category.glyph}
+                <DnaCategoryIcon id={category.id} size={18} />
               </span>
               <span className="min-w-0 flex-1">
                 <span

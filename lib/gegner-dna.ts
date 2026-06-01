@@ -37,8 +37,6 @@ export interface DnaCategory {
   hint: string;
   /** Akzentfarbe (CSS-Variable oder Hex) für die Karte. */
   accent: string;
-  /** Kurzes Symbol/Emoji für die Kartenkopfzeile. */
-  glyph: string;
   questions: DnaQuestion[];
 }
 
@@ -50,7 +48,6 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     label: "Real Habits",
     hint: "Wiederkehrende, echte Verhaltensmuster",
     accent: "var(--ta-cyan)",
-    glyph: "🔁",
     questions: [
       { id: "real-habits_repeats", label: "Was macht der Gegner immer wieder?" },
       { id: "real-habits_pressure", label: "Was macht der Gegner unter Druck?" },
@@ -69,7 +66,6 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     label: "Entry Patterns",
     hint: "Wie der Gegner seine Angriffe startet",
     accent: "var(--ta-pink)",
-    glyph: "🎯",
     questions: [
       { id: "entry-patterns_start", label: "Wie startet der Gegner seine Angriffe?" },
       { id: "entry-patterns_setup", label: "Welche Technik nutzt er als Setup?" },
@@ -88,7 +84,6 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     label: "Preferred Weapons",
     hint: "Bevorzugte und gefährlichste Techniken",
     accent: "#FBBF24",
-    glyph: "⚔️",
     questions: [
       { id: "preferred-weapons_most-common", label: "Was ist seine häufigste Waffe?" },
       { id: "preferred-weapons_most-dangerous", label: "Was ist seine gefährlichste Technik?" },
@@ -105,7 +100,6 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     label: "Defensive Reactions",
     hint: "Reaktionen auf Angriffe und Druck",
     accent: "#A78BFA",
-    glyph: "🛡️",
     questions: [
       { id: "defensive-reactions_jabs", label: "Wie reagiert der Gegner auf Jabs?" },
       { id: "defensive-reactions_pressure", label: "Wie reagiert der Gegner auf Druck?" },
@@ -123,7 +117,6 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     label: "Cage- und Raumverhalten",
     hint: "Bewegung im Center, am Cage und unter Druck",
     accent: "var(--ta-cyan)",
-    glyph: "🧭",
     questions: [
       { id: "cage-space_center-movement", label: "Wie bewegt sich der Gegner im Center?" },
       { id: "cage-space_at-cage", label: "Wie verhält er sich am Cage?" },
@@ -139,7 +132,6 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     label: "Schwächen",
     hint: "Technische, konditionelle und mentale Lücken",
     accent: "var(--ta-pink)",
-    glyph: "🔍",
     questions: [
       { id: "weaknesses_technical", label: "Wo ist der Gegner technisch anfällig?" },
       { id: "weaknesses_problem-situations", label: "Welche Situationen bereiten ihm sichtbar Probleme?" },
@@ -155,7 +147,6 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     label: "Exploit-Möglichkeiten",
     hint: "Wie sich Schwächen gezielt ausnutzen lassen",
     accent: "#FBBF24",
-    glyph: "💥",
     questions: [
       { id: "exploits_target-weakness", label: "Welche Schwäche kann gezielt ausgenutzt werden?" },
       { id: "exploits_technique-vs-pattern", label: "Welche Technik eignet sich gegen sein Muster?" },
@@ -170,7 +161,6 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     label: "Gameplan",
     hint: "Empfohlener Grundplan und Anpassungen",
     accent: "#A78BFA",
-    glyph: "🗺️",
     questions: [
       { id: "gameplan_base-plan", label: "Was ist der empfohlene Grundplan gegen diesen Gegner?" },
       { id: "gameplan_seek-distance", label: "Welche Distanz soll gesucht werden?" },
@@ -187,7 +177,6 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     label: "Drills",
     hint: "Konkrete Vorbereitung im Training",
     accent: "var(--ta-cyan)",
-    glyph: "🥊",
     questions: [
       { id: "drills_preparation", label: "Welche Drills passen zur Vorbereitung auf diesen Gegner?" },
       { id: "drills_defensive-reaction", label: "Welche defensive Reaktion soll trainiert werden?" },
