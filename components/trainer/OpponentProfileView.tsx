@@ -7,7 +7,11 @@ import {
   type FightStyle,
 } from "@/lib/fight-camp";
 import type { GegnerDnaAnswers } from "@/lib/gegner-dna";
+import type { ActionStat, DnaSplit } from "@/lib/fight-stats";
 import GegnerDnaAccordion from "./GegnerDnaAccordion";
+import FightDnaSplit from "./FightDnaSplit";
+import FightStatsBlock from "./FightStatsBlock";
+import FightInsights from "./FightInsights";
 
 // ── Kleine Marker-Icons (keine Emoji) ──────────────────────────────────────
 function MarkUp() {
@@ -65,6 +69,8 @@ export interface OpponentView {
   favoriteAttacks?: string[];
   notes?: string | null;
   dna?: GegnerDnaAnswers;
+  dnaSplit?: DnaSplit | null;
+  actionStats?: ActionStat[];
 }
 
 /**
@@ -167,6 +173,15 @@ export default function OpponentProfileView({
           )}
         </div>
       )}
+
+      {/* §1 Fight-DNA-Split */}
+      <FightDnaSplit split={opponent.dnaSplit} mode="view" />
+
+      {/* §3/§4/§5 Auto-Insights aus den Zahlen */}
+      <FightInsights split={opponent.dnaSplit} stats={opponent.actionStats ?? []} />
+
+      {/* §2 Technik-Statistik (Detailzahlen) */}
+      <FightStatsBlock stats={opponent.actionStats ?? []} mode="view" />
 
       <GegnerDnaAccordion answers={opponent.dna ?? {}} mode="view" />
     </div>

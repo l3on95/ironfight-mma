@@ -187,6 +187,8 @@ function OpponentDetailContent({ id }: { id: string }) {
                 favoriteAttacks: opponent.favoriteAttacks,
                 notes: opponent.notes,
                 dna: opponent.dna,
+                dnaSplit: opponent.dnaSplit,
+                actionStats: opponent.actionStats,
               }}
               busy={busy}
               submitLabel="Speichern"
@@ -222,6 +224,8 @@ function OpponentDetailContent({ id }: { id: string }) {
               favoriteAttacks: opponent.favoriteAttacks,
               notes: opponent.notes,
               dna: opponent.dna,
+              dnaSplit: opponent.dnaSplit,
+              actionStats: opponent.actionStats,
             }}
           />
         )}

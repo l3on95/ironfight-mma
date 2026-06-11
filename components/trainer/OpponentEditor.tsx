@@ -8,7 +8,11 @@ import {
   type FightStyle,
 } from "@/lib/fight-camp";
 import type { GegnerDnaAnswers } from "@/lib/gegner-dna";
+import type { ActionStat, DnaSplit } from "@/lib/fight-stats";
 import GegnerDnaAccordion from "./GegnerDnaAccordion";
+import FightDnaSplit from "./FightDnaSplit";
+import FightStatsBlock from "./FightStatsBlock";
+import FightInsights from "./FightInsights";
 
 export interface OpponentEditorValue {
   name: string;
@@ -22,6 +26,8 @@ export interface OpponentEditorValue {
   favoriteAttacks: string[];
   notes: string | null;
   dna: GegnerDnaAnswers;
+  dnaSplit: DnaSplit | null;
+  actionStats: ActionStat[];
 }
 
 export interface OpponentEditorInitial {
@@ -36,6 +42,8 @@ export interface OpponentEditorInitial {
   favoriteAttacks?: string[];
   notes?: string | null;
   dna?: GegnerDnaAnswers;
+  dnaSplit?: DnaSplit | null;
+  actionStats?: ActionStat[];
 }
 
 function parseTags(s: string): string[] {
@@ -99,6 +107,12 @@ export default function OpponentEditor({
   );
   const [notes, setNotes] = useState(initial?.notes ?? "");
   const [dna, setDna] = useState<GegnerDnaAnswers>(initial?.dna ?? {});
+  const [dnaSplit, setDnaSplit] = useState<DnaSplit | null>(
+    initial?.dnaSplit ?? null,
+  );
+  const [actionStats, setActionStats] = useState<ActionStat[]>(
+    initial?.actionStats ?? [],
+  );
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -114,6 +128,8 @@ export default function OpponentEditor({
       favoriteAttacks: parseTags(favorites),
       notes: notes.trim() || null,
       dna,
+      dnaSplit,
+      actionStats,
     });
   }
 
@@ -271,6 +287,31 @@ export default function OpponentEditor({
           />
         </label>
       </div>
+
+      {/* ── §1 Fight-DNA-Split ── */}
+      <FightDnaSplit split={dnaSplit} mode="edit" onChange={setDnaSplit} />
+
+      {/* ── §2 Technik-Statistik ── */}
+      <div>
+        <div className="mb-2 flex items-baseline justify-between gap-2">
+          <h3
+            className="font-display-ta font-black uppercase"
+            style={{ fontSize: "15px", letterSpacing: "0.06em" }}
+          >
+            Technik-Statistik
+          </h3>
+          <span
+            className="font-mono-ta text-[10px] uppercase"
+            style={{ letterSpacing: "0.12em", color: "var(--fg-4)" }}
+          >
+            Versuche · Treffer · Zone · Setup
+          </span>
+        </div>
+        <FightStatsBlock stats={actionStats} mode="edit" onChange={setActionStats} />
+      </div>
+
+      {/* ── §3/§4/§5 Live-Auswertung der eingegebenen Zahlen ── */}
+      <FightInsights split={dnaSplit} stats={actionStats} />
 
       {/* ── Gegner-DNA (ausklappbare Kategorien) ── */}
       <div>

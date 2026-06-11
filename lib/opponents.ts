@@ -34,6 +34,13 @@ import {
 import { getFirestoreDb } from "./firebase";
 import { belongsToGym } from "./gym";
 import type { GegnerDnaAnswers } from "./gegner-dna";
+import {
+  cleanActionStats,
+  cleanDnaSplit,
+  isDnaSplitEmpty,
+  type ActionStat,
+  type DnaSplit,
+} from "./fight-stats";
 import type {
   FighterStance,
   FightStyle,
@@ -55,6 +62,10 @@ export interface Opponent {
   notes: string | null;
   /** Strukturierte Gegner-DNA-Antworten (questionId → Freitext). */
   dna: GegnerDnaAnswers;
+  /** §1 Fight-DNA-Split — prozentuale Verteilung der Kampfbereiche (optional). */
+  dnaSplit?: DnaSplit | null;
+  /** §2 Action-Stats — gezählte Techniken (Versuche/Treffer/Zone/Setup, optional). */
+  actionStats?: ActionStat[];
   createdBy: string;
   createdByName: string | null;
   updatedBy?: string | null;
@@ -84,6 +95,8 @@ export type OpponentPatch = Partial<
     | "favoriteAttacks"
     | "notes"
     | "dna"
+    | "dnaSplit"
+    | "actionStats"
     | "updatedBy"
   >
 >;
@@ -101,6 +114,8 @@ type OpponentDoc = {
   favoriteAttacks: string[];
   notes: string | null;
   dna: GegnerDnaAnswers;
+  dnaSplit?: DnaSplit | null;
+  actionStats?: ActionStat[];
   createdBy: string;
   createdByName: string | null;
   updatedBy?: string | null;
@@ -142,6 +157,8 @@ function decode(id: string, d: OpponentDoc): Opponent {
     favoriteAttacks: d.favoriteAttacks ?? [],
     notes: d.notes ?? null,
     dna: d.dna ?? {},
+    dnaSplit: d.dnaSplit ?? null,
+    actionStats: d.actionStats ?? [],
     createdBy: d.createdBy,
     createdByName: d.createdByName ?? null,
     updatedBy: d.updatedBy ?? null,
@@ -172,6 +189,10 @@ export async function createOpponent(input: OpponentInput): Promise<Opponent> {
     createdByName: input.createdByName ?? null,
     updatedBy: input.createdBy,
   };
+  const split = cleanDnaSplit(input.dnaSplit);
+  if (!isDnaSplitEmpty(split)) body.dnaSplit = split;
+  const actions = cleanActionStats(input.actionStats);
+  if (actions.length > 0) body.actionStats = actions;
   if (input.isDemo) body.isDemo = true;
   await setDoc(ref, {
     ...body,
@@ -199,6 +220,12 @@ export async function updateOpponent(
     data.favoriteAttacks = patch.favoriteAttacks;
   if (patch.notes !== undefined) data.notes = patch.notes?.trim() || null;
   if (patch.dna !== undefined) data.dna = cleanDna(patch.dna);
+  if (patch.dnaSplit !== undefined) {
+    const split = cleanDnaSplit(patch.dnaSplit);
+    data.dnaSplit = isDnaSplitEmpty(split) ? null : split;
+  }
+  if (patch.actionStats !== undefined)
+    data.actionStats = cleanActionStats(patch.actionStats);
   if (patch.updatedBy !== undefined) data.updatedBy = patch.updatedBy ?? null;
   await updateDoc(opponentDoc(id), {
     ...data,
@@ -257,6 +284,9 @@ export function opponentToSnapshot(o: Opponent): OpponentProfile {
   };
   if (o.notes) snap.notes = o.notes;
   if (o.dna && Object.keys(o.dna).length > 0) snap.dna = { ...o.dna };
+  if (!isDnaSplitEmpty(o.dnaSplit)) snap.dnaSplit = cleanDnaSplit(o.dnaSplit);
+  const actions = cleanActionStats(o.actionStats);
+  if (actions.length > 0) snap.actionStats = actions;
   return snap;
 }
 

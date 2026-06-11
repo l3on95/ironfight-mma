@@ -92,6 +92,8 @@ function CompetitionDetailContent({
         favoriteAttacks: value.favoriteAttacks,
         notes: value.notes ?? undefined,
         dna: value.dna,
+        dnaSplit: value.dnaSplit,
+        actionStats: value.actionStats,
         opponentId: camp.opponent.opponentId ?? camp.opponentId ?? null,
       };
       await updateFightCamp(uid, campId, { opponent });
@@ -282,6 +284,8 @@ function CompetitionDetailContent({
                 favoriteAttacks: camp.opponent.favoriteAttacks,
                 notes: camp.opponent.notes ?? null,
                 dna: camp.opponent.dna ?? {},
+                dnaSplit: camp.opponent.dnaSplit,
+                actionStats: camp.opponent.actionStats,
               }}
               busy={busy}
               submitLabel="Gegner-DNA speichern"
@@ -302,6 +306,8 @@ function CompetitionDetailContent({
                 favoriteAttacks: camp.opponent.favoriteAttacks,
                 notes: camp.opponent.notes ?? null,
                 dna: camp.opponent.dna ?? {},
+                dnaSplit: camp.opponent.dnaSplit,
+                actionStats: camp.opponent.actionStats,
               }}
             />
           )}

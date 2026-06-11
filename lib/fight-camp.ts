@@ -34,6 +34,14 @@ import {
 import { getFirestoreDb } from "./firebase";
 import type { Category, TrainingArea } from "./types";
 import type { GegnerDnaAnswers } from "./gegner-dna";
+import {
+  cleanActionStats,
+  cleanDnaSplit,
+  isActionStatsEmpty,
+  isDnaSplitEmpty,
+  type ActionStat,
+  type DnaSplit,
+} from "./fight-stats";
 
 // ─── Gegner-Stil ───────────────────────────────────────────────────────────
 
@@ -112,6 +120,10 @@ export interface OpponentProfile {
    * eingefrorene Snapshot, der auch bei alten Wettkämpfen erhalten bleibt.
    */
   dna?: GegnerDnaAnswers;
+  /** §1 Eingefrorener Fight-DNA-Split (optional). */
+  dnaSplit?: DnaSplit | null;
+  /** §2 Eingefrorene Action-Stats (optional). */
+  actionStats?: ActionStat[];
   /** Verweis auf das geteilte Gegner-DNA-Profil (lib/opponents.ts), falls verknüpft. */
   opponentId?: string | null;
 }
@@ -268,6 +280,9 @@ export function cleanOpponentProfile(o: OpponentProfile): OpponentProfile {
     }
     if (Object.keys(dna).length > 0) clean.dna = dna;
   }
+  if (!isDnaSplitEmpty(o.dnaSplit)) clean.dnaSplit = cleanDnaSplit(o.dnaSplit);
+  if (!isActionStatsEmpty(o.actionStats))
+    clean.actionStats = cleanActionStats(o.actionStats);
   if (o.opponentId) clean.opponentId = o.opponentId;
   return clean;
 }
