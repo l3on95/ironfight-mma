@@ -1,11 +1,13 @@
 "use client";
 
-import TrainerRoute from "@/components/TrainerRoute";
 import TrainerHint from "@/components/TrainerHint";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import AreaCoverageChart from "@/components/trainer/AreaCoverageChart";
-import CompetitionCard from "@/components/trainer/CompetitionCard";
+import CompetitionCard, {
+  competitionGroup,
+} from "@/components/trainer/CompetitionCard";
+import MatchupBlock from "@/components/trainer/MatchupBlock";
 import { getStudentEntry, type StudentEntry } from "@/lib/admin";
 import { getRecentWorkouts, type WorkoutSession } from "@/lib/workouts";
 import { getAllProgress } from "@/lib/extensions/technique-progress";
@@ -144,6 +146,17 @@ function StudentDetailContent({ uid }: { uid: string }) {
     if (workouts === null || progress === null) return null;
     return analyzeTrainingHistory(workouts, progress);
   }, [workouts, progress]);
+
+  // Nächster anstehender Wettkampf — Basis für den Matchup-Block.
+  const nextCamp = useMemo(() => {
+    const upcoming = (camps ?? []).filter(
+      (c) => competitionGroup(c) === "upcoming",
+    );
+    upcoming.sort(
+      (a, b) => a.competitionDate.getTime() - b.competitionDate.getTime(),
+    );
+    return upcoming[0] ?? null;
+  }, [camps]);
 
   if (error && !entry) {
     return (
@@ -558,6 +571,17 @@ function StudentDetailContent({ uid }: { uid: string }) {
             </Link>
           </div>
 
+          {/* Matchup: Athlet vs. Gegner-DNA des nächsten Wettkampfs */}
+          {nextCamp && (
+            <div className="mt-4">
+              <MatchupBlock
+                athleteName={displayLabel(entry)}
+                athlete={athlete}
+                camp={nextCamp}
+              />
+            </div>
+          )}
+
           <div className="mt-4">
             {camps === null ? (
               <Skeleton className="h-24 w-full rounded-2xl" />
@@ -601,9 +625,5 @@ export default function StudentDetailPage({
 }: {
   params: { uid: string };
 }) {
-  return (
-    <TrainerRoute>
-      <StudentDetailContent uid={params.uid} />
-    </TrainerRoute>
-  );
+  return <StudentDetailContent uid={params.uid} />;
 }

@@ -48,6 +48,8 @@ export async function getStudentEntry(uid: string): Promise<StudentEntry | null>
         trainingStartDate?: Timestamp | null;
         weightKg?: number | null;
         heightCm?: number | null;
+        reachCm?: number | null;
+        stance?: AthleteProfile["stance"];
         weightClass?: AthleteProfile["weightClass"];
         bjjBelt?: AthleteProfile["bjjBelt"];
         gymName?: string | null;
@@ -63,6 +65,8 @@ export async function getStudentEntry(uid: string): Promise<StudentEntry | null>
         trainingStartDate: athleteData.trainingStartDate?.toDate() ?? null,
         weightKg: athleteData.weightKg ?? null,
         heightCm: athleteData.heightCm ?? null,
+        reachCm: athleteData.reachCm ?? null,
+        stance: athleteData.stance ?? null,
         weightClass: athleteData.weightClass ?? null,
         bjjBelt: athleteData.bjjBelt ?? null,
         gymName: athleteData.gymName ?? null,
@@ -128,6 +132,8 @@ export async function listAllStudents(): Promise<StudentEntry[]> {
             trainingStartDate?: Timestamp | null;
             weightKg?: number | null;
             heightCm?: number | null;
+            reachCm?: number | null;
+            stance?: AthleteProfile["stance"];
             weightClass?: AthleteProfile["weightClass"];
             bjjBelt?: AthleteProfile["bjjBelt"];
             gymName?: string | null;
@@ -143,6 +149,8 @@ export async function listAllStudents(): Promise<StudentEntry[]> {
             trainingStartDate: athleteData.trainingStartDate?.toDate() ?? null,
             weightKg: athleteData.weightKg ?? null,
             heightCm: athleteData.heightCm ?? null,
+            reachCm: athleteData.reachCm ?? null,
+            stance: athleteData.stance ?? null,
             weightClass: athleteData.weightClass ?? null,
             bjjBelt: athleteData.bjjBelt ?? null,
             gymName: athleteData.gymName ?? null,

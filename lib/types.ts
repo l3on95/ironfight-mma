@@ -382,6 +382,18 @@ export const BJJ_BELT_LABEL: Record<BjjBelt, string> = {
   black: "Schwarzgurt",
 };
 
+/**
+ * Auslage eines Kämpfers — geteilt zwischen Athleten-Profil und Gegner-Profil
+ * (lib/fight-camp.ts re-exportiert beide Namen für bestehende Imports).
+ */
+export type FighterStance = "orthodox" | "southpaw" | "switch";
+
+export const FIGHTER_STANCE_LABEL: Record<FighterStance, string> = {
+  orthodox: "Orthodox (Rechtsausleger)",
+  southpaw: "Southpaw (Linksausleger)",
+  switch: "Switch (beidseitig)",
+};
+
 export interface AthleteProfile {
   /** Hauptdisziplin */
   primaryDiscipline?: Discipline | null;
@@ -393,6 +405,10 @@ export interface AthleteProfile {
   weightKg?: number | null;
   /** Körpergröße in cm */
   heightCm?: number | null;
+  /** Reichweite in cm */
+  reachCm?: number | null;
+  /** Auslage */
+  stance?: FighterStance | null;
   /** Selbst gewählte Gewichtsklasse (sonst aus weightKg ableiten) */
   weightClass?: WeightClass | null;
   /** Optional: BJJ-Gurt */

@@ -8,11 +8,13 @@ import {
   ATHLETE_LEVEL_LABEL,
   BJJ_BELT_LABEL,
   DISCIPLINE_LABEL,
+  FIGHTER_STANCE_LABEL,
   WEIGHT_CLASS_LABEL,
   type AthleteLevel,
   type AthleteProfile,
   type BjjBelt,
   type Discipline,
+  type FighterStance,
   type WeightClass,
   weightClassForKg,
 } from "@/lib/types";
@@ -74,6 +76,8 @@ type AthleteForm = {
   trainingStartDate: string; // YYYY-MM-DD
   weightKg: string;
   heightCm: string;
+  reachCm: string;
+  stance: FighterStance | "";
   weightClassMode: "auto" | "manual";
   weightClass: WeightClass | "";
   bjjBelt: BjjBelt | "";
@@ -90,6 +94,8 @@ function emptyForm(): AthleteForm {
     trainingStartDate: "",
     weightKg: "",
     heightCm: "",
+    reachCm: "",
+    stance: "",
     weightClassMode: "auto",
     weightClass: "",
     bjjBelt: "",
@@ -116,6 +122,8 @@ function formFromAthlete(a: AthleteProfile | undefined): AthleteForm {
   f.trainingStartDate = dateToInputValue(a.trainingStartDate);
   f.weightKg = a.weightKg != null ? String(a.weightKg) : "";
   f.heightCm = a.heightCm != null ? String(a.heightCm) : "";
+  f.reachCm = a.reachCm != null ? String(a.reachCm) : "";
+  f.stance = a.stance ?? "";
   f.weightClass = a.weightClass ?? "";
   f.weightClassMode = a.weightClass ? "manual" : "auto";
   f.bjjBelt = a.bjjBelt ?? "";
@@ -129,6 +137,7 @@ function formFromAthlete(a: AthleteProfile | undefined): AthleteForm {
 function patchFromForm(form: AthleteForm): Partial<AthleteProfile> {
   const weightKg = form.weightKg ? Number(form.weightKg) : null;
   const heightCm = form.heightCm ? Number(form.heightCm) : null;
+  const reachCm = form.reachCm ? Number(form.reachCm) : null;
 
   let weightClass: WeightClass | null = null;
   if (form.weightClassMode === "manual" && form.weightClass) {
@@ -145,6 +154,8 @@ function patchFromForm(form: AthleteForm): Partial<AthleteProfile> {
       : null,
     weightKg: Number.isFinite(weightKg) ? weightKg : null,
     heightCm: Number.isFinite(heightCm) ? heightCm : null,
+    reachCm: Number.isFinite(reachCm) ? reachCm : null,
+    stance: form.stance || null,
     weightClass,
     bjjBelt: form.bjjBelt || null,
     gymName: form.gymName.trim() || null,
@@ -460,6 +471,38 @@ function ProfileContent() {
                       onChange={(e) => update("heightCm", e.target.value)}
                       className={inputClass}
                     />
+                  </Field>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Reichweite (cm)">
+                    <input
+                      type="number"
+                      step="1"
+                      min="0"
+                      max="250"
+                      value={form.reachCm}
+                      onChange={(e) => update("reachCm", e.target.value)}
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Auslage">
+                    <select
+                      value={form.stance}
+                      onChange={(e) =>
+                        update("stance", e.target.value as FighterStance | "")
+                      }
+                      className={inputClass}
+                    >
+                      <option value="">— wählen —</option>
+                      {(
+                        Object.keys(FIGHTER_STANCE_LABEL) as FighterStance[]
+                      ).map((s) => (
+                        <option key={s} value={s}>
+                          {FIGHTER_STANCE_LABEL[s]}
+                        </option>
+                      ))}
+                    </select>
                   </Field>
                 </div>
 

@@ -32,7 +32,12 @@ import {
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { getFirestoreDb } from "./firebase";
-import type { Category, TrainingArea } from "./types";
+import {
+  FIGHTER_STANCE_LABEL,
+  type Category,
+  type FighterStance,
+  type TrainingArea,
+} from "./types";
 import type { GegnerDnaAnswers } from "./gegner-dna";
 import {
   cleanActionStats,
@@ -45,13 +50,9 @@ import {
 
 // ─── Gegner-Stil ───────────────────────────────────────────────────────────
 
-export type FighterStance = "orthodox" | "southpaw" | "switch";
-
-export const FIGHTER_STANCE_LABEL: Record<FighterStance, string> = {
-  orthodox: "Orthodox (Rechtsausleger)",
-  southpaw: "Southpaw (Linksausleger)",
-  switch: "Switch (beidseitig)",
-};
+// FighterStance lebt jetzt in lib/types.ts (geteilt mit dem Athleten-Profil);
+// Re-Export hält alle bestehenden Imports aus dieser Datei stabil.
+export { FIGHTER_STANCE_LABEL, type FighterStance };
 
 export type FightStyle =
   | "striker"

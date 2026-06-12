@@ -23,6 +23,8 @@ type AthleteDoc = {
   trainingStartDate?: Timestamp | null;
   weightKg?: number | null;
   heightCm?: number | null;
+  reachCm?: number | null;
+  stance?: AthleteProfile["stance"];
   weightClass?: AthleteProfile["weightClass"];
   bjjBelt?: AthleteProfile["bjjBelt"];
   gymName?: string | null;
@@ -39,6 +41,8 @@ function athleteFromDoc(data?: AthleteDoc | null): AthleteProfile | undefined {
     trainingStartDate: data.trainingStartDate?.toDate() ?? null,
     weightKg: data.weightKg ?? null,
     heightCm: data.heightCm ?? null,
+    reachCm: data.reachCm ?? null,
+    stance: data.stance ?? null,
     weightClass: data.weightClass ?? null,
     bjjBelt: data.bjjBelt ?? null,
     gymName: data.gymName ?? null,
@@ -202,6 +206,8 @@ export async function updateAthleteProfile(
   }
   if (patch.weightKg !== undefined) next.weightKg = patch.weightKg;
   if (patch.heightCm !== undefined) next.heightCm = patch.heightCm;
+  if (patch.reachCm !== undefined) next.reachCm = patch.reachCm;
+  if (patch.stance !== undefined) next.stance = patch.stance;
   if (patch.weightClass !== undefined) next.weightClass = patch.weightClass;
   if (patch.bjjBelt !== undefined) next.bjjBelt = patch.bjjBelt;
   if (patch.gymName !== undefined) next.gymName = patch.gymName;
