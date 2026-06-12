@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import TrainerRoute from "@/components/TrainerRoute";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import OpponentProfileView from "@/components/trainer/OpponentProfileView";
@@ -349,9 +348,5 @@ export default function CompetitionDetailPage({
 }: {
   params: { uid: string; campId: string };
 }) {
-  return (
-    <TrainerRoute>
-      <CompetitionDetailContent uid={params.uid} campId={params.campId} />
-    </TrainerRoute>
-  );
+  return <CompetitionDetailContent uid={params.uid} campId={params.campId} />;
 }

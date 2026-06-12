@@ -3,7 +3,6 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import TrainerRoute from "@/components/TrainerRoute";
 import TrainerHint from "@/components/TrainerHint";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
@@ -456,16 +455,14 @@ function EmptyState({ title, hint }: { title: string; hint?: string }) {
 
 export default function CompetitionsHubPage() {
   return (
-    <TrainerRoute>
-      <Suspense
-        fallback={
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-            <Skeleton className="h-16 w-full" />
-          </div>
-        }
-      >
-        <CompetitionsHubContent />
-      </Suspense>
-    </TrainerRoute>
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+          <Skeleton className="h-16 w-full" />
+        </div>
+      }
+    >
+      <CompetitionsHubContent />
+    </Suspense>
   );
 }

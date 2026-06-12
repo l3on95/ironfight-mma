@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import TrainerRoute from "@/components/TrainerRoute";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import OpponentProfileView from "@/components/trainer/OpponentProfileView";
@@ -28,6 +27,34 @@ function formatDate(d: Date | null | undefined): string {
   });
 }
 
+type DetailTab = "uebersicht" | "dna" | "stats" | "videos";
+
+const DETAIL_TABS: [DetailTab, string][] = [
+  ["uebersicht", "Übersicht"],
+  ["dna", "DNA"],
+  ["stats", "Stats"],
+  ["videos", "Videos"],
+];
+
+/** Platzhalter, bis Video-Upload + KI-Analyse (Konzept §6) gebaut sind. */
+function VideosPlaceholder() {
+  return (
+    <div
+      className="rounded-2xl p-8 text-center"
+      style={{ border: "1px dashed var(--ink-5)", background: "var(--ink-2)" }}
+    >
+      <p className="text-sm font-bold" style={{ color: "var(--fg-3)" }}>
+        Video-Analyse — in Vorbereitung.
+      </p>
+      <p className="mx-auto mt-1 max-w-md text-xs" style={{ color: "var(--fg-4)" }}>
+        Hier lädst du künftig Kampf-Videos hoch. Die KI analysiert jedes Video
+        einzeln und aktualisiert die Gegner-DNA — Befunde mit Widerspruch
+        landen zur Bestätigung bei dir, nichts wird still überschrieben.
+      </p>
+    </div>
+  );
+}
+
 function OpponentDetailContent({ id }: { id: string }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -35,6 +62,7 @@ function OpponentDetailContent({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState<DetailTab>("uebersicht");
 
   const load = useCallback(async () => {
     setError(null);
@@ -211,23 +239,53 @@ function OpponentDetailContent({ id }: { id: string }) {
             </div>
           </>
         ) : (
-          <OpponentProfileView
-            opponent={{
-              name: opponent.name,
-              style: opponent.style,
-              stance: opponent.stance,
-              heightCm: opponent.heightCm,
-              weightKg: opponent.weightKg,
-              reachCm: opponent.reachCm,
-              strengths: opponent.strengths,
-              weaknesses: opponent.weaknesses,
-              favoriteAttacks: opponent.favoriteAttacks,
-              notes: opponent.notes,
-              dna: opponent.dna,
-              dnaSplit: opponent.dnaSplit,
-              actionStats: opponent.actionStats,
-            }}
-          />
+          <>
+            {/* Tabs: schneller Blick (Übersicht) vs. tiefes Scouting (DNA/Stats) */}
+            <div
+              className="mb-5 inline-flex gap-1 rounded-xl p-1"
+              style={{ background: "var(--ink-3)", border: "1px solid var(--ink-5)" }}
+            >
+              {DETAIL_TABS.map(([id, label]) => (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className="font-mono-ta rounded-lg px-4 py-2 text-[11px] font-bold uppercase transition-colors"
+                  style={{
+                    letterSpacing: "0.12em",
+                    background: tab === id ? "var(--ta-pink)" : "transparent",
+                    color: tab === id ? "#fff" : "var(--fg-3)",
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {tab === "videos" ? (
+              <VideosPlaceholder />
+            ) : (
+              <OpponentProfileView
+                section={
+                  tab === "uebersicht" ? "overview" : tab === "dna" ? "dna" : "stats"
+                }
+                opponent={{
+                  name: opponent.name,
+                  style: opponent.style,
+                  stance: opponent.stance,
+                  heightCm: opponent.heightCm,
+                  weightKg: opponent.weightKg,
+                  reachCm: opponent.reachCm,
+                  strengths: opponent.strengths,
+                  weaknesses: opponent.weaknesses,
+                  favoriteAttacks: opponent.favoriteAttacks,
+                  notes: opponent.notes,
+                  dna: opponent.dna,
+                  dnaSplit: opponent.dnaSplit,
+                  actionStats: opponent.actionStats,
+                }}
+              />
+            )}
+          </>
         )}
       </div>
     </main>
@@ -239,9 +297,5 @@ export default function OpponentDetailPage({
 }: {
   params: { id: string };
 }) {
-  return (
-    <TrainerRoute>
-      <OpponentDetailContent id={params.id} />
-    </TrainerRoute>
-  );
+  return <OpponentDetailContent id={params.id} />;
 }

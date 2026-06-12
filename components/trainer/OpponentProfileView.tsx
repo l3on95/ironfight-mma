@@ -73,18 +73,29 @@ export interface OpponentView {
   actionStats?: ActionStat[];
 }
 
+/** Teilansicht des Gegnerberichts (für die Tab-Darstellung im Gegner-Detail). */
+export type OpponentViewSection = "all" | "overview" | "dna" | "stats";
+
 /**
  * Read-only Gegnerbericht: Gegnerprofil-Zusammenfassung + Gegner-DNA in der
  * Profilansicht (nur beantwortete Fragen). Wird im Bibliotheks-Profil und in
  * der Wettkampf-Detailansicht (Snapshot) genutzt.
+ *
+ * `section` steuert, welcher Teil gerendert wird:
+ *   • "all"      — kompletter Bericht (Snapshot-Ansicht im Wettkampf)
+ *   • "overview" — Grunddaten + DNA-Split + Auto-Insights (Cockpit)
+ *   • "dna"      — qualitativer Gegner-DNA-Accordion
+ *   • "stats"    — Technik-Statistik
  */
 export default function OpponentProfileView({
   opponent,
   showBasics = true,
+  section = "all",
 }: {
   opponent: OpponentView;
   /** Grunddaten-Kopf anzeigen (in der Wettkampf-Ansicht oft schon vorhanden). */
   showBasics?: boolean;
+  section?: OpponentViewSection;
 }) {
   const measures = [
     opponent.heightCm ? `${opponent.heightCm} cm` : null,
@@ -96,9 +107,13 @@ export default function OpponentProfileView({
   const weaknesses = opponent.weaknesses ?? [];
   const favorites = opponent.favoriteAttacks ?? [];
 
+  const showOverview = section === "all" || section === "overview";
+  const showDna = section === "all" || section === "dna";
+  const showStats = section === "all" || section === "stats";
+
   return (
     <div className="flex flex-col gap-4">
-      {showBasics && (
+      {showOverview && showBasics && (
         <div
           className="rounded-2xl p-4 sm:p-5"
           style={{
@@ -174,16 +189,25 @@ export default function OpponentProfileView({
         </div>
       )}
 
-      {/* §1 Fight-DNA-Split */}
-      <FightDnaSplit split={opponent.dnaSplit} mode="view" />
+      {showOverview && (
+        <>
+          {/* §1 Fight-DNA-Split */}
+          <FightDnaSplit split={opponent.dnaSplit} mode="view" />
 
-      {/* §3/§4/§5 Auto-Insights aus den Zahlen */}
-      <FightInsights split={opponent.dnaSplit} stats={opponent.actionStats ?? []} />
+          {/* §3/§4/§5 Auto-Insights aus den Zahlen */}
+          <FightInsights
+            split={opponent.dnaSplit}
+            stats={opponent.actionStats ?? []}
+          />
+        </>
+      )}
 
       {/* §2 Technik-Statistik (Detailzahlen) */}
-      <FightStatsBlock stats={opponent.actionStats ?? []} mode="view" />
+      {showStats && (
+        <FightStatsBlock stats={opponent.actionStats ?? []} mode="view" />
+      )}
 
-      <GegnerDnaAccordion answers={opponent.dna ?? {}} mode="view" />
+      {showDna && <GegnerDnaAccordion answers={opponent.dna ?? {}} mode="view" />}
     </div>
   );
 }

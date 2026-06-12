@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import TrainerRoute from "@/components/TrainerRoute";
 import TrainerHint from "@/components/TrainerHint";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
@@ -556,9 +555,5 @@ function StudentsContent() {
 }
 
 export default function TrainerStudentsPage() {
-  return (
-    <TrainerRoute>
-      <StudentsContent />
-    </TrainerRoute>
-  );
+  return <StudentsContent />;
 }
