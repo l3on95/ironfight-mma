@@ -13,14 +13,22 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-      allow read: if request.auth != null && isTrainerOrAdmin();
-      allow update: if request.auth != null && isAdmin()
-                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["role"]);
+      // Lesen: eigenes Profil oder Trainer/Admin
+      allow read: if request.auth != null
+                  && (request.auth.uid == uid || isTrainerOrAdmin());
 
-      // Admin darf das komplette User-Dokument schreiben
-      // (fuer updateAthleteProfile im Demo-Seed)
-      allow write: if request.auth != null && isAdmin();
+      // Eigenes Profil anlegen (Signup) — keine privilegierte Rolle selbst vergeben
+      allow create: if request.auth != null && request.auth.uid == uid
+                    && (!("role" in request.resource.data)
+                        || request.resource.data.role == "user");
+
+      // Eigenes Profil aktualisieren — aber NIEMALS das Feld `role` aendern
+      // (schliesst die Privilege-Escalation: User kann sich nicht selbst zum Admin machen)
+      allow update: if request.auth != null && request.auth.uid == uid
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(["role"]);
+
+      // Admin darf Rollen setzen und das komplette User-Dokument verwalten
+      allow create, update, delete: if request.auth != null && isAdmin();
 
       match /{subcollection}/{document=**} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
@@ -43,21 +51,26 @@ service cloud.firestore {
     }
 
     // Gegner-DNA-Bibliothek (gym-weit geteilte Gegnerprofile).
-    // Single-Gym: Trainer/Admins lesen + schreiben. Die Gym-Trennung erfolgt
-    // ueber das gymId-Feld + belongsToGym (lib/gym.ts). Fuer echtes Multi-Gym
-    // hier zusaetzlich auf das Gym des Trainers einschraenken.
     match /opponents/{opponentId} {
       allow read, write: if request.auth != null && isTrainerOrAdmin();
     }
 
+    // Trainer-zugewiesene Trainingsinhalte (gym-weites Curriculum) — bewusst
+    // fuer alle eingeloggten Mitglieder lesbar. Schreiben nur Trainer/Admin.
     match /trainingSessions/{document=**} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && isTrainerOrAdmin();
     }
 
-    match /techniqueStats/{document=**} {
-      allow write: if request.auth != null;
+    // Anonyme Technik-Aufruf-Zaehler: nur Hochzaehlen erlaubt (viewCount/lastViewed),
+    // keine fremden Felder einschleusbar. Lesen nur Trainer/Admin.
+    match /techniqueStats/{techniqueId} {
       allow read: if request.auth != null && isTrainerOrAdmin();
+      allow create: if request.auth != null
+                    && request.resource.data.keys().hasOnly(["viewCount", "lastViewed"]);
+      allow update: if request.auth != null
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(["viewCount", "lastViewed"]);
     }
   }
 }
