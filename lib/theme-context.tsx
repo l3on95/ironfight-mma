@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useSyncExternalStore,
+  ReactNode,
+} from "react";
 
 type Theme = "dark" | "light";
 
@@ -14,27 +21,42 @@ const ThemeContext = createContext<ThemeContextValue>({
   toggleTheme: () => {},
 });
 
+function readTheme(): Theme {
+  if (typeof window === "undefined") return "dark";
+  try {
+    const saved = localStorage.getItem("ta-theme");
+    return saved === "light" || saved === "dark" ? saved : "dark";
+  } catch {
+    return "dark";
+  }
+}
+
+const listeners = new Set<() => void>();
+
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const theme = useSyncExternalStore<Theme>(subscribe, readTheme, () => "dark");
 
+  // Externes System (DOM-Attribut) mit dem React-State synchron halten.
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("ta-theme") as Theme | null;
-      if (saved === "light" || saved === "dark") {
-        setTheme(saved);
-        document.documentElement.setAttribute("data-theme", saved);
-      }
-    } catch {}
-  }, []);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
-  function toggleTheme() {
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    setTheme(next);
+  const toggleTheme = useCallback(() => {
+    const next: Theme = readTheme() === "dark" ? "light" : "dark";
     try {
       localStorage.setItem("ta-theme", next);
-      document.documentElement.setAttribute("data-theme", next);
     } catch {}
-  }
+    emit();
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

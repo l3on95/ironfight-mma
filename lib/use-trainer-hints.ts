@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 /**
  * Persistente "schon gesehen"-Markierung für interaktive Trainer-Hinweise.
@@ -11,6 +11,10 @@ import { useCallback, useEffect, useState } from "react";
  * Offline-Modus.
  *
  * Schlüssel-Format: `ta:trainer-hint:<hintId>` → "1" wenn gesehen.
+ *
+ * Gelesen wird über `useSyncExternalStore`: Der Server-Snapshot ist immer
+ * `true` (vermeidet ein Flash beim Hydrieren), der Client-Snapshot liest den
+ * echten Wert aus dem localStorage.
  */
 const STORAGE_PREFIX = "ta:trainer-hint:";
 
@@ -36,19 +40,42 @@ function writeSeen(id: string) {
   }
 }
 
+const listeners = new Set<() => void>();
+
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  // Auch auf Änderungen in anderen Tabs reagieren.
+  const onStorage = (e: StorageEvent) => {
+    if (!e.key || e.key.startsWith(STORAGE_PREFIX)) cb();
+  };
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", onStorage);
+  }
+  return () => {
+    listeners.delete(cb);
+    if (typeof window !== "undefined") {
+      window.removeEventListener("storage", onStorage);
+    }
+  };
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
 export function useTrainerHint(id: string): {
   seen: boolean;
   dismiss: () => void;
 } {
-  const [seen, setSeen] = useState(true); // initial true → vermeidet Flash
-
-  useEffect(() => {
-    setSeen(readSeen(id));
-  }, [id]);
+  const seen = useSyncExternalStore(
+    subscribe,
+    () => readSeen(id), // Client-Snapshot
+    () => true, // Server-Snapshot → kein Flash
+  );
 
   const dismiss = useCallback(() => {
     writeSeen(id);
-    setSeen(true);
+    emit();
   }, [id]);
 
   return { seen, dismiss };
@@ -64,6 +91,7 @@ export function resetAllTrainerHints() {
       if (k && k.startsWith(STORAGE_PREFIX)) keys.push(k);
     }
     keys.forEach((k) => window.localStorage.removeItem(k));
+    emit();
   } catch {
     // ignore
   }

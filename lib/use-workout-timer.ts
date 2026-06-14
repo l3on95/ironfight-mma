@@ -42,7 +42,7 @@ interface UseWorkoutTimer {
 }
 
 export function useWorkoutTimer(initial: TimerConfig = DEFAULT_CONFIG): UseWorkoutTimer {
-  const [config, setConfig] = useState<TimerConfig>(initial);
+  const [config, setConfigState] = useState<TimerConfig>(initial);
   const [phase, setPhase] = useState<Phase>("idle");
   const [round, setRound] = useState(1);
   const [remaining, setRemaining] = useState(initial.workSeconds);
@@ -160,9 +160,13 @@ export function useWorkoutTimer(initial: TimerConfig = DEFAULT_CONFIG): UseWorko
     } else if (phase === "rest") enterPhase("work", round + 1);
   }, [phase, round, config.rounds, enterPhase]);
 
-  useEffect(() => {
-    if (phase === "idle") setRemaining(config.workSeconds);
-  }, [config.workSeconds, phase]);
+  // Im Idle-Zustand ist `remaining` abgeleitet von `config.workSeconds`.
+  // Statt das in einem Effekt zu spiegeln (set-state-in-effect), aktualisieren
+  // wir es direkt beim Setzen der Config — gelesen über phaseRef.
+  const setConfig = useCallback((c: TimerConfig) => {
+    setConfigState(c);
+    if (phaseRef.current === "idle") setRemaining(c.workSeconds);
+  }, []);
 
   return {
     phase, round, remaining, running, totalForPhase,
