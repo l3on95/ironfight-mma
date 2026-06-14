@@ -44,3 +44,11 @@ next-env.d.ts
 /.cowork/
 /.agents/
 /.codex/
+
+# e2e / Playwright + Firebase-Emulator-Artefakte
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+.firebase/
+*-debug.log
