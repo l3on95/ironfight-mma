@@ -634,7 +634,7 @@ function ModalReady({
         <>
           <TrainerHint id="course-edit-techniques" title="Techniken auswählen">
             Wähle hier die Techniken aus, die deine Schüler diese Woche üben
-            sollen. Mit „Speichern" landen sie in den Bibliotheken aller
+            sollen. Mit „Speichern&quot; landen sie in den Bibliotheken aller
             abonnierten Schüler.
           </TrainerHint>
           <TechniquePicker
@@ -677,7 +677,7 @@ function ModalReady({
           {isTrainer && (
             <TrainerHint id="course-detail" title="Kurs-Details">
               Hier siehst du alle Infos zu diesem Kurs. Über „Techniken
-              bearbeiten" weist du Inhalte für diese Woche zu.
+              bearbeiten&quot; weist du Inhalte für diese Woche zu.
             </TrainerHint>
           )}
 

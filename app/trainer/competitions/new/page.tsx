@@ -86,10 +86,11 @@ function NewCompetitionContent() {
   const [creatingOpp, setCreatingOpp] = useState(false);
 
   const [name, setName] = useState("");
+  const [now] = useState(() => Date.now());
   const defaultDate = useMemo(
     () =>
-      new Date(Date.now() + 84 * 24 * 3600 * 1000).toISOString().slice(0, 10),
-    [],
+      new Date(now + 84 * 24 * 3600 * 1000).toISOString().slice(0, 10),
+    [now],
   );
   const [date, setDate] = useState(defaultDate);
 

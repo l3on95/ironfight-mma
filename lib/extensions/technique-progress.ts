@@ -15,7 +15,6 @@ import {
   collection,
   serverTimestamp,
   setDoc,
-  updateDoc,
   Timestamp,
 } from "firebase/firestore";
 import { getFirestoreDb } from "../firebase";

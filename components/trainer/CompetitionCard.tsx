@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { FIGHT_STYLE_LABEL, type FightCamp } from "@/lib/fight-camp";
 import { totalAnswered } from "@/lib/gegner-dna";
@@ -15,9 +16,9 @@ function formatDate(d: Date): string {
 /** Zeitlicher/Status-Bezug eines Wettkampfs — für Karten & Gruppierung. */
 export type CompetitionGroup = "upcoming" | "past" | "archived";
 
-export function competitionGroup(camp: FightCamp): CompetitionGroup {
+export function competitionGroup(camp: FightCamp, now = Date.now()): CompetitionGroup {
   if (camp.status === "archived") return "archived";
-  const isPast = camp.competitionDate.getTime() < Date.now();
+  const isPast = camp.competitionDate.getTime() < now;
   if (camp.status === "completed" || isPast) return "past";
   return "upcoming";
 }
@@ -37,11 +38,12 @@ export default function CompetitionCard({
   studentLabel: string;
   href: string;
 }) {
-  const group = competitionGroup(camp);
+  const [now] = useState(() => Date.now());
+  const group = competitionGroup(camp, now);
   const accent = GROUP_ACCENT[group];
   const dnaCount = totalAnswered(camp.opponent.dna ?? {});
   const days = Math.ceil(
-    (camp.competitionDate.getTime() - Date.now()) / (24 * 3600 * 1000),
+    (camp.competitionDate.getTime() - now) / (24 * 3600 * 1000),
   );
   const timing =
     group === "upcoming"

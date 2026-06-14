@@ -114,6 +114,7 @@ function StudentDetailContent({ uid }: { uid: string }) {
   const [progress, setProgress] = useState<TechniqueProgress[] | null>(null);
   const [camps, setCamps] = useState<FightCamp[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [now] = useState(() => Date.now());
 
   const load = useCallback(async () => {
     setError(null);
@@ -150,13 +151,13 @@ function StudentDetailContent({ uid }: { uid: string }) {
   // Nächster anstehender Wettkampf — Basis für den Matchup-Block.
   const nextCamp = useMemo(() => {
     const upcoming = (camps ?? []).filter(
-      (c) => competitionGroup(c) === "upcoming",
+      (c) => competitionGroup(c, now) === "upcoming",
     );
     upcoming.sort(
       (a, b) => a.competitionDate.getTime() - b.competitionDate.getTime(),
     );
     return upcoming[0] ?? null;
-  }, [camps]);
+  }, [camps, now]);
 
   if (error && !entry) {
     return (
@@ -185,7 +186,7 @@ function StudentDetailContent({ uid }: { uid: string }) {
   const athlete = entry.athlete;
   const competitionPersona =
     athlete?.nextCompetitionDate &&
-    athlete.nextCompetitionDate.getTime() > Date.now();
+    athlete.nextCompetitionDate.getTime() > now;
 
   return (
     <main className="min-h-screen" style={{ background: "var(--ink-1)" }}>

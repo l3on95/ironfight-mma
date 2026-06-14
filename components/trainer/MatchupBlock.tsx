@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   FIGHTER_STANCE_LABEL,
@@ -108,6 +109,7 @@ export default function MatchupBlock({
   athlete?: AthleteProfile;
   camp: FightCamp;
 }) {
+  const [now] = useState(() => Date.now());
   const opp = camp.opponent;
   const stats = opp.actionStats ?? [];
   const tendencies = deriveTendencies(stats).slice(0, 3);
@@ -115,7 +117,7 @@ export default function MatchupBlock({
   const dnaCount = totalAnswered(opp.dna ?? {});
 
   const days = Math.ceil(
-    (camp.competitionDate.getTime() - Date.now()) / (24 * 3600 * 1000),
+    (camp.competitionDate.getTime() - now) / (24 * 3600 * 1000),
   );
   const timing = days <= 0 ? "Heute" : `in ${days} ${days === 1 ? "Tag" : "Tagen"}`;
 

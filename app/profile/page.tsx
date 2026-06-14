@@ -198,7 +198,7 @@ function SubscriptionsBlock({ uid }: { uid: string }) {
     <Section title="Meine Kurse">
       <p className="text-xs text-foreground/60">
         Abonnierte Kurse: Neue Techniken aus diesen Trainings landen automatisch
-        in deiner Bibliothek — du musst nichts mehr manuell „Ich nehme teil"
+        in deiner Bibliothek — du musst nichts mehr manuell „Ich nehme teil&quot;
         klicken.
       </p>
 
@@ -261,6 +261,7 @@ function ProfileContent() {
   const [savingAthlete, setSavingAthlete] = useState(false);
   const [athleteSaved, setAthleteSaved] = useState(false);
   const [athleteError, setAthleteError] = useState<string | null>(null);
+  const [now] = useState(() => Date.now());
 
   useEffect(() => {
     setName(profile?.displayName ?? "");
@@ -274,12 +275,12 @@ function ProfileContent() {
     if (!form.trainingStartDate) return null;
     const start = new Date(form.trainingStartDate);
     if (Number.isNaN(start.getTime())) return null;
-    const months = (Date.now() - start.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+    const months = (now - start.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
     if (months < 1) return "Frisch dabei";
     if (months < 12) return `${Math.round(months)} Monate`;
     const years = months / 12;
     return years >= 2 ? `${years.toFixed(1)} Jahre` : `${years.toFixed(1)} Jahr`;
-  }, [form.trainingStartDate]);
+  }, [form.trainingStartDate, now]);
 
   // Auto-Gewichtsklasse Vorschau
   const autoWeightClass = useMemo(() => {
@@ -348,7 +349,7 @@ function ProfileContent() {
             <Section title="Fighter-Name">
               <p className="text-sm text-foreground/70">
                 So heißt du in der App. Lass das Feld leer, wenn du einfach
-                „Flex" bleiben willst.
+                „Flex&quot; bleiben willst.
               </p>
               <form onSubmit={handleSaveName} className="space-y-3">
                 <input

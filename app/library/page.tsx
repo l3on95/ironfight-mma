@@ -276,7 +276,7 @@ function LibraryContent() {
               <Link href="/schedule" className="font-bold underline" style={{ color: "var(--ta-cyan)" }}>
                 Stundenplan
               </Link>{" "}
-              auf ein Training und wähle „Ich nehme teil" — alle Techniken der Einheit werden automatisch hier gespeichert.
+              auf ein Training und wähle „Ich nehme teil&quot; — alle Techniken der Einheit werden automatisch hier gespeichert.
             </p>
           </div>
         )}

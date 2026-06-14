@@ -314,7 +314,7 @@ export default function WorkoutPage() {
 
             {equipment.length === 0 && (
               <div className="text-xs text-yellow-300">
-                Wähle mindestens ein Equipment (oder „Keine Geräte" für Bodyweight).
+                Wähle mindestens ein Equipment (oder „Keine Geräte&quot; für Bodyweight).
               </div>
             )}
           </div>

@@ -318,13 +318,13 @@ export default function PwaInstallPrompt() {
                             style={{ color: "var(--fg)" }}
                           >
                             <IconPlusSquare />
-                            „Zum Home-Bildschirm" wählen
+                            „Zum Home-Bildschirm&quot; wählen
                           </div>
                           <div
                             className="mt-0.5 text-xs leading-snug"
                             style={{ color: "var(--fg-4)" }}
                           >
-                            Im Menü nach unten scrollen und antippen — dann „Hinzufügen"
+                            Im Menü nach unten scrollen und antippen — dann „Hinzufügen&quot;
                           </div>
                         </div>
                       </li>

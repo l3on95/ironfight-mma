@@ -91,6 +91,47 @@ function parsePositive(v: string | null, fallback: number) {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
 }
 
+function IconPlay() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
+      <path d="M8 5.14v14l11-7-11-7z" />
+    </svg>
+  );
+}
+
+function IconPause() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
+      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+    </svg>
+  );
+}
+
+function IconSkip() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+      <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+    </svg>
+  );
+}
+
+function IconReset() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+    >
+      <polyline points="1 4 1 10 7 10" />
+      <path d="M3.51 15a9 9 0 1 0 .49-4.95" />
+    </svg>
+  );
+}
+
 // SVG circular progress ring
 function TimerRing({
   progress,
@@ -270,28 +311,6 @@ function TimerView() {
 
   const isLocked = t.phase !== "idle";
   const accent = phaseAccent(t.phase);
-
-  // Icon helpers
-  const IconPlay = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
-      <path d="M8 5.14v14l11-7-11-7z" />
-    </svg>
-  );
-  const IconPause = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
-      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-    </svg>
-  );
-  const IconSkip = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
-      <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-    </svg>
-  );
-  const IconReset = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-      <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-4.95" />
-    </svg>
-  );
 
   return (
     <>
