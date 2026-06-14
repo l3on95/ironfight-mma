@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "firebase emulators:exec --only auth,firestore 'playwright test'",
+    "test:e2e:routes": "playwright test route-protection.spec.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -24,14 +28,19 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.9.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.2.9",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5.15",
     "sharp": "^0.35.1",
     "tailwindcss": "^4.3.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
   }
 }
