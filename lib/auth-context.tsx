@@ -30,7 +30,7 @@ import {
   markOnboarded as markProfileOnboarded,
   markTrainerOnboarded as markProfileTrainerOnboarded,
 } from "./user-profile";
-import type { UserProfile } from "./types";
+import type { UserProfile, UserRole } from "./types";
 
 type AuthContextValue = {
   user: User | null;
@@ -48,6 +48,7 @@ type AuthContextValue = {
   finishOnboarding: () => Promise<void>;
   finishTrainerOnboarding: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  refreshRole: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -92,7 +93,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfileLoading(true);
       try {
         const p = await ensureUserProfile(u);
-        setProfile(p);
+        // Rolle kommt autoritativ aus den Auth Custom Claims, nicht aus Firestore
+        const { claims } = await u.getIdTokenResult();
+        setProfile({ ...p, role: claims.role as UserRole | undefined });
       } catch (err) {
         console.warn("[TidalAthletics] ensureUserProfile failed:", err);
         setProfile(null);
@@ -108,10 +111,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfileLoading(true);
     try {
       const p = await getUserProfile(user.uid);
-      setProfile(p);
+      const { claims } = await user.getIdTokenResult();
+      const role = claims.role as UserRole | undefined;
+      setProfile(p ? { ...p, role } : p);
     } finally {
       setProfileLoading(false);
     }
+  }, [user]);
+
+  /**
+   * Erzwingt ein Token-Refresh, damit ein frisch per Admin-SDK-Script gesetzter
+   * Rollen-Claim sofort im Client ankommt (ohne Re-Login).
+   */
+  const refreshRole = useCallback(async () => {
+    if (!user) return;
+    const { claims } = await user.getIdTokenResult(true);
+    const role = claims.role as UserRole | undefined;
+    setProfile((prev) => (prev ? { ...prev, role } : prev));
   }, [user]);
 
   const updateDisplayName = useCallback(
@@ -209,6 +225,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       finishOnboarding,
       finishTrainerOnboarding,
       refreshProfile,
+      refreshRole,
     }),
     [
       user,
@@ -220,6 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       finishOnboarding,
       finishTrainerOnboarding,
       refreshProfile,
+      refreshRole,
     ],
   );
 

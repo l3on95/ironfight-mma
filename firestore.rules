@@ -3,7 +3,9 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function userRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      // Rolle kommt autoritativ aus den Auth Custom Claims (per Admin-SDK gesetzt),
+      // NICHT mehr aus dem Firestore-Dokument — kein Client kann sie schreiben.
+      return request.auth.token.role;
     }
     function isTrainerOrAdmin() {
       return userRole() in ["trainer", "admin"];
@@ -17,18 +19,22 @@ service cloud.firestore {
       allow read: if request.auth != null
                   && (request.auth.uid == uid || isTrainerOrAdmin());
 
-      // Eigenes Profil anlegen (Signup) — keine privilegierte Rolle selbst vergeben
+      // Eigenes Profil anlegen (Signup) — niemals selbst ein `role`-Feld setzen
       allow create: if request.auth != null && request.auth.uid == uid
-                    && (!("role" in request.resource.data)
-                        || request.resource.data.role == "user");
+                    && !("role" in request.resource.data);
 
       // Eigenes Profil aktualisieren — aber NIEMALS das Feld `role` aendern
       // (schliesst die Privilege-Escalation: User kann sich nicht selbst zum Admin machen)
       allow update: if request.auth != null && request.auth.uid == uid
                     && !request.resource.data.diff(resource.data).affectedKeys().hasAny(["role"]);
 
-      // Admin darf Rollen setzen und das komplette User-Dokument verwalten
-      allow create, update, delete: if request.auth != null && isAdmin();
+      // Admin verwaltet Profile, aber die Rolle wird AUSSCHLIESSLICH per
+      // Admin-SDK-Script (Custom Claims) gesetzt — kein Client-Pfad schreibt `role`.
+      allow create: if request.auth != null && isAdmin()
+                    && !("role" in request.resource.data);
+      allow update: if request.auth != null && isAdmin()
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(["role"]);
+      allow delete: if request.auth != null && isAdmin();
 
       match /{subcollection}/{document=**} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
