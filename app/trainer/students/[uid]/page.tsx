@@ -193,9 +193,9 @@ function StudentDetailContent({ uid }: { uid: string }) {
       <div
         className="relative overflow-hidden border-b px-4 py-8 sm:px-6"
         style={{
-          borderColor: "rgba(0,212,230,0.2)",
+          borderColor: "rgba(35,196,206,0.2)",
           background:
-            "radial-gradient(500px 250px at 100% 50%, rgba(0,212,230,0.12), transparent 60%), linear-gradient(160deg, #07090C, #050505)",
+            "radial-gradient(500px 250px at 100% 50%, rgba(35,196,206,0.12), transparent 60%), linear-gradient(160deg, #0B0716, #080512)",
         }}
       >
         <div className="mx-auto max-w-7xl">
@@ -210,8 +210,8 @@ function StudentDetailContent({ uid }: { uid: string }) {
             <div
               className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl font-display-ta text-lg font-black"
               style={{
-                background: "rgba(0,212,230,0.1)",
-                border: "1px solid rgba(0,212,230,0.4)",
+                background: "rgba(35,196,206,0.1)",
+                border: "1px solid rgba(35,196,206,0.4)",
                 color: "var(--ta-cyan)",
               }}
             >
@@ -239,8 +239,8 @@ function StudentDetailContent({ uid }: { uid: string }) {
                     className="font-mono-ta rounded px-1.5 py-0.5 text-[10px] uppercase"
                     style={{
                       letterSpacing: "0.12em",
-                      background: "rgba(0,212,230,0.1)",
-                      border: "1px solid rgba(0,212,230,0.3)",
+                      background: "rgba(35,196,206,0.1)",
+                      border: "1px solid rgba(35,196,206,0.3)",
                       color: "var(--ta-cyan)",
                     }}
                   >
@@ -278,8 +278,8 @@ function StudentDetailContent({ uid }: { uid: string }) {
                     className="font-mono-ta rounded px-1.5 py-0.5 text-[10px] uppercase"
                     style={{
                       letterSpacing: "0.12em",
-                      background: "rgba(255,45,120,0.1)",
-                      border: "1px solid rgba(255,45,120,0.4)",
+                      background: "rgba(255,79,168,0.1)",
+                      border: "1px solid rgba(255,79,168,0.4)",
                       color: "var(--ta-pink)",
                     }}
                   >
@@ -315,7 +315,7 @@ function StudentDetailContent({ uid }: { uid: string }) {
           <Stat
             label="Wochen aktiv"
             value={analysis.weeksTracked}
-            accent="#FBBF24"
+            accent="#8A63E8"
           />
         </div>
 
@@ -406,7 +406,7 @@ function StudentDetailContent({ uid }: { uid: string }) {
                 <Stat
                   label="Gesamt"
                   value={analysis.technique.total}
-                  accent="#FBBF24"
+                  accent="#8A63E8"
                 />
               </div>
             </div>
@@ -460,7 +460,7 @@ function StudentDetailContent({ uid }: { uid: string }) {
                           height: "100%",
                           width: `${Math.round(c.shareOfTotal * 100)}%`,
                           background: "var(--ta-cyan)",
-                          boxShadow: "0 0 6px rgba(0,212,230,0.4)",
+                          boxShadow: "0 0 6px rgba(35,196,206,0.4)",
                         }}
                       />
                     </div>
@@ -492,8 +492,8 @@ function StudentDetailContent({ uid }: { uid: string }) {
               <div
                 className="rounded-xl p-3"
                 style={{
-                  background: "rgba(0,212,230,0.06)",
-                  border: "1px solid rgba(0,212,230,0.3)",
+                  background: "rgba(35,196,206,0.06)",
+                  border: "1px solid rgba(35,196,206,0.3)",
                 }}
               >
                 <div
@@ -521,8 +521,8 @@ function StudentDetailContent({ uid }: { uid: string }) {
               <div
                 className="rounded-xl p-3"
                 style={{
-                  background: "rgba(255,45,120,0.06)",
-                  border: "1px solid rgba(255,45,120,0.3)",
+                  background: "rgba(255,79,168,0.06)",
+                  border: "1px solid rgba(255,79,168,0.3)",
                 }}
               >
                 <div

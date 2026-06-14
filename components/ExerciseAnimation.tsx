@@ -20,11 +20,11 @@ import type { ExerciseKind, Category } from "@/lib/types";
 // ─── Design-Token ─────────────────────────────────────────────────────────────
 
 const T = {
-  cyan:    "#00D4E6",
-  cyanDim: "rgba(0,212,230,0.25)",
-  pink:    "#FF2D78",
-  pinkDim: "rgba(255,45,120,0.25)",
-  ink:     "#0C1014",
+  cyan:    "#23C4CE",
+  cyanDim: "rgba(35,196,206,0.25)",
+  pink:    "#FF4FA8",
+  pinkDim: "rgba(255,79,168,0.25)",
+  ink:     "#110B1E",
   fgDim:   "rgba(255,255,255,0.12)",
 } as const;
 
@@ -62,7 +62,7 @@ function PunchAnim() {
       <motion.circle
         cx={50} cy={75} r={15}
         fill={T.cyan}
-        style={{ filter: "drop-shadow(0 0 10px rgba(0,212,230,.8))" }}
+        style={{ filter: "drop-shadow(0 0 10px rgba(35,196,206,.8))" }}
         animate={{ cx: [50, 162, 50] }}
         transition={{
           duration: dur,
@@ -118,7 +118,7 @@ function KickAnim() {
         stroke={T.cyan}
         strokeWidth="5"
         strokeLinecap="round"
-        style={{ filter: "drop-shadow(0 0 8px rgba(0,212,230,.7))" }}
+        style={{ filter: "drop-shadow(0 0 8px rgba(35,196,206,.7))" }}
         animate={{
           x2: [155, 65, 155],
           y2: [125, 38, 125],
@@ -136,7 +136,7 @@ function KickAnim() {
       <motion.circle
         cx={155} cy={125} r={11}
         fill={T.cyan}
-        style={{ filter: "drop-shadow(0 0 12px rgba(0,212,230,.9))" }}
+        style={{ filter: "drop-shadow(0 0 12px rgba(35,196,206,.9))" }}
         animate={{
           cx: [155, 65, 155],
           cy: [125, 38, 125],
@@ -167,7 +167,7 @@ function GrappleAnim() {
       <motion.circle
         cx={100 + R} cy={78} r={18}
         fill={T.cyan}
-        style={{ filter: "drop-shadow(0 0 10px rgba(0,212,230,.7))" }}
+        style={{ filter: "drop-shadow(0 0 10px rgba(35,196,206,.7))" }}
         animate={{
           cx: [
             100 + R,
@@ -195,7 +195,7 @@ function GrappleAnim() {
       <motion.circle
         cx={100 - R} cy={78} r={18}
         fill={T.pink}
-        style={{ filter: "drop-shadow(0 0 8px rgba(255,45,120,.6))" }}
+        style={{ filter: "drop-shadow(0 0 8px rgba(255,79,168,.6))" }}
         animate={{
           cx: [
             100 - R,
@@ -246,7 +246,7 @@ function BounceAnim() {
       {/* Schatten / Boden */}
       <motion.ellipse
         cx={100} cy={128} rx={22} ry={7}
-        fill="rgba(0,212,230,0.18)"
+        fill="rgba(35,196,206,0.18)"
         animate={{
           rx: [22, 12, 22],
           ry: [7, 3, 7],
@@ -264,7 +264,7 @@ function BounceAnim() {
       <motion.circle
         cx={100} cy={100} r={22}
         fill={T.cyan}
-        style={{ filter: "drop-shadow(0 0 14px rgba(0,212,230,.8))" }}
+        style={{ filter: "drop-shadow(0 0 14px rgba(35,196,206,.8))" }}
         animate={{
           cy:    [100, 38, 100],
           scaleX:[1,   1,  1],
@@ -296,7 +296,7 @@ function BreatheAnim() {
       <motion.circle
         cx={100} cy={75} r={18}
         fill={T.cyan}
-        style={{ filter: "drop-shadow(0 0 12px rgba(0,212,230,.9))" }}
+        style={{ filter: "drop-shadow(0 0 12px rgba(35,196,206,.9))" }}
         animate={{ scale: [1, 1.12, 1] }}
         transition={{ duration: dur, ease: "easeInOut", repeat: Infinity }}
       />

@@ -13,46 +13,50 @@ const config: Config = {
         foreground: "var(--foreground)",
         // Tidal Athletics — cyan primary
         cyan: {
-          DEFAULT: "#00D4E6",
-          bright: "#4DEEFF",
-          deep: "#008FA0",
+          DEFAULT: "#23C4CE",
+          bright: "#5FE6EC",
+          deep: "#13939C",
         },
         // Tidal Athletics — pink accent
         pink: {
-          DEFAULT: "#FF2D78",
-          bright: "#FF5C99",
-          deep: "#B81E58",
+          DEFAULT: "#FF4FA8",
+          bright: "#FF85C2",
+          deep: "#D62E86",
         },
+        // Sekundär-Akzente
+        violet: { DEFAULT: "#9D7BFA", deep: "#7C5BD2" },
+        amber: { DEFAULT: "#8A63E8", deep: "#6A48C9" },
+        mint: { DEFAULT: "#3EE06B", deep: "#22B04C" },
         // Ink scale (dark backgrounds)
         ink: {
-          0: "#030406",
-          1: "#07090C",
-          2: "#0C1014",
-          3: "#11161C",
-          4: "#181E26",
-          5: "#232A33",
-          6: "#313B47",
+          0: "#07040D",
+          1: "#0B0716",
+          2: "#110B1E",
+          3: "#161028",
+          4: "#1E1733",
+          5: "#2B2243",
+          6: "#3C3158",
         },
         // Foreground scale
         fg: {
           DEFAULT: "#FFFFFF",
-          2: "#C9D1DA",
-          3: "#8893A1",
-          4: "#5A6573",
+          2: "#CCC9E0",
+          3: "#8F8AA8",
+          4: "#5F5878",
         },
         // Legacy aliases kept for backward compatibility
         blood: {
-          DEFAULT: "#00D4E6",
-          dark: "#008FA0",
-          light: "#4DEEFF",
+          DEFAULT: "#23C4CE",
+          dark: "#13939C",
+          light: "#5FE6EC",
         },
         carbon: {
-          900: "#030406",
-          800: "#07090C",
-          700: "#0C1014",
-          600: "#11161C",
-          500: "#232A33",
-          400: "#313B47",
+          900: "#07040D",
+          800: "#0B0716",
+          700: "#110B1E",
+          600: "#161028",
+          500: "#2B2243",
+          400: "#3C3158",
         },
       },
       fontFamily: {
@@ -62,9 +66,9 @@ const config: Config = {
       },
       backgroundImage: {
         "grid-pattern":
-          "linear-gradient(rgba(0,212,230,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,230,0.06) 1px, transparent 1px)",
+          "linear-gradient(rgba(35,196,206,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(35,196,206,0.06) 1px, transparent 1px)",
         "radial-fade":
-          "radial-gradient(ellipse at top, rgba(0,212,230,0.12), transparent 60%)",
+          "radial-gradient(ellipse at top, rgba(35,196,206,0.12), transparent 60%)",
       },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -78,8 +82,8 @@ const config: Config = {
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         workPulse: {
-          "0%, 100%": { filter: "drop-shadow(0 0 0 rgba(0,212,230,0))" },
-          "50%": { filter: "drop-shadow(0 0 24px rgba(0,212,230,.6))" },
+          "0%, 100%": { filter: "drop-shadow(0 0 0 rgba(35,196,206,0))" },
+          "50%": { filter: "drop-shadow(0 0 24px rgba(35,196,206,.6))" },
         },
         dotPulse: {
           "0%, 100%": { opacity: "1", transform: "scale(1)" },
@@ -87,10 +91,10 @@ const config: Config = {
         },
       },
       boxShadow: {
-        "glow-cyan": "0 0 0 1px rgba(0,212,230,.4), 0 0 24px rgba(0,212,230,.35), 0 0 60px rgba(0,212,230,.15)",
-        "glow-pink": "0 0 0 1px rgba(255,45,120,.4), 0 0 24px rgba(255,45,120,.35)",
-        "glow-cyan-sm": "0 0 12px rgba(0,212,230,.5)",
-        "glow-pink-sm": "0 0 12px rgba(255,45,120,.5)",
+        "glow-cyan": "0 0 0 1px rgba(35,196,206,.4), 0 0 24px rgba(35,196,206,.35), 0 0 60px rgba(35,196,206,.15)",
+        "glow-pink": "0 0 0 1px rgba(255,79,168,.4), 0 0 24px rgba(255,79,168,.35)",
+        "glow-cyan-sm": "0 0 12px rgba(35,196,206,.5)",
+        "glow-pink-sm": "0 0 12px rgba(255,79,168,.5)",
       },
     },
   },

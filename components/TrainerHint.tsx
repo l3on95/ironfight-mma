@@ -35,8 +35,8 @@ export default function TrainerHint({
       role="status"
       className="animate-fade-in mb-4 flex items-start gap-3 rounded-xl px-4 py-3"
       style={{
-        background: "rgba(0,212,230,0.06)",
-        border: "1px solid rgba(0,212,230,0.3)",
+        background: "rgba(35,196,206,0.06)",
+        border: "1px solid rgba(35,196,206,0.3)",
       }}
     >
       <span

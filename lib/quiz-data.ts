@@ -9,7 +9,7 @@ export interface QuizQuestion {
 export interface SportQuiz {
   id: string;
   name: string;
-  icon: string;
+  icon: import("@/components/ui/Icon").IconName;
   color: string;
   quiz: QuizQuestion[];
 }
@@ -19,7 +19,7 @@ export const SPORT_QUIZZES: SportQuiz[] = [
   {
     id: "mma",
     name: "MMA",
-    icon: "🥊",
+    icon: "target",
     color: "text-blood border-blood/60 bg-blood/10",
     quiz: [
       {
@@ -92,7 +92,7 @@ export const SPORT_QUIZZES: SportQuiz[] = [
   {
     id: "bjj",
     name: "BJJ",
-    icon: "🥋",
+    icon: "gi",
     color: "text-blue-400 border-blue-400/60 bg-blue-400/10",
     quiz: [
       {
@@ -174,7 +174,7 @@ export const SPORT_QUIZZES: SportQuiz[] = [
   {
     id: "boxing",
     name: "Boxen",
-    icon: "🥊",
+    icon: "glove",
     color: "text-yellow-400 border-yellow-400/60 bg-yellow-400/10",
     quiz: [
       {

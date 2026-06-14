@@ -3,6 +3,7 @@
 import PageHeader from "@/components/PageHeader";
 import { useState } from "react";
 import { SPORT_QUIZZES } from "@/lib/quiz-data";
+import Icon from "@/components/ui/Icon";
 import { Quiz } from "@/components/Quiz";
 
 // ─── Typen ────────────────────────────────────────────────────────────────────
@@ -15,7 +16,7 @@ interface RulesSection {
 interface Sport {
   id: string;
   name: string;
-  icon: string;
+  icon: import("@/components/ui/Icon").IconName;
   tagline: string;
   color: string;
   sections: RulesSection[];
@@ -27,7 +28,7 @@ const SPORTS: Sport[] = [
   {
     id: "mma",
     name: "MMA",
-    icon: "🥊",
+    icon: "target",
     tagline: "Mixed Martial Arts",
     color: "text-blood border-blood/60 bg-blood/10",
     sections: [
@@ -96,7 +97,7 @@ const SPORTS: Sport[] = [
   {
     id: "bjj",
     name: "BJJ",
-    icon: "🥋",
+    icon: "gi",
     tagline: "Brazilian Jiu-Jitsu",
     color: "text-blue-400 border-blue-400/60 bg-blue-400/10",
     sections: [
@@ -157,7 +158,7 @@ const SPORTS: Sport[] = [
   {
     id: "boxing",
     name: "Boxen",
-    icon: "🥊",
+    icon: "glove",
     tagline: "Das klassische Faustkampf-Regelwerk",
     color: "text-yellow-400 border-yellow-400/60 bg-yellow-400/10",
     sections: [
@@ -275,7 +276,7 @@ export default function RegelnPage() {
                   : "border-carbon-400 bg-carbon-700/40 text-foreground/70 hover:border-blood/60 hover:text-foreground"
               }`}
             >
-              <span>{s.icon}</span>
+              <Icon name={s.icon} size={18} />
               <span>{s.name}</span>
             </button>
           ))}

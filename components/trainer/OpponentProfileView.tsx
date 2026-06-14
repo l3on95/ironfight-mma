@@ -118,8 +118,8 @@ export default function OpponentProfileView({
           className="rounded-2xl p-4 sm:p-5"
           style={{
             background:
-              "radial-gradient(400px 200px at 100% 0%, rgba(255,45,120,0.12), transparent 60%), linear-gradient(160deg, var(--ink-3), var(--ink-2))",
-            border: "1px solid rgba(255,45,120,0.3)",
+              "radial-gradient(400px 200px at 100% 0%, rgba(255,79,168,0.12), transparent 60%), linear-gradient(160deg, var(--ink-3), var(--ink-2))",
+            border: "1px solid rgba(255,79,168,0.3)",
           }}
         >
           <div
@@ -172,7 +172,7 @@ export default function OpponentProfileView({
               {favorites.length > 0 && (
                 <MarkerRow
                   icon={<MarkStar />}
-                  color="#FBBF24"
+                  color="#8A63E8"
                   text={favorites.join(", ")}
                 />
               )}

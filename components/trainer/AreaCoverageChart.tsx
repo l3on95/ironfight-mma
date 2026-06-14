@@ -26,16 +26,16 @@ export default function AreaCoverageChart({
         const barColor = isHighlight
           ? "var(--ta-pink)"
           : isWeak && highlightWeak
-            ? "rgba(255,45,120,0.5)"
+            ? "rgba(255,79,168,0.5)"
             : "var(--ta-cyan)";
         return (
           <div
             key={s.area}
             className="flex items-center gap-2 rounded-md px-2 py-1"
             style={{
-              background: isHighlight ? "rgba(255,45,120,0.06)" : "transparent",
+              background: isHighlight ? "rgba(255,79,168,0.06)" : "transparent",
               border: isHighlight
-                ? "1px solid rgba(255,45,120,0.25)"
+                ? "1px solid rgba(255,79,168,0.25)"
                 : "1px solid transparent",
             }}
           >

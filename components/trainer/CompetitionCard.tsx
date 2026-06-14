@@ -25,7 +25,7 @@ export function competitionGroup(camp: FightCamp): CompetitionGroup {
 const GROUP_ACCENT: Record<CompetitionGroup, string> = {
   upcoming: "var(--ta-cyan)",
   past: "var(--fg-4)",
-  archived: "#A78BFA",
+  archived: "#9D7BFA",
 };
 
 export default function CompetitionCard({
@@ -101,8 +101,8 @@ export default function CompetitionCard({
         <span
           className="rounded px-1.5 py-0.5"
           style={{
-            background: dnaCount > 0 ? "rgba(0,212,230,0.1)" : "var(--ink-4)",
-            border: `1px solid ${dnaCount > 0 ? "rgba(0,212,230,0.35)" : "var(--ink-5)"}`,
+            background: dnaCount > 0 ? "rgba(35,196,206,0.1)" : "var(--ink-4)",
+            border: `1px solid ${dnaCount > 0 ? "rgba(35,196,206,0.35)" : "var(--ink-5)"}`,
             color: dnaCount > 0 ? "var(--ta-cyan)" : "var(--fg-4)",
           }}
         >

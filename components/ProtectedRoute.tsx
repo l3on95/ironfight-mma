@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
+
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -33,7 +35,7 @@ export default function ProtectedRoute({
     return (
       <div className="mx-auto max-w-7xl px-4 py-32 sm:px-6">
         <div className="mx-auto max-w-md text-center">
-          <div className="mb-4 text-4xl">⚠️</div>
+          <div className="mb-4 flex justify-center text-amber"><Icon name="warn" size={40} /></div>
           <h2 className="heading-display text-xl font-black">Verbindungsproblem</h2>
           <p className="mt-3 text-sm text-foreground/70">
             Die Verbindung zum Server dauert ungewöhnlich lange.
@@ -73,7 +75,7 @@ export default function ProtectedRoute({
     return (
       <div className="mx-auto max-w-7xl px-4 py-32 sm:px-6">
         <div className="mx-auto max-w-md text-center">
-          <div className="mb-4 text-4xl">🔒</div>
+          <div className="mb-4 flex justify-center text-cyan"><Icon name="lock" size={40} /></div>
           <h2 className="heading-display text-2xl font-black">Login erforderlich</h2>
           <p className="mt-3 text-sm text-foreground/70">
             Dieser Bereich ist nur für eingeloggte Nutzer zugänglich.

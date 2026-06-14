@@ -1,3 +1,4 @@
+import Icon from "@/components/ui/Icon";
 import PageHeader from "@/components/PageHeader";
 import { TechniqueViewTracker } from "@/components/TechniqueViewTracker";
 import {
@@ -191,7 +192,7 @@ export default function TechniqueDetailPage({
           <ul className="mt-4 space-y-2 text-sm text-foreground/85">
             {t.commonMistakes.map((m) => (
               <li key={m} className="flex gap-2">
-                <span className="text-blood">⚠</span>
+                <span className="text-blood"><Icon name="warn" size={14} /></span>
                 <span>{m}</span>
               </li>
             ))}
@@ -207,7 +208,7 @@ export default function TechniqueDetailPage({
             <ul className="mt-4 space-y-2 text-sm text-foreground/85">
               {t.safetyNotes.map((note) => (
                 <li key={note} className="flex gap-2">
-                  <span className="text-yellow-400">⚠</span>
+                  <span className="text-yellow-400"><Icon name="warn" size={14} /></span>
                   <span>{note}</span>
                 </li>
               ))}
@@ -244,7 +245,7 @@ export default function TechniqueDetailPage({
                     key={eq}
                     className="inline-flex items-center gap-2 rounded-sm border border-carbon-400 bg-carbon-800 px-3 py-1.5 text-xs font-bold uppercase tracking-wider"
                   >
-                    <span>{def.icon}</span>
+                    <Icon name={def.icon} size={14} />
                     <span>{def.label}</span>
                   </span>
                 );

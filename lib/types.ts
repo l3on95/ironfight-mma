@@ -151,7 +151,7 @@ export type EquipmentId =
 export interface EquipmentDef {
   id: EquipmentId;
   label: string;
-  icon: string; // Emoji / kurzes ASCII-Symbol
+  icon: import("@/components/ui/Icon").IconName; // SVG-Icon-Name (kein Emoji)
   description: string;
   defaultFor: Category[];
 }

@@ -219,7 +219,7 @@ export default function PwaInstallPrompt() {
                   width={48}
                   height={48}
                   className="rounded-xl shrink-0"
-                  style={{ border: "1px solid rgba(0,212,230,0.2)" }}
+                  style={{ border: "1px solid rgba(35,196,206,0.2)" }}
                 />
                 <div>
                   <div
@@ -277,9 +277,9 @@ export default function PwaInstallPrompt() {
                         <span
                           className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-black"
                           style={{
-                            background: "rgba(0,212,230,0.12)",
+                            background: "rgba(35,196,206,0.12)",
                             color: "var(--ta-cyan)",
-                            border: "1px solid rgba(0,212,230,0.3)",
+                            border: "1px solid rgba(35,196,206,0.3)",
                           }}
                         >
                           1
@@ -305,9 +305,9 @@ export default function PwaInstallPrompt() {
                         <span
                           className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-black"
                           style={{
-                            background: "rgba(0,212,230,0.12)",
+                            background: "rgba(35,196,206,0.12)",
                             color: "var(--ta-cyan)",
-                            border: "1px solid rgba(0,212,230,0.3)",
+                            border: "1px solid rgba(35,196,206,0.3)",
                           }}
                         >
                           2

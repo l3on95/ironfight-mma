@@ -36,11 +36,11 @@ import TrainerHint from "@/components/TrainerHint";
 // ─── Visuelle Hilfskonstanten ──────────────────────────────────────────────
 
 const LEVEL_STYLE: Record<string, { label: string; color: string }> = {
-  kids:     { label: "Kids",     color: "#FF2D78" },
-  teens:    { label: "Teens",    color: "#FBBF24" },
-  adult:    { label: "Adult",    color: "#00D4E6" },
+  kids:     { label: "Kids",     color: "#FF4FA8" },
+  teens:    { label: "Teens",    color: "#8A63E8" },
+  adult:    { label: "Adult",    color: "#23C4CE" },
   advanced: { label: "Advanced", color: "#F3F4F6" },
-  mixed:    { label: "Mixed",    color: "#A78BFA" },
+  mixed:    { label: "Mixed",    color: "#9D7BFA" },
 };
 
 const CATEGORY_STYLE: Record<string, { label: string; color: string }> = {
@@ -52,14 +52,14 @@ const CATEGORY_STYLE: Record<string, { label: string; color: string }> = {
 
 const DISCIPLINE_COLOR: Record<string, string> = {
   boxing:            "#FB923C",
-  kickboxen:         "#FBBF24",
+  kickboxen:         "#8A63E8",
   "muay-thai":       "#F87171",
   "fitness-kickboxen": "#FCD34D",
   wrestling:         "#60A5FA",
   bjj:               "#C084FC",
-  mma:               "#00D4E6",
-  karate:            "#A78BFA",
-  "wing-tsung":      "#34D399",
+  mma:               "#23C4CE",
+  karate:            "#9D7BFA",
+  "wing-tsung":      "#3EE06B",
   "self-defense":    "#9CA3AF",
 };
 
@@ -475,8 +475,8 @@ function DayColumn({
         style={{
           fontFamily: "var(--font-mono)",
           letterSpacing: "0.12em",
-          background: isToday ? "rgba(0,212,230,.12)" : "var(--ink-3)",
-          border: `1px solid ${isToday ? "rgba(0,212,230,.4)" : "var(--ink-4)"}`,
+          background: isToday ? "rgba(35,196,206,.12)" : "var(--ink-3)",
+          border: `1px solid ${isToday ? "rgba(35,196,206,.4)" : "var(--ink-4)"}`,
           color: isToday ? "var(--ta-cyan)" : "var(--fg-3)",
         }}
       >
@@ -517,7 +517,7 @@ function BlockCard({ block, isToday, onClick }: { block: TrainingBlock; isToday:
       className="w-full rounded-lg p-2 text-left transition-all"
       style={{
         background: "var(--ink-3)",
-        border: `1px solid ${isToday ? "rgba(0,212,230,.2)" : "var(--ink-4)"}`,
+        border: `1px solid ${isToday ? "rgba(35,196,206,.2)" : "var(--ink-4)"}`,
         borderLeft: `3px solid ${accentColor}`,
         cursor: "pointer",
       }}
@@ -658,8 +658,8 @@ function ModalReady({
             <div
               className="mt-4 rounded-xl px-3 py-2.5 text-xs"
               style={{
-                background: "rgba(0,212,230,0.06)",
-                border: "1px solid rgba(0,212,230,0.25)",
+                background: "rgba(35,196,206,0.06)",
+                border: "1px solid rgba(35,196,206,0.25)",
                 color: "var(--fg-2)",
                 lineHeight: 1.5,
               }}
@@ -710,8 +710,8 @@ function ModalReady({
                 style={
                   subscribed
                     ? {
-                        background: "rgba(0,212,230,0.08)",
-                        border: "1px solid rgba(0,212,230,0.3)",
+                        background: "rgba(35,196,206,0.08)",
+                        border: "1px solid rgba(35,196,206,0.3)",
                         color: "var(--ta-cyan)",
                         letterSpacing: "0.1em",
                       }
@@ -752,7 +752,7 @@ function ModalReady({
                 participated ? (
                   <div
                     className="rounded-xl py-2.5 text-center text-xs font-bold uppercase"
-                    style={{ background: "rgba(0,212,230,.08)", border: "1px solid rgba(0,212,230,.3)", color: "var(--ta-cyan)", letterSpacing: "0.1em" }}
+                    style={{ background: "rgba(35,196,206,.08)", border: "1px solid rgba(35,196,206,.3)", color: "var(--ta-cyan)", letterSpacing: "0.1em" }}
                   >
                     ✓ Teilgenommen
                     {attendResult !== null && attendResult > 0 && (
@@ -907,7 +907,7 @@ function TechniquePicker({
                   key={id}
                   onClick={() => onToggle(id)}
                   className="rounded-lg px-2 py-1 text-[11px] transition-opacity hover:opacity-70"
-                  style={{ background: "rgba(0,212,230,.1)", border: "1px solid rgba(0,212,230,.3)", color: "var(--ta-cyan)" }}
+                  style={{ background: "rgba(35,196,206,.1)", border: "1px solid rgba(35,196,206,.3)", color: "var(--ta-cyan)" }}
                   title="Entfernen"
                 >
                   {t?.name ?? id} ✕
@@ -974,7 +974,7 @@ function TechniqueGroup({
         {selectedInGroup > 0 && (
           <span
             className="rounded px-1.5 py-0.5 text-[10px] font-bold"
-            style={{ background: "rgba(0,212,230,.15)", color: "var(--ta-cyan)" }}
+            style={{ background: "rgba(35,196,206,.15)", color: "var(--ta-cyan)" }}
           >
             {selectedInGroup}
           </span>
@@ -996,8 +996,8 @@ function TechniqueGroup({
                 onClick={() => onToggle(t.id)}
                 className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors"
                 style={{
-                  background: selected ? "rgba(0,212,230,.1)" : "transparent",
-                  border: `1px solid ${selected ? "rgba(0,212,230,.3)" : "transparent"}`,
+                  background: selected ? "rgba(35,196,206,.1)" : "transparent",
+                  border: `1px solid ${selected ? "rgba(35,196,206,.3)" : "transparent"}`,
                 }}
               >
                 {/* Checkbox */}

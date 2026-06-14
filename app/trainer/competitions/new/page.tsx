@@ -50,8 +50,8 @@ function StepHeader({ n, title }: { n: number; title: string }) {
       <span
         className="font-display-ta flex h-7 w-7 items-center justify-center rounded-lg text-sm font-black"
         style={{
-          background: "rgba(255,45,120,0.1)",
-          border: "1px solid rgba(255,45,120,0.4)",
+          background: "rgba(255,79,168,0.1)",
+          border: "1px solid rgba(255,79,168,0.4)",
           color: "var(--ta-pink)",
         }}
       >
@@ -219,9 +219,9 @@ function NewCompetitionContent() {
       <div
         className="border-b px-4 py-7 sm:px-6"
         style={{
-          borderColor: "rgba(255,45,120,0.2)",
+          borderColor: "rgba(255,79,168,0.2)",
           background:
-            "radial-gradient(500px 220px at 100% 50%, rgba(255,45,120,0.1), transparent 60%), linear-gradient(160deg, #0A0709, #050505)",
+            "radial-gradient(500px 220px at 100% 50%, rgba(255,79,168,0.1), transparent 60%), linear-gradient(160deg, #140A12, #080512)",
         }}
       >
         <div className="mx-auto max-w-3xl">
@@ -280,7 +280,7 @@ function NewCompetitionContent() {
                         onClick={() => setStudentUid(s.uid)}
                         className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-colors"
                         style={{
-                          background: active ? "rgba(0,212,230,0.1)" : "var(--ink-3)",
+                          background: active ? "rgba(35,196,206,0.1)" : "var(--ink-3)",
                           border: `1px solid ${active ? "var(--ta-cyan)" : "var(--ink-5)"}`,
                         }}
                       >
@@ -372,7 +372,7 @@ function NewCompetitionContent() {
                             onClick={() => setSelectedOpponentId(o.id)}
                             className="rounded-xl px-3 py-2.5 text-left transition-colors"
                             style={{
-                              background: active ? "rgba(255,45,120,0.1)" : "var(--ink-3)",
+                              background: active ? "rgba(255,79,168,0.1)" : "var(--ink-3)",
                               border: `1px solid ${active ? "var(--ta-pink)" : "var(--ink-5)"}`,
                             }}
                           >

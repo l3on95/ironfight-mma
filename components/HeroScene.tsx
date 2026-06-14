@@ -94,8 +94,8 @@ export default function HeroScene() {
       dpr={[1, 1.5]}
       gl={{ antialias: true, alpha: true }}
     >
-      <color attach="background" args={["#050505"]} />
-      <fog attach="fog" args={["#050505", 6, 14]} />
+      <color attach="background" args={["#080512"]} />
+      <fog attach="fog" args={["#080512", 6, 14]} />
 
       <ambientLight intensity={0.25} />
       <directionalLight position={[3, 4, 5]} intensity={0.8} />

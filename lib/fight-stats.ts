@@ -39,10 +39,10 @@ export const DNA_SPLIT_META: Record<
   { label: string; color: string }
 > = {
   boxing: { label: "Boxen", color: "var(--ta-cyan)" },
-  kicking: { label: "Kicks", color: "#FBBF24" },
+  kicking: { label: "Kicks", color: "#8A63E8" },
   wrestling: { label: "Wrestling", color: "var(--ta-pink)" },
-  ground: { label: "Boden", color: "#A78BFA" },
-  clinch: { label: "Clinch", color: "#34D399" },
+  ground: { label: "Boden", color: "#9D7BFA" },
+  clinch: { label: "Clinch", color: "#3EE06B" },
 };
 
 export const EMPTY_DNA_SPLIT: DnaSplit = {
@@ -94,9 +94,9 @@ export const ACTION_GROUP_META: Record<
   { label: string; color: string }
 > = {
   strike: { label: "Schläge", color: "var(--ta-cyan)" },
-  kick: { label: "Kicks", color: "#FBBF24" },
+  kick: { label: "Kicks", color: "#8A63E8" },
   takedown: { label: "Takedowns", color: "var(--ta-pink)" },
-  ground: { label: "Boden", color: "#A78BFA" },
+  ground: { label: "Boden", color: "#9D7BFA" },
 };
 
 export interface ActionDef {

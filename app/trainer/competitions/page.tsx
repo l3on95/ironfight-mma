@@ -57,8 +57,8 @@ function OpponentCard({ opponent }: { opponent: Opponent }) {
           className="font-mono-ta shrink-0 rounded px-1.5 py-0.5 text-[9px] uppercase"
           style={{
             letterSpacing: "0.12em",
-            background: dnaCount > 0 ? "rgba(0,212,230,0.1)" : "var(--ink-4)",
-            border: `1px solid ${dnaCount > 0 ? "rgba(0,212,230,0.35)" : "var(--ink-5)"}`,
+            background: dnaCount > 0 ? "rgba(35,196,206,0.1)" : "var(--ink-4)",
+            border: `1px solid ${dnaCount > 0 ? "rgba(35,196,206,0.35)" : "var(--ink-5)"}`,
             color: dnaCount > 0 ? "var(--ta-cyan)" : "var(--fg-4)",
           }}
         >
@@ -224,9 +224,9 @@ function CompetitionsHubContent() {
       <div
         className="relative overflow-hidden border-b px-4 py-9 sm:px-6"
         style={{
-          borderColor: "rgba(255,45,120,0.2)",
+          borderColor: "rgba(255,79,168,0.2)",
           background:
-            "radial-gradient(420px 250px at 100% 50%, rgba(255,45,120,0.12), transparent 60%), linear-gradient(160deg, #0A0709, #050505)",
+            "radial-gradient(420px 250px at 100% 50%, rgba(255,79,168,0.12), transparent 60%), linear-gradient(160deg, #140A12, #080512)",
         }}
       >
         <div className="mx-auto max-w-7xl">
@@ -235,8 +235,8 @@ function CompetitionsHubContent() {
               className="font-mono-ta rounded px-2 py-0.5 text-[10px] font-black uppercase"
               style={{
                 letterSpacing: "0.2em",
-                background: "rgba(255,45,120,0.12)",
-                border: "1px solid rgba(255,45,120,0.4)",
+                background: "rgba(255,79,168,0.12)",
+                border: "1px solid rgba(255,79,168,0.4)",
                 color: "var(--ta-pink)",
               }}
             >
@@ -401,7 +401,7 @@ function CompetitionsHubContent() {
                 </Section>
               )}
               {grouped.archived.length > 0 && (
-                <Section title="Archiviert" accent="#A78BFA">
+                <Section title="Archiviert" accent="#9D7BFA">
                   {grouped.archived.map((c) => (
                     <CompetitionCard
                       key={c.id}

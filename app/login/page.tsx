@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
+
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -98,7 +100,7 @@ export default function LoginPage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="text-center">
-          <div className="mb-4 text-2xl">🔄</div>
+          <div className="mb-4 flex justify-center animate-spin" style={{ color: "var(--ta-cyan)", animationDuration: "1.4s" }}><Icon name="refresh" size={28} /></div>
           <p className="font-mono-ta text-sm uppercase" style={{ letterSpacing: "0.2em", color: "var(--fg-3)" }}>
             Weiterleitung zu Google…
           </p>
@@ -116,9 +118,9 @@ export default function LoginPage() {
             className="flex h-20 w-20 items-center justify-center rounded-2xl font-display-ta text-2xl font-black"
             style={{
               background: "linear-gradient(135deg, var(--ta-cyan), var(--ta-cyan-deep))",
-              color: "#001417",
+              color: "#03201D",
               boxShadow:
-                "0 0 40px rgba(0,212,230,.25), 0 0 80px rgba(255,45,120,.1)",
+                "0 0 40px rgba(35,196,206,.25), 0 0 80px rgba(255,79,168,.1)",
             }}
           >
             TA
@@ -230,8 +232,8 @@ export default function LoginPage() {
               <div
                 className="rounded-xl px-4 py-3 text-sm"
                 style={{
-                  border: "1px solid rgba(255,45,120,.4)",
-                  background: "rgba(255,45,120,.08)",
+                  border: "1px solid rgba(255,79,168,.4)",
+                  background: "rgba(255,79,168,.08)",
                   color: "var(--ta-pink)",
                 }}
               >
@@ -248,7 +250,7 @@ export default function LoginPage() {
                 <span className="flex items-center justify-center gap-2">
                   <span
                     className="h-4 w-4 animate-spin rounded-full border-2"
-                    style={{ borderColor: "rgba(0,20,23,.3)", borderTopColor: "#001417" }}
+                    style={{ borderColor: "rgba(0,20,23,.3)", borderTopColor: "#03201D" }}
                   />
                   Einloggen…
                 </span>

@@ -225,10 +225,10 @@ export default function HelpPage() {
                 letterSpacing: "0.12em",
                 background:
                   tab === "trainer"
-                    ? "rgba(0,212,230,0.12)"
+                    ? "rgba(35,196,206,0.12)"
                     : "var(--ink-3)",
                 border: `1px solid ${
-                  tab === "trainer" ? "rgba(0,212,230,0.4)" : "var(--ink-5)"
+                  tab === "trainer" ? "rgba(35,196,206,0.4)" : "var(--ink-5)"
                 }`,
                 color: tab === "trainer" ? "var(--ta-cyan)" : "var(--fg-3)",
               }}
@@ -243,10 +243,10 @@ export default function HelpPage() {
                 letterSpacing: "0.12em",
                 background:
                   tab === "student"
-                    ? "rgba(0,212,230,0.12)"
+                    ? "rgba(35,196,206,0.12)"
                     : "var(--ink-3)",
                 border: `1px solid ${
-                  tab === "student" ? "rgba(0,212,230,0.4)" : "var(--ink-5)"
+                  tab === "student" ? "rgba(35,196,206,0.4)" : "var(--ink-5)"
                 }`,
                 color: tab === "student" ? "var(--ta-cyan)" : "var(--fg-3)",
               }}

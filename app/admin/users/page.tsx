@@ -3,6 +3,10 @@
 import AdminRoute from "@/components/AdminRoute";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
+import DashboardHero from "@/components/dashboard/DashboardHero";
+import SectionCard from "@/components/dashboard/SectionCard";
+import EmptyState from "@/components/dashboard/EmptyState";
+import Reveal from "@/components/dashboard/Reveal";
 import { listAllUsers, setUserRole, type AdminUserEntry } from "@/lib/admin";
 import type { UserRole } from "@/lib/types";
 import { useCallback, useEffect, useState } from "react";
@@ -21,15 +25,15 @@ const ROLES: { value: UserRole; label: string; color: string; bg: string; border
     value: "trainer",
     label: "Trainer",
     color: "var(--ta-cyan)",
-    bg: "rgba(0,212,230,.1)",
-    border: "rgba(0,212,230,.35)",
+    bg: "rgba(35,196,206,.1)",
+    border: "rgba(35,196,206,.35)",
   },
   {
     value: "admin",
     label: "Admin",
-    color: "#FBBF24",
-    bg: "rgba(251,191,36,.1)",
-    border: "rgba(251,191,36,.35)",
+    color: "#8A63E8",
+    bg: "rgba(138,99,232,.1)",
+    border: "rgba(138,99,232,.35)",
   },
 ];
 
@@ -75,11 +79,10 @@ function UserRow({
 
   return (
     <div
-      className="rounded-2xl p-4"
-      style={{
-        background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
-        border: isSelf ? "1px solid rgba(251,191,36,.3)" : "1px solid var(--ink-4)",
-      }}
+      className="card-glass !p-4"
+      style={
+        isSelf ? { borderColor: "rgba(138,99,232,.3)" } : undefined
+      }
     >
       <div className="flex items-start gap-3">
         {/* Avatar */}
@@ -108,9 +111,9 @@ function UserRow({
                 className="font-mono-ta rounded px-1.5 py-0.5 text-[9px] uppercase"
                 style={{
                   letterSpacing: "0.15em",
-                  background: "rgba(251,191,36,.12)",
-                  border: "1px solid rgba(251,191,36,.35)",
-                  color: "#FBBF24",
+                  background: "rgba(138,99,232,.12)",
+                  border: "1px solid rgba(138,99,232,.35)",
+                  color: "#8A63E8",
                 }}
               >
                 Du
@@ -258,44 +261,13 @@ function AdminUsersContent() {
   };
 
   return (
-    <main className="min-h-screen" style={{ background: "var(--ink-1)" }}>
-      {/* Header */}
-      <div
-        className="relative overflow-hidden border-b px-4 py-10 sm:px-6"
-        style={{
-          borderColor: "rgba(251,191,36,.2)",
-          background:
-            "radial-gradient(400px 250px at 100% 50%, rgba(251,191,36,.1), transparent 60%), linear-gradient(160deg, #0d0b04, #050505)",
-        }}
-      >
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-2 flex items-center gap-2">
-            <span
-              className="font-mono-ta rounded px-2 py-0.5 text-[10px] font-black uppercase"
-              style={{
-                letterSpacing: "0.2em",
-                background: "rgba(251,191,36,.12)",
-                border: "1px solid rgba(251,191,36,.4)",
-                color: "#FBBF24",
-              }}
-            >
-              Admin
-            </span>
-          </div>
-          <h1
-            className="font-display-ta font-black uppercase leading-none"
-            style={{ fontSize: "clamp(28px, 5vw, 42px)", letterSpacing: "0.02em" }}
-          >
-            Nutzerverwaltung
-          </h1>
-          <p
-            className="font-mono-ta mt-2 text-[11px] uppercase"
-            style={{ letterSpacing: "0.2em", color: "var(--fg-4)" }}
-          >
-            Rollen zuweisen · Mitglieder & Trainer verwalten
-          </p>
-        </div>
-      </div>
+    <main className="min-h-screen">
+      <DashboardHero
+        badges={[{ label: "Admin", accent: "amber", icon: "shield" }]}
+        accent="amber"
+        title="Nutzerverwaltung"
+        subtitle="Rollen zuweisen · Mitglieder & Trainer verwalten"
+      />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {error && (
@@ -336,17 +308,17 @@ function AdminUsersContent() {
                   style={{
                     fontFamily: "var(--font-mono)",
                     letterSpacing: "0.12em",
-                    background: active ? "rgba(251,191,36,.12)" : "var(--ink-3)",
-                    border: `1px solid ${active ? "rgba(251,191,36,.4)" : "var(--ink-5)"}`,
-                    color: active ? "#FBBF24" : "var(--fg-4)",
+                    background: active ? "rgba(138,99,232,.12)" : "var(--ink-3)",
+                    border: `1px solid ${active ? "rgba(138,99,232,.4)" : "var(--ink-5)"}`,
+                    color: active ? "#8A63E8" : "var(--fg-4)",
                   }}
                 >
                   {tab.label}
                   <span
                     className="rounded-md px-1 py-0.5 text-[9px]"
                     style={{
-                      background: active ? "rgba(251,191,36,.2)" : "var(--ink-4)",
-                      color: active ? "#FBBF24" : "var(--fg-4)",
+                      background: active ? "rgba(138,99,232,.2)" : "var(--ink-4)",
+                      color: active ? "#8A63E8" : "var(--fg-4)",
                     }}
                   >
                     {count}
@@ -367,44 +339,35 @@ function AdminUsersContent() {
         )}
 
         {users !== null && filtered.length === 0 && (
-          <div
-            className="rounded-2xl p-10 text-center"
-            style={{ border: "1px dashed var(--ink-5)", background: "var(--ink-2)" }}
-          >
-            <p className="text-sm" style={{ color: "var(--fg-4)" }}>
-              {search ? "Keine Nutzer gefunden." : "Noch keine Nutzer registriert."}
-            </p>
-          </div>
+          <EmptyState
+            icon="users"
+            title={search ? "Keine Nutzer gefunden." : "Noch keine Nutzer registriert."}
+          />
         )}
 
         {users !== null && filtered.length > 0 && (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((entry) => (
-              <UserRow
-                key={entry.uid}
-                entry={entry}
-                isSelf={entry.uid === selfUid}
-                onRoleChange={handleRoleChange}
-              />
-            ))}
-          </div>
+          <Reveal>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((entry) => (
+                <UserRow
+                  key={entry.uid}
+                  entry={entry}
+                  isSelf={entry.uid === selfUid}
+                  onRoleChange={handleRoleChange}
+                />
+              ))}
+            </div>
+          </Reveal>
         )}
 
         {/* Info-Kasten */}
-        <div
-          className="mt-8 rounded-2xl p-5"
-          style={{
-            background: "var(--ink-2)",
-            border: "1px solid var(--ink-4)",
-          }}
+        <SectionCard
+          title="Rollenübersicht"
+          icon="shield"
+          accent="var(--ta-amber)"
+          className="mt-8"
         >
-          <p
-            className="font-mono-ta text-[10px] uppercase"
-            style={{ letterSpacing: "0.2em", color: "var(--fg-4)" }}
-          >
-            Rollenübersicht
-          </p>
-          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-3">
             {ROLES.map((r) => (
               <div
                 key={r.value}
@@ -428,7 +391,7 @@ function AdminUsersContent() {
               </div>
             ))}
           </div>
-        </div>
+        </SectionCard>
       </div>
     </main>
   );

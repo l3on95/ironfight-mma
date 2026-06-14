@@ -134,7 +134,7 @@ export default function TrainerOnboardingModal() {
                     i === step
                       ? "var(--ta-cyan)"
                       : i < step
-                        ? "rgba(0,212,230,0.4)"
+                        ? "rgba(35,196,206,0.4)"
                         : "var(--ink-5)",
                 }}
               />

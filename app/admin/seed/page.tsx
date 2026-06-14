@@ -1,6 +1,7 @@
 "use client";
 
 import AdminRoute from "@/components/AdminRoute";
+import DashboardHero from "@/components/dashboard/DashboardHero";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
 import { listAllStudents, type StudentEntry } from "@/lib/admin";
@@ -65,7 +66,7 @@ function StudentSeedCard({
       style={{
         background: "linear-gradient(180deg, var(--ink-3), var(--ink-2))",
         border: count?.hasDemo
-          ? "1px solid rgba(0,212,230,0.4)"
+          ? "1px solid rgba(35,196,206,0.4)"
           : "1px solid var(--ink-4)",
       }}
     >
@@ -74,8 +75,8 @@ function StudentSeedCard({
         <div
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-display-ta text-sm font-black"
           style={{
-            background: "rgba(0,212,230,0.1)",
-            border: "1px solid rgba(0,212,230,0.35)",
+            background: "rgba(35,196,206,0.1)",
+            border: "1px solid rgba(35,196,206,0.35)",
             color: "var(--ta-cyan)",
           }}
         >
@@ -94,8 +95,8 @@ function StudentSeedCard({
                 className="font-mono-ta rounded px-1.5 py-0.5 text-[9px] uppercase"
                 style={{
                   letterSpacing: "0.15em",
-                  background: "rgba(0,212,230,0.12)",
-                  border: "1px solid rgba(0,212,230,0.4)",
+                  background: "rgba(35,196,206,0.12)",
+                  border: "1px solid rgba(35,196,206,0.4)",
                   color: "var(--ta-cyan)",
                 }}
               >
@@ -172,10 +173,10 @@ function StudentSeedCard({
                 className="rounded-lg px-3 py-2 text-left text-xs font-bold transition-all"
                 style={{
                   background: active
-                    ? "rgba(0,212,230,0.1)"
+                    ? "rgba(35,196,206,0.1)"
                     : "var(--ink-3)",
                   border: `1px solid ${
-                    active ? "rgba(0,212,230,0.4)" : "var(--ink-5)"
+                    active ? "rgba(35,196,206,0.4)" : "var(--ink-5)"
                   }`,
                   color: active ? "var(--ta-cyan)" : "var(--fg-3)",
                   opacity: isBusy ? 0.6 : 1,
@@ -235,8 +236,8 @@ function StudentSeedCard({
         <div
           className="mt-3 rounded-lg px-3 py-2 text-[10px]"
           style={{
-            background: "rgba(0,212,230,0.06)",
-            border: "1px solid rgba(0,212,230,0.3)",
+            background: "rgba(35,196,206,0.06)",
+            border: "1px solid rgba(35,196,206,0.3)",
             color: "var(--fg-2)",
             fontFamily: "var(--font-mono)",
             letterSpacing: "0.1em",
@@ -253,8 +254,8 @@ function StudentSeedCard({
         <div
           className="mt-3 rounded-lg px-3 py-2 text-[10px]"
           style={{
-            background: "rgba(255,45,120,0.06)",
-            border: "1px solid rgba(255,45,120,0.3)",
+            background: "rgba(255,79,168,0.06)",
+            border: "1px solid rgba(255,79,168,0.3)",
             color: "var(--ta-pink)",
             fontFamily: "var(--font-mono)",
             letterSpacing: "0.08em",
@@ -372,44 +373,13 @@ function SeedContent() {
   );
 
   return (
-    <main className="min-h-screen" style={{ background: "var(--ink-1)" }}>
-      {/* Header */}
-      <div
-        className="relative overflow-hidden border-b px-4 py-10 sm:px-6"
-        style={{
-          borderColor: "rgba(251,191,36,.2)",
-          background:
-            "radial-gradient(400px 250px at 100% 50%, rgba(251,191,36,.1), transparent 60%), linear-gradient(160deg, #0d0b04, #050505)",
-        }}
-      >
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-2 flex items-center gap-2">
-            <span
-              className="font-mono-ta rounded px-2 py-0.5 text-[10px] font-black uppercase"
-              style={{
-                letterSpacing: "0.2em",
-                background: "rgba(251,191,36,.12)",
-                border: "1px solid rgba(251,191,36,.4)",
-                color: "#FBBF24",
-              }}
-            >
-              Admin · Demo
-            </span>
-          </div>
-          <h1
-            className="font-display-ta font-black uppercase leading-none"
-            style={{ fontSize: "clamp(28px, 5vw, 42px)", letterSpacing: "0.02em" }}
-          >
-            Demo-Daten verwalten
-          </h1>
-          <p
-            className="font-mono-ta mt-2 text-[11px] uppercase"
-            style={{ letterSpacing: "0.2em", color: "var(--fg-4)" }}
-          >
-            Testschüler · Realistische Fortschrittsdaten · {totalDemo} aktiv
-          </p>
-        </div>
-      </div>
+    <main className="min-h-screen">
+      <DashboardHero
+        badges={[{ label: "Admin · Demo", accent: "amber", icon: "shield" }]}
+        accent="amber"
+        title="Demo-Daten verwalten"
+        subtitle={`Testschüler · Realistische Fortschrittsdaten · ${totalDemo} aktiv`}
+      />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {/* Info-Block */}

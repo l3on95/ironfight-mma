@@ -1,6 +1,7 @@
 "use client";
 
 import PageHeader from "@/components/PageHeader";
+import Icon, { type IconName } from "@/components/ui/Icon";
 import TechniqueInlinePanel from "@/components/TechniqueInlinePanel";
 import { useAuth } from "@/lib/auth-context";
 import { unlockAudio, isAudioUnlocked } from "@/lib/audio";
@@ -233,7 +234,7 @@ function WorkoutRunner() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {!audioUnlocked && (
           <div className="mb-4 rounded-sm border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
-            <strong>📱 Sound:</strong> Tippe einmal auf <strong>Start</strong>, damit Sound auf deinem Gerät funktioniert.
+            <strong>Sound:</strong> Tippe einmal auf <strong>Start</strong>, damit Sound auf deinem Gerät funktioniert.
           </div>
         )}
 
@@ -338,9 +339,9 @@ function WorkoutRunner() {
 
             {/* Einstellungen */}
             <div className="grid grid-cols-3 gap-2">
-              <SettingToggle label="Sound" value={settings.soundOn} onChange={setSoundOn} icon="🔔" />
-              <SettingToggle label="Vibration" value={settings.vibrate} onChange={setVibrate} icon="📳" />
-              <SettingToggle label="Display" value={settings.wakeLock} onChange={setWakeLock} icon="🌓" />
+              <SettingToggle label="Sound" value={settings.soundOn} onChange={setSoundOn} icon="bell" />
+              <SettingToggle label="Vibration" value={settings.vibrate} onChange={setVibrate} icon="vibrate" />
+              <SettingToggle label="Display" value={settings.wakeLock} onChange={setWakeLock} icon="moon" />
             </div>
           </div>
 
@@ -395,7 +396,7 @@ function WorkoutRunner() {
                         if (!def) return null;
                         return (
                           <span key={eq} className="inline-flex items-center gap-1 rounded-sm bg-carbon-700 px-2 py-0.5 text-foreground/70">
-                            <span>{def.icon}</span>
+                            <Icon name={def.icon} size={14} />
                             <span>{def.label}</span>
                           </span>
                         );
@@ -476,7 +477,7 @@ function WorkoutRunner() {
             {allDone && (
               <div className="rounded-sm border border-green-500/40 bg-green-500/10 px-4 py-6 text-center">
                 <div className="font-display text-3xl font-black text-green-400">
-                  Workout fertig! 🏆
+                  Workout fertig!
                 </div>
                 {logState === "saving" && (
                   <p className="mt-2 text-xs text-foreground/60">Speichere Session…</p>
@@ -602,7 +603,7 @@ function WorkoutRunner() {
                                           key={eq}
                                           className="inline-flex items-center gap-1 text-foreground/60"
                                         >
-                                          <span>{def.icon}</span>
+                                          <Icon name={def.icon} size={13} />
                                           <span>{def.label}</span>
                                         </span>
                                       ) : null;
@@ -670,7 +671,7 @@ function SettingToggle({
   label: string;
   value: boolean;
   onChange: (v: boolean) => void;
-  icon: string;
+  icon: IconName;
 }) {
   return (
     <button
@@ -681,7 +682,7 @@ function SettingToggle({
           : "border-carbon-500 bg-carbon-700/40 text-foreground/40"
       }`}
     >
-      <span className="text-base">{icon}</span>
+      <Icon name={icon} size={18} />
       <span className="text-[10px] font-bold tracking-widest">
         {label} {value ? "an" : "aus"}
       </span>

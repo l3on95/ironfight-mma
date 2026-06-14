@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
+
 import { getTechniqueById, youtubeSearchUrl, CATEGORY_LABEL } from "@/lib/techniques";
 import {
   DIFFICULTY_LABEL,
@@ -153,7 +155,7 @@ export default function TechniqueInlinePanel({
           <ul className="space-y-1">
             {visibleMistakes.map((m) => (
               <li key={m} className="flex gap-2 text-xs text-foreground/75">
-                <span className="text-blood shrink-0">⚠</span>
+                <span className="text-blood shrink-0"><Icon name="warn" size={14} /></span>
                 <span>{m}</span>
               </li>
             ))}
@@ -197,7 +199,7 @@ export default function TechniqueInlinePanel({
           <ul className="space-y-1">
             {t.safetyNotes.map((note) => (
               <li key={note} className="flex gap-2 text-xs text-foreground/75">
-                <span className="text-yellow-400 shrink-0">⚠</span>
+                <span className="text-yellow-400 shrink-0"><Icon name="warn" size={14} /></span>
                 <span>{note}</span>
               </li>
             ))}

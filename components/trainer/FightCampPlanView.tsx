@@ -26,22 +26,22 @@ const EX_BY_ID = new Map(EXERCISES.map((e) => [e.id, e]));
 const PHASE_ACCENT: Record<FightCampPhase, string> = {
   foundation: "var(--ta-cyan)",
   "specific-prep": "var(--ta-pink)",
-  "sparring-simulation": "#FBBF24",
-  taper: "#A78BFA",
+  "sparring-simulation": "#8A63E8",
+  taper: "#9D7BFA",
 };
 
 const PHASE_ACCENT_BG: Record<FightCampPhase, string> = {
-  foundation: "rgba(0,212,230,0.08)",
-  "specific-prep": "rgba(255,45,120,0.08)",
-  "sparring-simulation": "rgba(251,191,36,0.08)",
-  taper: "rgba(167,139,250,0.08)",
+  foundation: "rgba(35,196,206,0.08)",
+  "specific-prep": "rgba(255,79,168,0.08)",
+  "sparring-simulation": "rgba(138,99,232,0.08)",
+  taper: "rgba(157,123,250,0.08)",
 };
 
 const PHASE_ACCENT_BORDER: Record<FightCampPhase, string> = {
-  foundation: "rgba(0,212,230,0.35)",
-  "specific-prep": "rgba(255,45,120,0.35)",
-  "sparring-simulation": "rgba(251,191,36,0.35)",
-  taper: "rgba(167,139,250,0.35)",
+  foundation: "rgba(35,196,206,0.35)",
+  "specific-prep": "rgba(255,79,168,0.35)",
+  "sparring-simulation": "rgba(138,99,232,0.35)",
+  taper: "rgba(157,123,250,0.35)",
 };
 
 export default function FightCampPlanView({
@@ -64,8 +64,8 @@ export default function FightCampPlanView({
         className="rounded-2xl p-5"
         style={{
           background:
-            "radial-gradient(400px 200px at 100% 0%, rgba(255,45,120,0.15), transparent 60%), linear-gradient(160deg, var(--ink-3), var(--ink-2))",
-          border: "1px solid rgba(255,45,120,0.35)",
+            "radial-gradient(400px 200px at 100% 0%, rgba(255,79,168,0.15), transparent 60%), linear-gradient(160deg, var(--ink-3), var(--ink-2))",
+          border: "1px solid rgba(255,79,168,0.35)",
         }}
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -106,7 +106,7 @@ export default function FightCampPlanView({
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.color = "var(--ta-pink)";
-                e.currentTarget.style.borderColor = "rgba(255,45,120,0.35)";
+                e.currentTarget.style.borderColor = "rgba(255,79,168,0.35)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = "var(--fg-4)";
@@ -223,7 +223,7 @@ export default function FightCampPlanView({
               )}
               {camp.opponent.favoriteAttacks.length > 0 && (
                 <div>
-                  <span style={{ color: "#FBBF24" }}>★ </span>
+                  <span style={{ color: "#8A63E8" }}>★ </span>
                   <span style={{ color: "var(--fg-2)" }}>
                     {camp.opponent.favoriteAttacks.join(", ")}
                   </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import PageHeader from "@/components/PageHeader";
+import Icon, { type IconName } from "@/components/ui/Icon";
 import { ALL_EQUIPMENT, defaultEquipmentForCategory, EQUIPMENT } from "@/lib/equipment";
 import { generateWorkout } from "@/lib/workout-generator";
 import { TRAINING_PLANS } from "@/lib/training-plans";
@@ -19,11 +20,11 @@ const CATEGORIES: Category[] = ["boxing", "wrestling", "bjj", "muay-thai"];
 const DIFFICULTIES: Difficulty[] = ["anfaenger", "fortgeschritten", "pro"];
 const DURATION_PRESETS = [10, 15, 20, 30, 45, 60, 75, 90];
 
-const PLAN_ICONS: Record<string, string> = {
-  boxing: "🥊",
-  wrestling: "🤼",
-  bjj: "🥋",
-  "muay-thai": "🦵",
+const PLAN_ICONS: Record<string, IconName> = {
+  boxing: "glove",
+  wrestling: "grapple",
+  bjj: "gi",
+  "muay-thai": "kick",
 };
 
 export default function WorkoutPage() {
@@ -68,9 +69,9 @@ export default function WorkoutPage() {
 
   const stats = useMemo(() => {
     const equipmentLabels = equipment
-      .map((id) => EQUIPMENT[id]?.icon)
+      .map((id) => EQUIPMENT[id]?.label)
       .filter(Boolean)
-      .join(" ");
+      .join(" · ");
     return { equipmentLabels: equipmentLabels || "—" };
   }, [equipment]);
 
@@ -111,7 +112,7 @@ export default function WorkoutPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-2xl">{PLAN_ICONS[plan.slug]}</span>
+                          <span className="text-blood"><Icon name={PLAN_ICONS[plan.slug] ?? "glove"} size={26} /></span>
                           <div className="text-xs font-bold uppercase tracking-widest text-blood">
                             {plan.level}
                           </div>
@@ -213,7 +214,7 @@ export default function WorkoutPage() {
                         : "border-carbon-400 bg-carbon-700/40 hover:border-blood/60"
                     }`}
                   >
-                    <span className="text-xl">{eq.icon}</span>
+                    <span className={active ? "text-blood" : "text-foreground/60"}><Icon name={eq.icon} size={22} /></span>
                     <div className="min-w-0">
                       <div
                         className={`text-sm font-bold ${

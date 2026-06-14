@@ -144,9 +144,9 @@ function OpponentDetailContent({ id }: { id: string }) {
       <div
         className="border-b px-4 py-7 sm:px-6"
         style={{
-          borderColor: "rgba(255,45,120,0.2)",
+          borderColor: "rgba(255,79,168,0.2)",
           background:
-            "radial-gradient(500px 220px at 100% 50%, rgba(255,45,120,0.1), transparent 60%), linear-gradient(160deg, #0A0709, #050505)",
+            "radial-gradient(500px 220px at 100% 50%, rgba(255,79,168,0.1), transparent 60%), linear-gradient(160deg, #140A12, #080512)",
         }}
       >
         <div className="mx-auto max-w-3xl">

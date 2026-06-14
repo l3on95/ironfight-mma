@@ -146,8 +146,8 @@ function StudentCard({ entry }: { entry: StudentEntry }) {
         <div
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-display-ta text-sm font-black"
           style={{
-            background: "rgba(0,212,230,0.1)",
-            border: "1px solid rgba(0,212,230,0.35)",
+            background: "rgba(35,196,206,0.1)",
+            border: "1px solid rgba(35,196,206,0.35)",
             color: "var(--ta-cyan)",
           }}
         >
@@ -181,8 +181,8 @@ function StudentCard({ entry }: { entry: StudentEntry }) {
                 className="font-mono-ta rounded px-1.5 py-0.5 text-[9px] uppercase"
                 style={{
                   letterSpacing: "0.12em",
-                  background: "rgba(0,212,230,0.08)",
-                  border: "1px solid rgba(0,212,230,0.3)",
+                  background: "rgba(35,196,206,0.08)",
+                  border: "1px solid rgba(35,196,206,0.3)",
                   color: "var(--ta-cyan)",
                 }}
               >
@@ -238,8 +238,8 @@ function StudentCard({ entry }: { entry: StudentEntry }) {
             <div
               className="rounded-xl px-3 py-2.5 text-xs"
               style={{
-                background: "rgba(255,45,120,0.06)",
-                border: "1px solid rgba(255,45,120,0.3)",
+                background: "rgba(255,79,168,0.06)",
+                border: "1px solid rgba(255,79,168,0.3)",
                 color: "var(--fg-3)",
               }}
             >
@@ -358,8 +358,8 @@ function StudentCard({ entry }: { entry: StudentEntry }) {
               className="font-mono-ta rounded-lg px-3 py-1.5 text-[10px] uppercase transition-colors"
               style={{
                 letterSpacing: "0.18em",
-                background: "rgba(0,212,230,0.08)",
-                border: "1px solid rgba(0,212,230,0.35)",
+                background: "rgba(35,196,206,0.08)",
+                border: "1px solid rgba(35,196,206,0.35)",
                 color: "var(--ta-cyan)",
               }}
             >
@@ -437,9 +437,9 @@ function StudentsContent() {
       <div
         className="relative overflow-hidden border-b px-4 py-10 sm:px-6"
         style={{
-          borderColor: "rgba(0,212,230,0.2)",
+          borderColor: "rgba(35,196,206,0.2)",
           background:
-            "radial-gradient(400px 250px at 100% 50%, rgba(0,212,230,0.1), transparent 60%), linear-gradient(160deg, #07090C, #050505)",
+            "radial-gradient(400px 250px at 100% 50%, rgba(35,196,206,0.1), transparent 60%), linear-gradient(160deg, #0B0716, #080512)",
         }}
       >
         <div className="mx-auto max-w-7xl">
@@ -448,8 +448,8 @@ function StudentsContent() {
               className="font-mono-ta rounded px-2 py-0.5 text-[10px] font-black uppercase"
               style={{
                 letterSpacing: "0.2em",
-                background: "rgba(0,212,230,0.12)",
-                border: "1px solid rgba(0,212,230,0.4)",
+                background: "rgba(35,196,206,0.12)",
+                border: "1px solid rgba(35,196,206,0.4)",
                 color: "var(--ta-cyan)",
               }}
             >

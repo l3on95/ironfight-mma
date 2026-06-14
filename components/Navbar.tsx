@@ -435,8 +435,8 @@ export default function Navbar() {
                 <span
                   className="flex h-8 w-8 items-center justify-center rounded-xl text-xs font-black"
                   style={{
-                    border: "1px solid rgba(0,212,230,.4)",
-                    background: "rgba(0,212,230,.08)",
+                    border: "1px solid rgba(35,196,206,.4)",
+                    background: "rgba(35,196,206,.08)",
                     color: "var(--ta-cyan)",
                   }}
                 >

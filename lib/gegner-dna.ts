@@ -76,7 +76,7 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     id: "preferred-weapons",
     label: "Preferred Weapons",
     hint: "Bevorzugte und gefährlichste Techniken",
-    accent: "#FBBF24",
+    accent: "#8A63E8",
     questions: [
       { id: "preferred-weapons_most-common", label: "Was ist seine häufigste Waffe?" },
       { id: "preferred-weapons_most-dangerous", label: "Was ist seine gefährlichste Technik?" },
@@ -92,7 +92,7 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     id: "defensive-reactions",
     label: "Defensive Reactions",
     hint: "Reaktionen auf Angriffe und Druck",
-    accent: "#A78BFA",
+    accent: "#9D7BFA",
     questions: [
       { id: "defensive-reactions_jabs", label: "Wie reagiert der Gegner auf Jabs?" },
       { id: "defensive-reactions_pressure", label: "Wie reagiert er auf Druck – Clinch suchen, kontern oder flüchten?" },
@@ -135,7 +135,7 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     id: "exploits",
     label: "Exploit-Möglichkeiten",
     hint: "Wie sich Schwächen gezielt ausnutzen lassen",
-    accent: "#FBBF24",
+    accent: "#8A63E8",
     questions: [
       { id: "exploits_target-weakness", label: "Welche Schwäche kann gezielt ausgenutzt werden?" },
       { id: "exploits_technique-vs-pattern", label: "Welche Technik eignet sich gegen sein Muster?" },
@@ -149,7 +149,7 @@ export const DNA_CATEGORIES: DnaCategory[] = [
     id: "gameplan",
     label: "Gameplan",
     hint: "Empfohlener Grundplan und Anpassungen",
-    accent: "#A78BFA",
+    accent: "#9D7BFA",
     questions: [
       { id: "gameplan_base-plan", label: "Was ist der empfohlene Grundplan gegen diesen Gegner?" },
       { id: "gameplan_seek-distance", label: "Welche Distanz soll gesucht werden?" },

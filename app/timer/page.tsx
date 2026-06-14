@@ -1,5 +1,7 @@
 "use client";
 
+import Icon, { type IconName } from "@/components/ui/Icon";
+
 import PageHeader from "@/components/PageHeader";
 import {
   DEFAULT_CONFIG,
@@ -370,12 +372,12 @@ function TimerView() {
           <div
             className="mb-6 rounded-xl px-4 py-3 text-sm"
             style={{
-              border: "1px solid rgba(0,212,230,.3)",
-              background: "rgba(0,212,230,.06)",
+              border: "1px solid rgba(35,196,206,.3)",
+              background: "rgba(35,196,206,.06)",
               color: "var(--fg-2)",
             }}
           >
-            <div className="font-bold" style={{ color: "var(--ta-cyan)" }}>📱 Sound-Hinweis</div>
+            <div className="font-bold" style={{ color: "var(--ta-cyan)" }}>Sound-Hinweis</div>
             <p className="mt-1 text-xs" style={{ color: "var(--fg-3)" }}>
               Auf Handys muss der Sound einmal pro Sitzung freigegeben werden.
               Tippe auf <strong>Start</strong> oder den Button unten.
@@ -384,14 +386,14 @@ function TimerView() {
               onClick={async () => { const ok = await unlockAudio(); setAudioUnlocked(ok); }}
               className="mt-3 rounded-xl px-4 py-2 text-xs font-bold uppercase transition-all"
               style={{
-                border: "1px solid rgba(0,212,230,.5)",
-                background: "rgba(0,212,230,.1)",
+                border: "1px solid rgba(35,196,206,.5)",
+                background: "rgba(35,196,206,.1)",
                 color: "var(--ta-cyan)",
                 fontFamily: "var(--font-mono)",
                 letterSpacing: "0.15em",
               }}
             >
-              🔔 Sound aktivieren
+              Sound aktivieren
             </button>
           </div>
         )}
@@ -480,9 +482,9 @@ function TimerView() {
             className="col-span-1 flex h-14 items-center justify-center rounded-xl transition-all"
             style={{
               background: "var(--ta-cyan)",
-              color: "#001417",
+              color: "#03201D",
               boxShadow:
-                "0 0 0 1px rgba(0,212,230,.6), 0 0 24px rgba(0,212,230,.4)",
+                "0 0 0 1px rgba(35,196,206,.6), 0 0 24px rgba(35,196,206,.4)",
             }}
           >
             {t.running ? <IconPause /> : <IconPlay />}
@@ -549,9 +551,9 @@ function TimerView() {
 
         {/* Settings row */}
         <div className={`mt-6 grid ${vibrateSupported ? "grid-cols-3" : "grid-cols-2"} gap-2`}>
-          <SettingToggle label="Sound" value={settings.soundOn} onChange={setSoundOn} icon="🔔" />
+          <SettingToggle label="Sound" value={settings.soundOn} onChange={setSoundOn} icon="bell" />
           {vibrateSupported && (
-            <SettingToggle label="Vibration" value={settings.vibrate} onChange={setVibrate} icon="📳" />
+            <SettingToggle label="Vibration" value={settings.vibrate} onChange={setVibrate} icon="vibrate" />
           )}
           <button
             onClick={openFullscreen}
@@ -570,7 +572,7 @@ function TimerView() {
               (e.currentTarget as HTMLButtonElement).style.color = "var(--fg-3)";
             }}
           >
-            <span className="text-base">⛶</span>
+            <Icon name="fullscreen" size={18} />
             <span className="font-mono-ta text-[10px] font-bold uppercase" style={{ letterSpacing: "0.15em" }}>Vollbild</span>
           </button>
         </div>
@@ -625,7 +627,7 @@ function SettingToggle({
   label: string;
   value: boolean;
   onChange: (v: boolean) => void;
-  icon: string;
+  icon: IconName;
 }) {
   return (
     <button
@@ -633,13 +635,13 @@ function SettingToggle({
       className="flex flex-col items-center gap-1 rounded-xl px-3 py-3 transition-all"
       style={{
         border: value
-          ? "1px solid rgba(0,212,230,.5)"
+          ? "1px solid rgba(35,196,206,.5)"
           : "1px solid var(--ink-5)",
-        background: value ? "rgba(0,212,230,.08)" : "var(--ink-3)",
+        background: value ? "rgba(35,196,206,.08)" : "var(--ink-3)",
         color: value ? "var(--ta-cyan)" : "var(--fg-4)",
       }}
     >
-      <span className="text-base">{icon}</span>
+      <Icon name={icon} size={18} />
       <span className="font-mono-ta text-[10px] font-bold uppercase" style={{ letterSpacing: "0.15em" }}>
         {label} {value ? "an" : "aus"}
       </span>
@@ -685,7 +687,7 @@ function ConfigField({
           }}
           onFocus={(e) => {
             (e.currentTarget as HTMLInputElement).style.borderColor = "var(--ta-cyan)";
-            (e.currentTarget as HTMLInputElement).style.boxShadow = "0 0 0 3px rgba(0,212,230,.18)";
+            (e.currentTarget as HTMLInputElement).style.boxShadow = "0 0 0 3px rgba(35,196,206,.18)";
           }}
           onBlur={(e) => {
             (e.currentTarget as HTMLInputElement).style.borderColor = "var(--ink-5)";

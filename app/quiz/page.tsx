@@ -4,6 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import { useState } from "react";
 import { SPORT_QUIZZES } from "@/lib/quiz-data";
+import Icon from "@/components/ui/Icon";
 import { Quiz } from "@/components/Quiz";
 
 export default function QuizPage() {
@@ -31,7 +32,7 @@ export default function QuizPage() {
                   : "border-carbon-400 bg-carbon-700/40 text-foreground/70 hover:border-blood/60 hover:text-foreground"
               }`}
             >
-              <span>{s.icon}</span>
+              <Icon name={s.icon} size={18} />
               <span>{s.name}</span>
             </button>
           ))}

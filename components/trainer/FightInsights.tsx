@@ -12,10 +12,10 @@ import {
 } from "@/lib/fight-stats";
 
 const TONE_COLOR: Record<TendencyTone, string> = {
-  weapon: "#FBBF24",
-  success: "#34D399",
+  weapon: "#8A63E8",
+  success: "#3EE06B",
   zone: "var(--ta-cyan)",
-  setup: "#A78BFA",
+  setup: "#9D7BFA",
   warning: "var(--ta-pink)",
 };
 
@@ -45,7 +45,7 @@ export default function FightInsights({
       className="rounded-2xl p-4 sm:p-5"
       style={{
         background:
-          "radial-gradient(360px 180px at 0% 0%, rgba(0,212,230,0.08), transparent 60%), var(--ink-2)",
+          "radial-gradient(360px 180px at 0% 0%, rgba(35,196,206,0.08), transparent 60%), var(--ink-2)",
         border: "1px solid var(--ink-4)",
       }}
     >
@@ -117,7 +117,7 @@ export default function FightInsights({
                   className="font-mono-ta mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase"
                   style={{
                     letterSpacing: "0.08em",
-                    background: s.kind === "drill" ? "rgba(0,212,230,0.12)" : "rgba(255,45,120,0.12)",
+                    background: s.kind === "drill" ? "rgba(35,196,206,0.12)" : "rgba(255,79,168,0.12)",
                     border: `1px solid ${s.kind === "drill" ? "var(--ta-cyan)" : "var(--ta-pink)"}`,
                     color: s.kind === "drill" ? "var(--ta-cyan)" : "var(--ta-pink)",
                   }}
@@ -157,7 +157,7 @@ function CageHeatmap({
 }) {
   // Anteil → Deckkraft (0.12 Grundton + bis 0.65 nach Anteil).
   const alpha = (z: CageZone) => 0.12 + 0.65 * (total > 0 ? zones[z] / total : 0);
-  const pink = "255,45,120";
+  const pink = "255,79,168";
 
   return (
     <svg

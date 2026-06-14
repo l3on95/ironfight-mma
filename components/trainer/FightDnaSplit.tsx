@@ -85,7 +85,7 @@ export default function FightDnaSplit({
           className="font-mono-ta text-[10px] uppercase"
           style={{
             letterSpacing: "0.12em",
-            color: total === 100 ? "#34D399" : "var(--fg-4)",
+            color: total === 100 ? "#3EE06B" : "var(--fg-4)",
           }}
         >
           Summe {total}%{total !== 100 && total > 0 ? " · ≈100 anstreben" : ""}

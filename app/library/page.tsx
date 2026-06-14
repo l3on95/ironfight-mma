@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
+
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -24,13 +26,13 @@ const CATEGORY_STYLE: Record<string, { label: string; color: string }> = {
 
 const DISCIPLINE_COLOR: Record<string, string> = {
   boxing:            "#FB923C",
-  kickboxen:         "#FBBF24",
+  kickboxen:         "#8A63E8",
   "muay-thai":       "#F87171",
   "fitness-kickboxen": "#FCD34D",
   wrestling:         "#60A5FA",
   bjj:               "#C084FC",
-  mma:               "#00D4E6",
-  karate:            "#A78BFA",
+  mma:               "#23C4CE",
+  karate:            "#9D7BFA",
 };
 
 const TECHNIQUE_LEVEL_COLOR: Record<string, string> = {
@@ -350,8 +352,8 @@ function LibraryContent() {
                       key={t.id}
                       className="flex items-center gap-3 rounded-lg px-3 py-2"
                       style={{
-                        background: alreadySaved ? "rgba(0,212,230,.06)" : "var(--ink-3)",
-                        border: `1px solid ${alreadySaved ? "rgba(0,212,230,.2)" : "var(--ink-4)"}`,
+                        background: alreadySaved ? "rgba(35,196,206,.06)" : "var(--ink-3)",
+                        border: `1px solid ${alreadySaved ? "rgba(35,196,206,.2)" : "var(--ink-4)"}`,
                       }}
                     >
                       <div
@@ -448,7 +450,7 @@ function LibraryCard({
             </span>
           )}
           <span className="text-[10px]" style={{ color: "var(--fg-4)" }}>
-            {entry.source === "training" ? `📋 ${entry.contextLabel ?? "Training"}` : "✋ Manuell"}
+            {entry.source === "training" ? `Training: ${entry.contextLabel ?? "Kurs"}` : "Manuell gemerkt"}
           </span>
           <span className="text-[10px]" style={{ color: "var(--fg-4)" }}>{dateStr}</span>
         </div>
@@ -481,8 +483,8 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function EmptyState() {
   return (
     <div className="py-12 text-center">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-3xl" style={{ background: "var(--ink-3)" }}>
-        📚
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: "var(--ink-3)", color: "var(--ta-cyan)" }}>
+        <Icon name="book" size={30} />
       </div>
       <h3 className="mb-2 font-display-ta text-lg font-black uppercase" style={{ color: "var(--fg-2)", letterSpacing: "0.04em" }}>
         Bibliothek leer

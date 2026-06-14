@@ -1,5 +1,7 @@
 "use client";
 
+import Icon, { type IconName } from "@/components/ui/Icon";
+
 /**
  * Workout Session — Geführter Trainings-Modus
  *
@@ -83,7 +85,7 @@ const PHASE_BG: Record<Phase, string> = {
 const PHASE_GLOW: Record<Phase, string> = {
   idle:  "",
   prep:  "drop-shadow(0 0 20px rgba(234,179,8,.5))",
-  work:  "drop-shadow(0 0 28px rgba(0,212,230,.6))",
+  work:  "drop-shadow(0 0 28px rgba(35,196,206,.6))",
   rest:  "drop-shadow(0 0 20px rgba(59,130,246,.5))",
   done:  "drop-shadow(0 0 20px rgba(34,197,94,.5))",
 };
@@ -382,7 +384,7 @@ function SessionRunner() {
           >
             Workout fertig!
           </div>
-          <div className="mt-1 text-3xl">🏆</div>
+          <div className="mt-2 flex justify-center text-amber"><Icon name="trophy" size={36} /></div>
           {logState === "saving" && (
             <p className="mt-4 text-xs text-fg-4">Speichere Session…</p>
           )}
@@ -441,22 +443,22 @@ function SessionRunner() {
       {/* ── Sound-Hinweis ─────────────────────────────────────────────────────── */}
       {!audioUnlocked && !t.running && !allDone && (
         <div className="mt-3 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-2.5 text-center text-xs text-yellow-200">
-          📱 Tippe <strong>Start</strong>, damit Sound auf deinem Gerät funktioniert.
+          Tippe <strong>Start</strong>, damit Sound auf deinem Gerät funktioniert.
         </div>
       )}
 
       {/* ── Einstellungen ─────────────────────────────────────────────────────── */}
       <div className="mt-4 grid grid-cols-3 gap-2">
         <ToggleChip
-          icon="🔔" label="Sound"
+          icon="bell" label="Sound"
           value={settings.soundOn} onChange={setSoundOn}
         />
         <ToggleChip
-          icon="📳" label="Vibration"
+          icon="vibrate" label="Vibration"
           value={settings.vibrate} onChange={setVibrate}
         />
         <ToggleChip
-          icon="🌓" label="Display"
+          icon="moon" label="Display"
           value={settings.wakeLock} onChange={setWakeLock}
         />
       </div>
@@ -479,7 +481,7 @@ function SessionRunner() {
 function ToggleChip({
   icon, label, value, onChange,
 }: {
-  icon: string; label: string; value: boolean; onChange: (v: boolean) => void;
+  icon: IconName; label: string; value: boolean; onChange: (v: boolean) => void;
 }) {
   return (
     <button
@@ -490,7 +492,7 @@ function ToggleChip({
           : "border-carbon-400 bg-carbon-700/40 text-fg-4"
       }`}
     >
-      <span className="text-base">{icon}</span>
+      <Icon name={icon} size={18} />
       <span>{label}</span>
     </button>
   );
