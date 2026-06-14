@@ -91,8 +91,17 @@ Rules + indexes: `firestore.rules`, `firestore.indexes.json`, `firebase.json`.
 ## Backlog (open)
 - [ ] Stripe Pro membership (checkout, webhook, premium gate)
 - [ ] Middleware: server-side token signature verification (service account)
-- [ ] Lint cleanup: Next 16's stricter `react-hooks` rules
-  (`set-state-in-effect`, `purity`, `static-components`) plus
-  `no-unescaped-entities` surface ~46 pre-existing findings — `npm run lint`
-  currently fails. Add tests before refactoring the hook-effect cases.
+- [x] Lint cleanup: Next 16's stricter `react-hooks` rules + `no-unescaped-entities`
+  (was ~46 findings). `npm run lint` is now green. The 4 behavior-sensitive hooks
+  (`use-workout-timer`, `use-trainer-hints`, `use-timer-settings`, `theme-context`)
+  were refactored to `useSyncExternalStore` / derived state under characterization
+  tests; mechanical findings (purity, static-components, unescaped-entities) were
+  fixed in place.
+- [ ] Revisit the 25 scoped `react-hooks/set-state-in-effect` suppressions in
+  `app/**` + `components/PwaInstallPrompt.tsx`. These are legitimate effects
+  (async Firestore fetches, error resets, prop/URL→state syncs, mount-time
+  browser-capability reads), suppressed with per-site justifications rather than
+  refactored because the pages have no unit tests. The principled fix is to move
+  data loading to a server/Suspense or React-Query pattern (and add page tests)
+  so the suppressions can be removed.
 - [ ] Re-evaluate ESLint 10 once `eslint-plugin-react` supports it.
