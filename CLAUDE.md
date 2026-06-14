@@ -1,77 +1,98 @@
-# IronFight MMA — Projekt-Kontext
+# IronFight MMA — Project Context
 
-> Quelle der Wahrheit ist der Code. Diese Datei hält nur **stabile** Konventionen
-> und Architektur-Entscheidungen fest — KEINE vollständige Datei-Liste (driftet
-> sonst sofort). Für die aktuelle Struktur: `app/`, `lib/`, `components/` ansehen.
+> The source of truth is the code. This file records only **stable** conventions
+> and architecture decisions — NOT a full file listing (which drifts immediately).
+> For the current structure, look at `app/`, `lib/`, `components/`.
 
-## Identität
-- **App:** IronFight MMA / Tidal Athletics — MMA-Trainings- & Coaching-App
-- **Firebase-Projekt:** ironfight-mma (ironfight-mma.firebaseapp.com)
+## Identity
+- **App:** IronFight MMA / Tidal Athletics — MMA training & coaching app
+- **Firebase project:** ironfight-mma (ironfight-mma.firebaseapp.com)
 - **Repo:** github.com/Kern-Digital/ironfight-mma
 
-## Tech-Stack
-| Layer | Technologie | Version |
+## Tech Stack
+| Layer | Technology | Version |
 |---|---|---|
-| Framework | Next.js App Router | 14.2.35 |
-| Sprache | TypeScript (strict) | 5.x |
-| Styling | Tailwind CSS | 3.4 |
+| Framework | Next.js App Router | 16.2.9 |
+| Language | TypeScript (strict) | 6.x |
+| Styling | Tailwind CSS | 4.x |
 | Auth + DB | Firebase Web SDK (Auth + Firestore) | 12.x |
-| Admin | firebase-admin (nur Scripts/serverseitig) | 14.x |
-| 3D | @react-three/fiber v8 + drei v9 | **React 18 — NICHT auf v9/v10 heben!** |
+| Admin | firebase-admin (scripts / server-side only) | 14.x |
+| 3D | @react-three/fiber v9 + drei v10 | (requires React 19) |
 | Animation | Framer Motion | 12.x |
-| State | Zustand (installiert) | 5.x |
-| Payments | Stripe (installiert, noch nicht gebaut) | — |
-| React | React | **18** (nicht 19!) |
+| State | Zustand (installed) | 5.x |
+| Payments | Stripe (installed, not yet built) | — |
+| React | React | 19 |
+| Lint | ESLint (flat config) | 9.x — see note below |
 
-## Architektur & Patterns (wichtig)
-- **Firebase IMMER lazy** über `lib/firebase.ts`: `getFirebaseApp()` /
-  `getFirebaseAuth()` / `getFirestoreDb()` — nie module-level `initializeApp()`.
-- **`"use client"`** auf alle Komponenten mit `useAuth`/`useState`/`useEffect`.
-- **`@/` Alias** für alle Imports.
-- **Auth-Context:** `lib/auth-context.tsx` → `AuthProvider` + `useAuth()`.
-  Spiegelt das ID-Token in ein `__session`-Cookie (für die Middleware).
+> **ESLint pinned to 9.x (not 10).** `eslint-config-next` 16 bundles
+> `eslint-plugin-react` 7.37.x, whose newest release still caps at `eslint ^9.7`
+> and crashes on ESLint 10 (which removed `context.getFilename()`). 9.39.4 is the
+> newest ESLint the Next 16 lint stack supports. Revisit once the React plugin
+> ships ESLint 10 support.
 
-### Rollen & Berechtigungen (Sicherheits-kritisch)
-- Rollen (`user` | `trainer` | `admin`) liegen **autoritativ in Firebase Auth
-  Custom Claims**, NICHT im Firestore-Dokument.
-- Client liest die Rolle via `getIdTokenResult()` (`claims.role`) — siehe
-  `auth-context.tsx` (`refreshRole()` erzwingt Token-Refresh nach Claim-Änderung).
-- Rollen werden **ausschließlich serverseitig** per Admin-SDK gesetzt:
-  `node scripts/set-role.mjs <uid> <role>` oder `--backfill`
-  (braucht `GOOGLE_APPLICATION_CREDENTIALS`). **Kein In-App-Pfad** schreibt `role`.
-- `firestore.rules` liest `request.auth.token.role`; Clients dürfen das `role`-Feld
-  nie schreiben (Privilege-Escalation geschlossen).
+## Architecture & Patterns (important)
+- **Firebase is ALWAYS lazy** via `lib/firebase.ts`: `getFirebaseApp()` /
+  `getFirebaseAuth()` / `getFirestoreDb()` — never a module-level `initializeApp()`.
+- **`"use client"`** on every component that uses `useAuth` / `useState` / `useEffect`.
+- **`@/` alias** for all imports.
+- **Auth context:** `lib/auth-context.tsx` → `AuthProvider` + `useAuth()`.
+  It mirrors the ID token into a `__session` cookie (consumed by the middleware).
 
-### Route-Schutz (zweischichtig)
-- **Server:** `middleware.ts` (Edge) gated über das `__session`-Cookie:
-  `/admin/*` → 404 (Existenz verbergen), übrige geschützte Bereiche → Redirect
-  `/login`. Not-Aus via `MIDDLEWARE_AUTH=off`. (Noch keine Signaturprüfung —
-  echte Datensicherheit liegt bei den Firestore-Regeln.)
-- **Client:** `<ProtectedRoute>` als zusätzlicher UI-Guard.
+### Roles & Permissions (security-critical)
+- Roles (`user` | `trainer` | `admin`) are **authoritative in Firebase Auth
+  custom claims**. A `role` field is also mirrored into the `users/{uid}`
+  document, but **only** by the admin script (`set-role.mjs`) — never by a client,
+  and it is not the source rules trust.
+- The client reads the role via `getIdTokenResult()` (`claims.role`) — see
+  `auth-context.tsx` (`refreshRole()` forces a token refresh after a claim change).
+- Roles are set **server-side only** via the Admin SDK:
+  `node scripts/set-role.mjs <uid> <role>` or `--backfill`
+  (requires `GOOGLE_APPLICATION_CREDENTIALS`). The script sets the custom claim
+  AND writes the mirror `role` field on the user doc. **No in-app path** writes
+  `role`.
+- `firestore.rules` reads `request.auth.token.role`; clients may never write the
+  `role` field (privilege escalation closed).
 
-## Design-System
-- Dark als Default, **zusätzlich Light-Theme** über `lib/theme-context.tsx`.
-- Tokens als CSS-Variablen in `app/globals.css`:
-  `--ink-0..6` (Hintergrund-Ebenen) · `--fg`, `--fg-2..4` (Text) · Pink-Akzent.
-- Tailwind-Farben in `tailwind.config`: `pink` (Akzent), `ink`, `blood`, `carbon`.
-- Utility-Klassen u.a.: `card-glass`, `font-mono-ta` (Mono via `var(--font-mono)`).
+### Route protection (two layers)
+- **Server:** `middleware.ts` (Edge) gates via the `__session` cookie:
+  `/admin/*` → 404 (hide existence), other protected areas → redirect to
+  `/login`. Kill switch via `MIDDLEWARE_AUTH=off`. (No signature verification yet —
+  real data security lives in the Firestore rules.)
+- **Client:** `<ProtectedRoute>` as an additional UI guard.
 
-## Firestore (Collections — Top-Level)
+## Design System
+- Dark by default, **plus a light theme** via `lib/theme-context.tsx`.
+- Tokens as CSS variables in `app/globals.css`:
+  `--ink-0..6` (background layers) · `--fg`, `--fg-2..4` (text) · pink accent.
+- Tailwind colors in `tailwind.config.ts`: `pink` (accent), `ink`, `blood`, `carbon`.
+- Utility classes include: `card-glass`, `font-mono-ta` (mono via `var(--font-mono)`).
+- **Tailwind 4 setup:** `app/globals.css` starts with `@import "tailwindcss";` and
+  loads the legacy config via `@config "../tailwind.config.ts";`. The PostCSS
+  plugin is `@tailwindcss/postcss` (configured in `postcss.config.mjs`);
+  autoprefixer is built in.
+
+## Firestore (top-level collections)
 ```
-users/{uid}              — Profil (role NUR via Custom Claims, nie Client-Write)
-users/{uid}/workouts     — geloggte Workouts
-opponents/{id}           — Gegner-DNA-Bibliothek (Trainer/Admin)
-trainingSessions/**      — gym-weites Curriculum (alle lesen, Trainer/Admin schreiben)
-techniqueStats/{id}      — anonyme Aufruf-Zähler (nur viewCount/lastViewed)
+users/{uid}              — profile (role only via custom claims + admin-written mirror)
+users/{uid}/workouts     — logged workouts
+opponents/{id}           — opponent "DNA" library (trainer/admin)
+trainingSessions/**      — gym-wide curriculum (all read, trainer/admin write)
+techniqueStats/{id}      — anonymous view counters (only viewCount / lastViewed)
 ```
-Regeln + Indizes: `firestore.rules`, `firestore.indexes.json`, `firebase.json`.
+Rules + indexes: `firestore.rules`, `firestore.indexes.json`, `firebase.json`.
 
-## Konventionen
-- Deutsch in UI-Texten, Englisch im Code.
-- Komponenten: Default-Export · Utilities: benannte Exports.
-- Env-Vars: ohne Anführungszeichen in `.env.local` (Vorlage: `.env.local.example`).
-- R3F: NIEMALS @react-three/fiber v9+ ohne React 19 — bleibt auf v8!
+## Conventions
+- German in UI text, English in code.
+- Components: default export · Utilities: named exports.
+- Env vars: no quotes in `.env.local` (template: `.env.local.example`).
+- Lint uses flat config (`eslint.config.mjs`); the `lint` script is `eslint .`
+  (`next lint` was removed in Next 16).
 
-## Backlog (offen)
-- [ ] Stripe Pro-Membership (Checkout, Webhook, Premium-Gate)
-- [ ] Middleware: serverseitige Token-Signaturprüfung (Service-Account)
+## Backlog (open)
+- [ ] Stripe Pro membership (checkout, webhook, premium gate)
+- [ ] Middleware: server-side token signature verification (service account)
+- [ ] Lint cleanup: Next 16's stricter `react-hooks` rules
+  (`set-state-in-effect`, `purity`, `static-components`) plus
+  `no-unescaped-entities` surface ~46 pre-existing findings — `npm run lint`
+  currently fails. Add tests before refactoring the hook-effect cases.
+- [ ] Re-evaluate ESLint 10 once `eslint-plugin-react` supports it.
