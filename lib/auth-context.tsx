@@ -14,6 +14,7 @@ import {
   getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
+  onIdTokenChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -104,6 +105,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
     return unsub;
+  }, []);
+
+  // Spiegelt das Firebase-ID-Token in ein `__session`-Cookie, damit die
+  // Middleware (serverseitig) (un)authentifizierte Nutzer erkennen kann.
+  // onIdTokenChanged feuert bei Login, Logout und Token-Refresh (~stuendlich).
+  useEffect(() => {
+    return onIdTokenChanged(getFirebaseAuth(), async (u) => {
+      if (u) {
+        const token = await u.getIdToken();
+        const secure =
+          typeof location !== "undefined" && location.protocol === "https:"
+            ? "; secure"
+            : "";
+        document.cookie = `__session=${token}; path=/; max-age=3600; samesite=lax${secure}`;
+      } else {
+        document.cookie = "__session=; path=/; max-age=0; samesite=lax";
+      }
+    });
   }, []);
 
   const refreshProfile = useCallback(async () => {
