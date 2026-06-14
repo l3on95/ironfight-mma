@@ -180,6 +180,7 @@ function SubscriptionsBlock({ uid }: { uid: string }) {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid]);
@@ -264,6 +265,7 @@ function ProfileContent() {
   const [now] = useState(() => Date.now());
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronisiert externe Daten (Profil/Props) in lokalen Formular-State.
     setName(profile?.displayName ?? "");
     setForm(formFromAthlete(profile?.athlete));
   }, [profile?.displayName, profile?.athlete]);

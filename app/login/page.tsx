@@ -56,6 +56,7 @@ export default function LoginPage() {
   }, [user, router]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronisiert URL-Parameter in lokalen State.
     if (redirectError) setError(redirectError);
   }, [redirectError]);
 

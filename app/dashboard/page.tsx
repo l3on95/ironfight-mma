@@ -153,6 +153,7 @@ function DashboardContent() {
   }, [user]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
     fetchData();
   }, [fetchData]);
 
@@ -478,6 +479,7 @@ function TrainerDashboardContent() {
 
   useEffect(() => {
     if (!user) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Fehler-Reset vor erneutem Laden — bewusster Effekt.
     setError(null);
 
     Promise.all([

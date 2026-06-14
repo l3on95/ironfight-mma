@@ -113,12 +113,14 @@ function NewCompetitionContent() {
   }, [gymId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
     load();
   }, [load]);
 
   // Vorauswahl aus Query-Parametern (?student= / ?opponent=)
   useEffect(() => {
     const s = searchParams.get("student");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronisiert URL-Parameter in lokalen State.
     if (s) setStudentUid(s);
     const o = searchParams.get("opponent");
     if (o) {

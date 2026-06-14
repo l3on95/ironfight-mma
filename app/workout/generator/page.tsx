@@ -36,6 +36,7 @@ export default function WorkoutPage() {
 
   useEffect(() => {
     if (equipment.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronisiert externe Daten (Profil/Props) in lokalen Formular-State.
       setEquipment(defaultEquipmentForCategory(category));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

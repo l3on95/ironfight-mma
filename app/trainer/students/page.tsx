@@ -107,6 +107,7 @@ function StudentCard({ entry }: { entry: StudentEntry }) {
   useEffect(() => {
     if (!open || progress !== null || progressLoading) return;
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
     setProgressLoading(true);
     setProgressError(null);
     getStudentProgress(entry.uid)
@@ -415,6 +416,7 @@ function StudentsContent() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
     load();
   }, [load]);
 

@@ -104,6 +104,7 @@ export default function PwaInstallPrompt() {
     if (wasDismissedRecently()) return;
 
     const detected = detectPlatform();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Einmaliges Lesen einer Browser-Fähigkeit nach Mount (SSR-sicher).
     setPlatform(detected);
 
     // Android Chrome / Desktop Chrome+Edge: browser fires this event

@@ -159,6 +159,7 @@ function CompetitionsHubContent() {
   }, [gymId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
     load();
   }, [load]);
 

@@ -208,6 +208,7 @@ function SessionRunner() {
   // ─── Audio-Unlock ─────────────────────────────────────────────────────────────
 
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- Einmaliges Lesen einer Browser-Fähigkeit nach Mount (SSR-sicher).
   useEffect(() => setAudioUnlocked(isAudioUnlocked()), []);
 
   async function handleStart() {

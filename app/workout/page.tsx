@@ -146,6 +146,7 @@ function WorkoutRunner() {
   }, [t.phase, nextExerciseId, user, workout, exerciseSequence, t.config]);
 
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- Einmaliges Lesen einer Browser-Fähigkeit nach Mount (SSR-sicher).
   useEffect(() => setAudioUnlocked(isAudioUnlocked()), []);
 
   // Technique accordion (in current exercise card)

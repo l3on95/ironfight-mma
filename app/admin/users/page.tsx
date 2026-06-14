@@ -182,6 +182,7 @@ function AdminUsersContent() {
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
   useEffect(() => { load(); }, [load]);
 
   // Filter + Suche
