@@ -20,7 +20,7 @@ import {
 } from "@/lib/types";
 import { updateAthleteProfile } from "@/lib/user-profile";
 import { getSubscriptions, unsubscribeFromBlock } from "@/lib/training-sessions";
-import { TRAINING_BLOCKS, WEEKDAY_SHORT } from "@/lib/schedule";
+import { WEEKDAY_SHORT } from "@/lib/schedule";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import AchievementsPanel from "@/components/AchievementsPanel";

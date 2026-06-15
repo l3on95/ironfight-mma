@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface BeforeInstallPromptEvent extends Event {
@@ -214,7 +215,7 @@ export default function PwaInstallPrompt() {
 
               {/* App icon + title */}
               <div className="mb-4 flex items-center gap-3 pr-8">
-                <img
+                <Image
                   src="/icons/icon-192.png"
                   alt="Tidal Athletics"
                   width={48}

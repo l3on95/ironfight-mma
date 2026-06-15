@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import {
-  TRAINING_BLOCKS,
   WEEKDAY_LABELS,
   WEEKDAY_SHORT,
   getBlocksForDay,
@@ -454,7 +453,6 @@ export default function SchedulePage() {
 // ─── DayColumn ────────────────────────────────────────────────────────────
 
 function DayColumn({
-  weekday,
   blocks,
   isToday,
   onBlockClick,

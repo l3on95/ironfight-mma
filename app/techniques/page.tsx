@@ -3,13 +3,11 @@
 import PageHeader from "@/components/PageHeader";
 import {
   ALL_TECHNIQUES,
-  CATEGORY_LABEL,
   DISCIPLINE_LABEL,
   searchTechniques,
 } from "@/lib/techniques";
 import {
   DIFFICULTY_LABEL,
-  TECHNIQUE_LEVEL_LABEL,
   type Difficulty,
   type Discipline,
   type TechniqueLevel,
