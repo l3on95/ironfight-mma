@@ -10,11 +10,11 @@ import {
   type TimerConfig,
 } from "@/lib/use-workout-timer";
 import { useAuth } from "@/lib/auth-context";
-import { logWorkout } from "@/lib/workouts";
 import { unlockAudio } from "@/lib/audio";
 import { useAudioUnlocked } from "@/lib/use-audio";
 import { useBrowserCapability } from "@/lib/use-browser-capability";
 import { useTimerSettings } from "@/lib/use-timer-settings";
+import { useWorkoutLogging } from "@/lib/use-workout-logging";
 import { useWakeLock } from "@/lib/use-wake-lock";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -224,6 +224,7 @@ function TimerView() {
   const label = params.get("label");
 
   const t = useWorkoutTimer(initial);
+  const logState = useWorkoutLogging(t.phase, user?.uid ?? null, t.config, label);
   const progress =
     t.phase === "idle" || t.totalForPhase === 0
       ? 0
@@ -266,28 +267,6 @@ function TimerView() {
     () => typeof navigator !== "undefined" && typeof navigator.vibrate === "function",
     false,
   );
-
-  const [logState, setLogState] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const loggedRef = useRef<symbol | null>(null);
-
-  useEffect(() => {
-    if (t.phase !== "done") {
-      if (t.phase === "idle" || t.phase === "prep") {
-        loggedRef.current = null;
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- Reaktion auf Phasenwechsel — bewusster State-Übergang, kein Render-State.
-        setLogState("idle");
-      }
-      return;
-    }
-    if (!user) { setLogState("idle"); return; }
-    const sessionToken = Symbol("session");
-    if (loggedRef.current) return;
-    loggedRef.current = sessionToken;
-    setLogState("saving");
-    logWorkout(user.uid, t.config, label)
-      .then(() => setLogState("saved"))
-      .catch(() => { setLogState("error"); loggedRef.current = null; });
-  }, [t.phase, user, t.config, label]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
