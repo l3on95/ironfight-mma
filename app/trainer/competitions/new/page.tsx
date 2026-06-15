@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Skeleton from "@/components/ui/Skeleton";
@@ -27,6 +28,9 @@ import { getAllProgress } from "@/lib/extensions/technique-progress";
 import { FIGHT_STYLE_LABEL } from "@/lib/fight-camp";
 import { totalAnswered } from "@/lib/gegner-dna";
 import { ATHLETE_LEVEL_LABEL, type TechniqueProgress } from "@/lib/types";
+
+const EMPTY_STUDENTS: StudentEntry[] = [];
+const EMPTY_OPPONENTS: Opponent[] = [];
 
 function studentLabel(s: StudentEntry): string {
   return s.displayName ?? s.authProviderName ?? s.email ?? s.uid;
@@ -73,9 +77,36 @@ function NewCompetitionContent() {
   const searchParams = useSearchParams();
   const gymId = resolveGymId(profile);
 
-  const [students, setStudents] = useState<StudentEntry[] | null>(null);
-  const [opponents, setOpponents] = useState<Opponent[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const newCompKey = ["new-competition-data", gymId] as const;
+  const [mutationError, setMutationError] = useState<string | null>(null);
+  const {
+    data,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: newCompKey,
+    queryFn: async () => {
+      const [studentList, opponentList] = await Promise.all([
+        listAllStudents().catch(() => [] as StudentEntry[]),
+        listOpponentsForGym(gymId).catch(() => [] as Opponent[]),
+      ]);
+      return { students: studentList, opponents: opponentList };
+    },
+  });
+  const students = queryError ? EMPTY_STUDENTS : (data?.students ?? null);
+  const opponents = queryError ? EMPTY_OPPONENTS : (data?.opponents ?? null);
+  const error =
+    mutationError ??
+    (queryError
+      ? queryError instanceof Error
+        ? queryError.message
+        : "Unbekannter Fehler"
+      : null);
+  const retry = () => {
+    setMutationError(null);
+    refetch();
+  };
 
   const [studentUid, setStudentUid] = useState<string | null>(() => searchParams.get("student"));
   const [studentSearch, setStudentSearch] = useState("");
@@ -95,27 +126,6 @@ function NewCompetitionContent() {
   const [date, setDate] = useState(defaultDate);
 
   const [submitting, setSubmitting] = useState(false);
-
-  const load = useCallback(async () => {
-    setError(null);
-    try {
-      const [studentList, opponentList] = await Promise.all([
-        listAllStudents().catch(() => [] as StudentEntry[]),
-        listOpponentsForGym(gymId).catch(() => [] as Opponent[]),
-      ]);
-      setStudents(studentList);
-      setOpponents(opponentList);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unbekannter Fehler");
-      setStudents([]);
-      setOpponents([]);
-    }
-  }, [gymId]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    load();
-  }, [load]);
 
   const filteredStudents = useMemo(() => {
     const q = studentSearch.trim().toLowerCase();
@@ -144,7 +154,7 @@ function NewCompetitionContent() {
   async function handleCreateOpponent(value: OpponentEditorValue) {
     if (!user) return;
     setCreatingOpp(true);
-    setError(null);
+    setMutationError(null);
     try {
       const created = await createOpponent({
         gymId,
@@ -153,12 +163,18 @@ function NewCompetitionContent() {
           profile?.displayName ?? profile?.authProviderName ?? profile?.email ?? null,
         ...value,
       });
-      setOpponents((prev) => [created, ...(prev ?? [])]);
+      queryClient.setQueryData<{ students: StudentEntry[]; opponents: Opponent[] }>(
+        newCompKey,
+        (prev) =>
+          prev
+            ? { ...prev, opponents: [created, ...prev.opponents] }
+            : { students: [], opponents: [created] },
+      );
       setSelectedOpponentId(created.id);
       setOppMode("existing");
       if (!name.trim()) setName(`Wettkampf vs ${created.name}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gegner-DNA konnte nicht angelegt werden");
+      setMutationError(err instanceof Error ? err.message : "Gegner-DNA konnte nicht angelegt werden");
     } finally {
       setCreatingOpp(false);
     }
@@ -167,7 +183,7 @@ function NewCompetitionContent() {
   async function handleCreateCompetition() {
     if (!user || !studentUid || !selectedOpponentId) return;
     setSubmitting(true);
-    setError(null);
+    setMutationError(null);
     try {
       // 1) Snapshot der Gegner-DNA holen (eingefroren für diesen Wettkampf)
       const opponent =
@@ -200,7 +216,7 @@ function NewCompetitionContent() {
 
       router.push(`/trainer/competitions/${studentUid}/${created.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Wettkampf konnte nicht erstellt werden");
+      setMutationError(err instanceof Error ? err.message : "Wettkampf konnte nicht erstellt werden");
       setSubmitting(false);
     }
   }
@@ -235,7 +251,7 @@ function NewCompetitionContent() {
       <div className="mx-auto max-w-3xl px-4 py-7 sm:px-6">
         {error && (
           <div className="mb-5">
-            <ErrorState title="Fehler" message={error} onRetry={load} />
+            <ErrorState title="Fehler" message={error} onRetry={retry} />
           </div>
         )}
 
