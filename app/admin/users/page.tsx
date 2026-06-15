@@ -9,9 +9,12 @@ import EmptyState from "@/components/dashboard/EmptyState";
 import Reveal from "@/components/dashboard/Reveal";
 import { listAllUsers, type AdminUserEntry } from "@/lib/admin";
 import type { UserRole } from "@/lib/types";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 // ─── Rollen-Konfiguration ──────────────────────────────────────────────────
+
+const EMPTY_USERS: AdminUserEntry[] = [];
 
 const ROLES: { value: UserRole; label: string; color: string; bg: string; border: string }[] = [
   {
@@ -160,30 +163,31 @@ const FILTER_TABS: { value: Filter; label: string }[] = [
 // ─── Hauptinhalt ──────────────────────────────────────────────────────────
 
 function AdminUsersContent() {
-  const [users, setUsers] = useState<AdminUserEntry[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
-  const [selfUid, setSelfUid] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setError(null);
-    setUsers(null);
-    try {
-      // selfUid aus dem Auth-Context holen (via window.__selfUid gesetzt vom AdminRoute)
+  const {
+    data,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ["admin-users"],
+    queryFn: async () => {
       const { getFirebaseAuth } = await import("@/lib/firebase");
-      setSelfUid(getFirebaseAuth().currentUser?.uid ?? null);
-      const data = await listAllUsers();
-      setUsers(data);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Unbekannter Fehler";
-      setError(msg);
-      setUsers([]);
-    }
-  }, []);
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-  useEffect(() => { load(); }, [load]);
+      const selfUid = getFirebaseAuth().currentUser?.uid ?? null;
+      const list = await listAllUsers();
+      return { users: list, selfUid };
+    },
+  });
+  const users = queryError ? EMPTY_USERS : (data?.users ?? null);
+  const selfUid = data?.selfUid ?? null;
+  const error = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Unbekannter Fehler"
+    : null;
+  const retry = () => {
+    refetch();
+  };
 
   // Filter + Suche
   const filtered = (users ?? []).filter((u) => {
@@ -222,7 +226,7 @@ function AdminUsersContent() {
               title="Nutzer konnten nicht geladen werden"
               message={error}
               hint="Prüfe die Firestore-Regeln — Admin muss Lesezugriff auf die users-Collection haben."
-              onRetry={load}
+              onRetry={retry}
             />
           </div>
         )}
