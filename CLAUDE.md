@@ -24,7 +24,7 @@
 | React | React | 19 |
 | Lint | ESLint (flat config) | 9.x — see note below |
 
-> **ESLint pinned to 9.x (not 10).** `eslint-config-next` 16 bundles
+> **ESLint pinned to 9.x.** `eslint-config-next` 16 bundles
 > `eslint-plugin-react` 7.37.x, whose newest release still caps at `eslint ^9.7`
 > and crashes on ESLint 10 (which removed `context.getFilename()`). 9.39.4 is the
 > newest ESLint the Next 16 lint stack supports. Revisit once the React plugin
