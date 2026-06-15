@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import TrainerHint from "@/components/TrainerHint";
@@ -26,6 +27,10 @@ import { FIGHT_STYLE_LABEL } from "@/lib/fight-camp";
 import { totalAnswered } from "@/lib/gegner-dna";
 
 type Tab = "wettkaempfe" | "dna";
+
+const EMPTY_CAMPS: FightCamp[] = [];
+const EMPTY_OPPONENTS: Opponent[] = [];
+const EMPTY_STUDENT_MAP = new Map<string, StudentEntry>();
 
 function studentLabelOf(entry: StudentEntry | undefined): string {
   if (!entry) return "Schüler";
@@ -126,42 +131,40 @@ function CompetitionsHubContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const gymId = resolveGymId(profile);
+  const queryClient = useQueryClient();
 
   const [tab, setTab] = useState<Tab>(
     searchParams.get("tab") === "dna" ? "dna" : "wettkaempfe",
   );
-  const [camps, setCamps] = useState<FightCamp[] | null>(null);
-  const [opponents, setOpponents] = useState<Opponent[] | null>(null);
-  const [students, setStudents] = useState<Map<string, StudentEntry>>(new Map());
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [showNewOpponent, setShowNewOpponent] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setError(null);
-    setCamps(null);
-    setOpponents(null);
-    try {
+  const { data, error: queryError } = useQuery({
+    queryKey: ["competitions-overview", gymId],
+    queryFn: async () => {
       const [allCamps, gymOpponents, studentList] = await Promise.all([
         listAllFightCamps().catch(() => [] as FightCamp[]),
         listOpponentsForGym(gymId).catch(() => [] as Opponent[]),
         listAllStudents().catch(() => [] as StudentEntry[]),
       ]);
-      setCamps(allCamps.filter((c) => belongsToGym(c.gymId, gymId)));
-      setOpponents(gymOpponents);
-      setStudents(new Map(studentList.map((s) => [s.uid, s])));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unbekannter Fehler");
-      setCamps([]);
-      setOpponents([]);
-    }
-  }, [gymId]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    load();
-  }, [load]);
+      return {
+        camps: allCamps.filter((c) => belongsToGym(c.gymId, gymId)),
+        opponents: gymOpponents,
+        students: new Map(studentList.map((s) => [s.uid, s])),
+      };
+    },
+  });
+  const camps = queryError ? EMPTY_CAMPS : (data?.camps ?? null);
+  const opponents = queryError ? EMPTY_OPPONENTS : (data?.opponents ?? null);
+  const students = data?.students ?? EMPTY_STUDENT_MAP;
+  const queryErrorMessage = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Unbekannter Fehler"
+    : null;
+  const error = mutationError ?? queryErrorMessage;
 
   // ── Wettkämpfe filtern + gruppieren ──
   const filteredCamps = useMemo(() => {
@@ -206,7 +209,7 @@ function CompetitionsHubContent() {
       });
       router.push(`/trainer/opponents/${created.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Anlegen fehlgeschlagen");
+      setMutationError(err instanceof Error ? err.message : "Anlegen fehlgeschlagen");
       setCreating(false);
     }
   }
@@ -296,7 +299,12 @@ function CompetitionsHubContent() {
             <ErrorState
               title="Daten konnten nicht geladen werden"
               message={error}
-              onRetry={load}
+              onRetry={async () => {
+                setMutationError(null);
+                await queryClient.invalidateQueries({
+                  queryKey: ["competitions-overview", gymId],
+                });
+              }}
             />
           </div>
         )}

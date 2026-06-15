@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import TrainerHint from "@/components/TrainerHint";
 import Skeleton from "@/components/ui/Skeleton";
@@ -23,6 +24,10 @@ import {
 import { listOpponentsForGym, type Opponent } from "@/lib/opponents";
 import { listAllStudents, type StudentEntry } from "@/lib/admin";
 import { totalAnswered } from "@/lib/gegner-dna";
+
+const EMPTY_CAMPS: FightCamp[] = [];
+const EMPTY_OPPONENTS: Opponent[] = [];
+const EMPTY_STUDENTS: StudentEntry[] = [];
 
 function studentLabelOf(entry: StudentEntry | undefined): string {
   if (!entry) return "Schüler";
@@ -81,38 +86,31 @@ function OpponentMiniCard({ opponent }: { opponent: Opponent }) {
 export default function TrainerDashboardPage() {
   const { profile } = useAuth();
   const gymId = resolveGymId(profile);
+  const queryClient = useQueryClient();
 
-  const [camps, setCamps] = useState<FightCamp[] | null>(null);
-  const [opponents, setOpponents] = useState<Opponent[] | null>(null);
-  const [students, setStudents] = useState<StudentEntry[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setError(null);
-    setCamps(null);
-    setOpponents(null);
-    setStudents(null);
-    try {
+  const { data, error: queryError } = useQuery({
+    queryKey: ["trainer-overview", gymId],
+    queryFn: async () => {
       const [allCamps, gymOpponents, studentList] = await Promise.all([
         listAllFightCamps().catch(() => [] as FightCamp[]),
         listOpponentsForGym(gymId).catch(() => [] as Opponent[]),
         listAllStudents().catch(() => [] as StudentEntry[]),
       ]);
-      setCamps(allCamps.filter((c) => belongsToGym(c.gymId, gymId)));
-      setOpponents(gymOpponents);
-      setStudents(studentList);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unbekannter Fehler");
-      setCamps([]);
-      setOpponents([]);
-      setStudents([]);
-    }
-  }, [gymId]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    load();
-  }, [load]);
+      return {
+        camps: allCamps.filter((c) => belongsToGym(c.gymId, gymId)),
+        opponents: gymOpponents,
+        students: studentList,
+      };
+    },
+  });
+  const camps = queryError ? EMPTY_CAMPS : (data?.camps ?? null);
+  const opponents = queryError ? EMPTY_OPPONENTS : (data?.opponents ?? null);
+  const students = queryError ? EMPTY_STUDENTS : (data?.students ?? null);
+  const error = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Unbekannter Fehler"
+    : null;
 
   const studentMap = useMemo(
     () => new Map((students ?? []).map((s) => [s.uid, s])),
@@ -168,7 +166,11 @@ export default function TrainerDashboardPage() {
             <ErrorState
               title="Daten konnten nicht geladen werden"
               message={error}
-              onRetry={load}
+              onRetry={async () => {
+                await queryClient.invalidateQueries({
+                  queryKey: ["trainer-overview", gymId],
+                });
+              }}
             />
           </div>
         )}

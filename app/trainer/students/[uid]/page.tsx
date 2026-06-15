@@ -9,7 +9,7 @@ import CompetitionCard, {
 } from "@/components/trainer/CompetitionCard";
 import MatchupBlock from "@/components/trainer/MatchupBlock";
 import { getStudentEntry, type StudentEntry } from "@/lib/admin";
-import { getRecentWorkouts, type WorkoutSession } from "@/lib/workouts";
+import { getRecentWorkouts } from "@/lib/workouts";
 import { getAllProgress } from "@/lib/extensions/technique-progress";
 import {
   analyzeTrainingHistory,
@@ -25,7 +25,8 @@ import {
 } from "@/lib/types";
 import { listFightCamps, type FightCamp } from "@/lib/fight-camp";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const CATEGORY_LABEL: Record<string, string> = {
   boxing: "Boxing",
@@ -109,20 +110,12 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 function StudentDetailContent({ uid }: { uid: string }) {
-  const [entry, setEntry] = useState<StudentEntry | null>(null);
-  const [workouts, setWorkouts] = useState<WorkoutSession[] | null>(null);
-  const [progress, setProgress] = useState<TechniqueProgress[] | null>(null);
-  const [camps, setCamps] = useState<FightCamp[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [now] = useState(() => Date.now());
 
-  const load = useCallback(async () => {
-    setError(null);
-    setEntry(null);
-    setWorkouts(null);
-    setProgress(null);
-    setCamps(null);
-    try {
+  const { data, error: queryError } = useQuery({
+    queryKey: ["student-detail", uid],
+    queryFn: async () => {
       const [e, w, p, c] = await Promise.all([
         getStudentEntry(uid),
         getRecentWorkouts(uid, 500),
@@ -130,19 +123,18 @@ function StudentDetailContent({ uid }: { uid: string }) {
         listFightCamps(uid).catch(() => [] as FightCamp[]),
       ]);
       if (!e) throw new Error("Schüler nicht gefunden");
-      setEntry(e);
-      setWorkouts(w);
-      setProgress(p);
-      setCamps(c);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unbekannter Fehler");
-    }
-  }, [uid]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    load();
-  }, [load]);
+      return { entry: e, workouts: w, progress: p, camps: c };
+    },
+  });
+  const entry = data?.entry ?? null;
+  const workouts = data?.workouts ?? null;
+  const progress = data?.progress ?? null;
+  const camps = data?.camps ?? null;
+  const error = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Unbekannter Fehler"
+    : null;
 
   const analysis = useMemo<TrainingHistoryAnalysis | null>(() => {
     if (workouts === null || progress === null) return null;
@@ -166,7 +158,9 @@ function StudentDetailContent({ uid }: { uid: string }) {
         <ErrorState
           title="Schüler konnte nicht geladen werden"
           message={error}
-          onRetry={load}
+          onRetry={async () => {
+            await queryClient.invalidateQueries({ queryKey: ["student-detail", uid] });
+          }}
         />
       </div>
     );
