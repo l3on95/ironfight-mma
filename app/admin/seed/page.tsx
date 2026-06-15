@@ -15,7 +15,8 @@ import {
   type SeedResult,
 } from "@/lib/demo-seed";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type DemoCount = {
   workouts: number;
@@ -24,6 +25,11 @@ type DemoCount = {
   sparring: number;
   hasDemo: boolean;
 };
+
+type SeedData = { students: StudentEntry[]; counts: Record<string, DemoCount> };
+const EMPTY_STUDENTS: StudentEntry[] = [];
+const EMPTY_COUNTS: Record<string, DemoCount> = {};
+const SEED_KEY = ["admin-seed-data"] as const;
 
 const PERSONAS: DemoPersona[] = ["beginner", "intermediate", "competitor"];
 
@@ -280,26 +286,17 @@ function StudentSeedCard({
 }
 
 function SeedContent() {
-  const [students, setStudents] = useState<StudentEntry[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [counts, setCounts] = useState<Record<string, DemoCount>>({});
-  const [busy, setBusy] = useState<
-    Record<string, { type: "seed" | "clear"; persona?: DemoPersona } | null>
-  >({});
-  const [results, setResults] = useState<Record<string, SeedResult>>({});
-  const [perStudentError, setPerStudentError] = useState<Record<string, string>>(
-    {},
-  );
-
-  const loadStudents = useCallback(async () => {
-    setError(null);
-    setStudents(null);
-    try {
-      const data = await listAllStudents();
-      setStudents(data);
-      // Counts parallel laden
+  const queryClient = useQueryClient();
+  const {
+    data,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: SEED_KEY,
+    queryFn: async (): Promise<SeedData> => {
+      const list = await listAllStudents();
       const entries = await Promise.all(
-        data.map(async (s) => {
+        list.map(async (s) => {
           try {
             return [s.uid, await countDemoData(s.uid)] as const;
           } catch {
@@ -316,18 +313,26 @@ function SeedContent() {
           }
         }),
       );
-      setCounts(Object.fromEntries(entries));
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Unbekannter Fehler";
-      setError(msg);
-      setStudents([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    loadStudents();
-  }, [loadStudents]);
+      return { students: list, counts: Object.fromEntries(entries) };
+    },
+  });
+  const students = queryError ? EMPTY_STUDENTS : (data?.students ?? null);
+  const counts = data?.counts ?? EMPTY_COUNTS;
+  const error = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Unbekannter Fehler"
+    : null;
+  const retry = () => {
+    refetch();
+  };
+  const [busy, setBusy] = useState<
+    Record<string, { type: "seed" | "clear"; persona?: DemoPersona } | null>
+  >({});
+  const [results, setResults] = useState<Record<string, SeedResult>>({});
+  const [perStudentError, setPerStudentError] = useState<Record<string, string>>(
+    {},
+  );
 
   const handleSeed = useCallback(
     async (uid: string, persona: DemoPersona) => {
@@ -337,7 +342,9 @@ function SeedContent() {
         const result = await seedDemoStudent(uid, persona);
         setResults((r) => ({ ...r, [uid]: result }));
         const c = await countDemoData(uid);
-        setCounts((s) => ({ ...s, [uid]: c }));
+        queryClient.setQueryData<SeedData>(SEED_KEY, (prev) =>
+          prev ? { ...prev, counts: { ...prev.counts, [uid]: c } } : prev,
+        );
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Fehler beim Seeding";
         setPerStudentError((s) => ({ ...s, [uid]: msg }));
@@ -345,7 +352,7 @@ function SeedContent() {
         setBusy((s) => ({ ...s, [uid]: null }));
       }
     },
-    [],
+    [queryClient],
   );
 
   const handleClear = useCallback(async (uid: string) => {
@@ -359,14 +366,16 @@ function SeedContent() {
         return next;
       });
       const c = await countDemoData(uid);
-      setCounts((s) => ({ ...s, [uid]: c }));
+      queryClient.setQueryData<SeedData>(SEED_KEY, (prev) =>
+        prev ? { ...prev, counts: { ...prev.counts, [uid]: c } } : prev,
+      );
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Fehler beim Löschen";
       setPerStudentError((s) => ({ ...s, [uid]: msg }));
     } finally {
       setBusy((s) => ({ ...s, [uid]: null }));
     }
-  }, []);
+  }, [queryClient]);
 
   const totalDemo = useMemo(
     () => Object.values(counts).filter((c) => c.hasDemo).length,
@@ -427,7 +436,7 @@ function SeedContent() {
             <ErrorState
               title="Schüler konnten nicht geladen werden"
               message={error}
-              onRetry={loadStudents}
+              onRetry={retry}
             />
           </div>
         )}
