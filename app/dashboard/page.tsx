@@ -19,7 +19,6 @@ import {
   computeStats,
   getRecentWorkouts,
   type WorkoutSession,
-  type WorkoutStats,
 } from "@/lib/workouts";
 import {
   TRAINING_BLOCKS,
@@ -30,7 +29,7 @@ import {
 } from "@/lib/schedule";
 import { getSessionCountForWeek } from "@/lib/training-sessions";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 function formatRelative(d: Date) {
   const diffMs = Date.now() - d.getTime();
@@ -113,49 +112,47 @@ function StreakCalendar({ sessions }: { sessions: WorkoutSession[] }) {
 
 // ─── Schüler-Dashboard ────────────────────────────────────────────────────────
 
+const EMPTY_SESSIONS: WorkoutSession[] = [];
+const EMPTY_TECHNIQUES: TechniqueStatEntry[] = [];
+
 function DashboardContent() {
   const { user, profile } = useAuth();
   const greeting = greetingFor(profile?.displayName);
 
-  const [sessions, setSessions] = useState<WorkoutSession[] | null>(null);
-  const [stats, setStats] = useState<WorkoutStats | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(() => {
-    if (!user) return;
-    setError(null);
-    setSessions(null);
-    setStats(null);
-
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(
-        () =>
-          reject(
-            new Error(
-              "Verbindung zu Firestore dauert zu lange. Bitte Internetverbindung prüfen."
-            )
-          ),
-        15000
-      )
-    );
-
-    Promise.race([getRecentWorkouts(user.uid, 20), timeout])
-      .then((data) => {
-        setSessions(data as WorkoutSession[]);
-        setStats(computeStats(data as WorkoutSession[]));
-      })
-      .catch((err: unknown) => {
-        const msg = err instanceof Error ? err.message : "Unbekannter Fehler";
-        setError(msg);
-        setSessions([]);
-        setStats(computeStats([]));
-      });
-  }, [user]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    fetchData();
-  }, [fetchData]);
+  const {
+    data,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ["dashboard-workouts", user?.uid],
+    enabled: !!user,
+    retry: false,
+    queryFn: async () => {
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                "Verbindung zu Firestore dauert zu lange. Bitte Internetverbindung prüfen."
+              )
+            ),
+          15000
+        )
+      );
+      const result = await Promise.race([getRecentWorkouts(user!.uid, 20), timeout]);
+      return result as WorkoutSession[];
+    },
+  });
+  const sessions = queryError ? EMPTY_SESSIONS : (data ?? null);
+  const stats = sessions ? computeStats(sessions) : null;
+  const error = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Unbekannter Fehler"
+    : null;
+  const fetchData = () => {
+    refetch();
+  };
 
   const todayLabel = new Date().toLocaleDateString("de-DE", {
     weekday: "long",
@@ -473,30 +470,31 @@ function TrainerDashboardContent() {
   const todayWeekday = getCurrentWeekday();
   const todayBlocks = getBlocksForDay(todayWeekday);
 
-  const [topTechniques, setTopTechniques] = useState<TechniqueStatEntry[] | null>(null);
-  const [sessionCount, setSessionCount] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Fehler-Reset vor erneutem Laden — bewusster Effekt.
-    setError(null);
-
-    Promise.all([
-      getTopTechniques(10),
-      getSessionCountForWeek(weekId),
-    ])
-      .then(([techniques, count]) => {
-        setTopTechniques(techniques);
-        setSessionCount(count);
-      })
-      .catch((err: unknown) => {
-        const msg = err instanceof Error ? err.message : "Daten konnten nicht geladen werden";
-        setError(msg);
-        setTopTechniques([]);
-        setSessionCount(0);
-      });
-  }, [user, weekId]);
+  const {
+    data,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ["trainer-dashboard", user?.uid, weekId],
+    enabled: !!user,
+    queryFn: async () => {
+      const [techniques, count] = await Promise.all([
+        getTopTechniques(10),
+        getSessionCountForWeek(weekId),
+      ]);
+      return { topTechniques: techniques, sessionCount: count };
+    },
+  });
+  const topTechniques = queryError ? EMPTY_TECHNIQUES : (data?.topTechniques ?? null);
+  const sessionCount = queryError ? 0 : (data?.sessionCount ?? null);
+  const error = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Daten konnten nicht geladen werden"
+    : null;
+  const retry = () => {
+    refetch();
+  };
 
   const today = new Date();
   const todayLabel = today.toLocaleDateString("de-DE", {
@@ -526,15 +524,7 @@ function TrainerDashboardContent() {
               title="Daten konnten nicht geladen werden"
               message={error}
               hint="Prüfe deine Internetverbindung und lade die Seite neu."
-              onRetry={() => {
-                setTopTechniques(null);
-                setSessionCount(null);
-                setError(null);
-                if (!user) return;
-                Promise.all([getTopTechniques(10), getSessionCountForWeek(weekId)])
-                  .then(([t, c]) => { setTopTechniques(t); setSessionCount(c); })
-                  .catch(() => { setTopTechniques([]); setSessionCount(0); });
-              }}
+              onRetry={retry}
             />
           </div>
         )}
