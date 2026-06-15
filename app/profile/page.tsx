@@ -253,22 +253,27 @@ function ProfileContent() {
   const { user, profile, profileLoading, updateDisplayName, refreshProfile, logOut } =
     useAuth();
 
-  const [name, setName] = useState("");
+  const [name, setName] = useState(profile?.displayName ?? "");
   const [savingName, setSavingName] = useState(false);
   const [nameSaved, setNameSaved] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
 
-  const [form, setForm] = useState<AthleteForm>(emptyForm());
+  const [form, setForm] = useState<AthleteForm>(() => formFromAthlete(profile?.athlete));
   const [savingAthlete, setSavingAthlete] = useState(false);
   const [athleteSaved, setAthleteSaved] = useState(false);
   const [athleteError, setAthleteError] = useState<string | null>(null);
   const [now] = useState(() => Date.now());
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronisiert externe Daten (Profil/Props) in lokalen Formular-State.
+  // Synchronisiert das geladene Profil in den lokalen Formular-State ohne Effekt:
+  // State-Anpassung während des Renders, wenn sich displayName/athlete ändern.
+  const [prevDisplayName, setPrevDisplayName] = useState(profile?.displayName);
+  const [prevAthlete, setPrevAthlete] = useState(profile?.athlete);
+  if (profile?.displayName !== prevDisplayName || profile?.athlete !== prevAthlete) {
+    setPrevDisplayName(profile?.displayName);
+    setPrevAthlete(profile?.athlete);
     setName(profile?.displayName ?? "");
     setForm(formFromAthlete(profile?.athlete));
-  }, [profile?.displayName, profile?.athlete]);
+  }
 
   const greeting = greetingFor(profile?.displayName);
 

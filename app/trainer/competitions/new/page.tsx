@@ -77,11 +77,11 @@ function NewCompetitionContent() {
   const [opponents, setOpponents] = useState<Opponent[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [studentUid, setStudentUid] = useState<string | null>(null);
+  const [studentUid, setStudentUid] = useState<string | null>(() => searchParams.get("student"));
   const [studentSearch, setStudentSearch] = useState("");
 
   const [oppMode, setOppMode] = useState<"existing" | "new">("existing");
-  const [selectedOpponentId, setSelectedOpponentId] = useState<string | null>(null);
+  const [selectedOpponentId, setSelectedOpponentId] = useState<string | null>(() => searchParams.get("opponent"));
   const [oppSearch, setOppSearch] = useState("");
   const [creatingOpp, setCreatingOpp] = useState(false);
 
@@ -116,18 +116,6 @@ function NewCompetitionContent() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
     load();
   }, [load]);
-
-  // Vorauswahl aus Query-Parametern (?student= / ?opponent=)
-  useEffect(() => {
-    const s = searchParams.get("student");
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronisiert URL-Parameter in lokalen State.
-    if (s) setStudentUid(s);
-    const o = searchParams.get("opponent");
-    if (o) {
-      setSelectedOpponentId(o);
-      setOppMode("existing");
-    }
-  }, [searchParams]);
 
   const filteredStudents = useMemo(() => {
     const q = studentSearch.trim().toLowerCase();

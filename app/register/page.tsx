@@ -47,7 +47,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(redirectError);
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleRedirectPending, setGoogleRedirectPending] = useState(false);
@@ -56,10 +56,13 @@ export default function RegisterPage() {
     if (user) router.replace("/dashboard");
   }, [user, router]);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronisiert URL-Parameter in lokalen State.
+  // Synchronisiert redirectError (Auth-Context) in den lokalen Fehler-State ohne
+  // Effekt: State-Anpassung während des Renders, wenn sich redirectError ändert.
+  const [seenRedirectError, setSeenRedirectError] = useState(redirectError);
+  if (redirectError !== seenRedirectError) {
+    setSeenRedirectError(redirectError);
     if (redirectError) setError(redirectError);
-  }, [redirectError]);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

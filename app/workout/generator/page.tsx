@@ -14,7 +14,7 @@ import {
 import { CATEGORY_LABEL } from "@/lib/techniques";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 const CATEGORIES: Category[] = ["boxing", "wrestling", "bjj", "muay-thai"];
 const DIFFICULTIES: Difficulty[] = ["anfaenger", "fortgeschritten", "pro"];
@@ -31,16 +31,18 @@ export default function WorkoutPage() {
   const router = useRouter();
   const [category, setCategory] = useState<Category>("boxing");
   const [difficulty, setDifficulty] = useState<Difficulty>("anfaenger");
-  const [equipment, setEquipment] = useState<EquipmentId[]>([]);
+  const [equipment, setEquipment] = useState<EquipmentId[]>(() => defaultEquipmentForCategory(category));
   const [duration, setDuration] = useState<number>(30);
 
-  useEffect(() => {
+  // Setzt Standard-Equipment für die Kategorie, solange der Nutzer noch nichts
+  // gewählt hat — ohne Effekt: State-Anpassung während des Renders bei Kategoriewechsel.
+  const [prevCategory, setPrevCategory] = useState(category);
+  if (category !== prevCategory) {
+    setPrevCategory(category);
     if (equipment.length === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronisiert externe Daten (Profil/Props) in lokalen Formular-State.
       setEquipment(defaultEquipmentForCategory(category));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category]);
+  }
 
   function toggleEquipment(id: EquipmentId) {
     setEquipment((prev) =>
