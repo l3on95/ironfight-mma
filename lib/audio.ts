@@ -27,11 +27,20 @@ let _ctx:       AudioContext | null = null;
 let _unlocked = false;
 let _muted    = false;
 let _vibrateEnabled = true;
+const _unlockListeners = new Set<() => void>();
+
+function notifyUnlock() {
+  for (const l of _unlockListeners) l();
+}
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 export function setAudioMuted(value: boolean) { _muted = value; }
 export function isAudioUnlocked(): boolean    { return _unlocked; }
+export function subscribeAudioUnlocked(cb: () => void): () => void {
+  _unlockListeners.add(cb);
+  return () => { _unlockListeners.delete(cb); };
+}
 
 /** No-op — rückwärtskompatibel */
 export function initAudio(): void {}
@@ -81,6 +90,7 @@ export async function unlockAudio(): Promise<boolean> {
   }
 
   _unlocked = true;
+  notifyUnlock();
   return true;
 }
 

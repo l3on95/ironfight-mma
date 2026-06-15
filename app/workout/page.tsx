@@ -4,7 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import TechniqueInlinePanel from "@/components/TechniqueInlinePanel";
 import { useAuth } from "@/lib/auth-context";
-import { unlockAudio, isAudioUnlocked } from "@/lib/audio";
+import { unlockAudio } from "@/lib/audio";
 import { getExerciseById } from "@/lib/exercises";
 import { getTechniqueById, CATEGORY_LABEL } from "@/lib/techniques";
 import { EQUIPMENT } from "@/lib/equipment";
@@ -15,6 +15,7 @@ import {
   type Phase,
 } from "@/lib/use-workout-timer";
 import { useTimerSettings } from "@/lib/use-timer-settings";
+import { useAudioUnlocked } from "@/lib/use-audio";
 import { useWakeLock } from "@/lib/use-wake-lock";
 import { logWorkoutFull } from "@/lib/workouts";
 import { DIFFICULTY_LABEL, type WorkoutDefinition } from "@/lib/types";
@@ -145,9 +146,7 @@ function WorkoutRunner() {
       .catch(() => setLogState("error"));
   }, [t.phase, nextExerciseId, user, workout, exerciseSequence, t.config]);
 
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- Einmaliges Lesen einer Browser-Fähigkeit nach Mount (SSR-sicher).
-  useEffect(() => setAudioUnlocked(isAudioUnlocked()), []);
+  const audioUnlocked = useAudioUnlocked();
 
   // Technique accordion (in current exercise card)
   const [openTechniqueId, setOpenTechniqueId] = useState<string | null>(null);
@@ -183,8 +182,7 @@ function WorkoutRunner() {
 
   async function handleStart() {
     if (!audioUnlocked) {
-      const ok = await unlockAudio();
-      setAudioUnlocked(ok);
+      await unlockAudio();
     }
     t.start();
   }

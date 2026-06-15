@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import { useBrowserCapability } from "@/lib/use-browser-capability";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface BeforeInstallPromptEvent extends Event {
@@ -93,8 +94,8 @@ function IconPlusSquare() {
 
 // ── Component ──────────────────────────────────────────────────────────────
 export default function PwaInstallPrompt() {
+  const platform = useBrowserCapability<Platform | null>(() => detectPlatform(), null);
   const [visible, setVisible] = useState(false);
-  const [platform, setPlatform] = useState<Platform | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installing, setInstalling] = useState(false);
 
@@ -105,8 +106,6 @@ export default function PwaInstallPrompt() {
     if (wasDismissedRecently()) return;
 
     const detected = detectPlatform();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Einmaliges Lesen einer Browser-Fähigkeit nach Mount (SSR-sicher).
-    setPlatform(detected);
 
     // Android Chrome / Desktop Chrome+Edge: browser fires this event
     function handleBeforeInstall(e: Event) {

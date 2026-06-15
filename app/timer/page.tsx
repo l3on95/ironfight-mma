@@ -11,7 +11,9 @@ import {
 } from "@/lib/use-workout-timer";
 import { useAuth } from "@/lib/auth-context";
 import { logWorkout } from "@/lib/workouts";
-import { unlockAudio, isAudioUnlocked } from "@/lib/audio";
+import { unlockAudio } from "@/lib/audio";
+import { useAudioUnlocked } from "@/lib/use-audio";
+import { useBrowserCapability } from "@/lib/use-browser-capability";
 import { useTimerSettings } from "@/lib/use-timer-settings";
 import { useWakeLock } from "@/lib/use-wake-lock";
 import { useSearchParams } from "next/navigation";
@@ -259,15 +261,11 @@ function TimerView() {
     };
   }, []);
 
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- Einmaliges Lesen einer Browser-Fähigkeit nach Mount (SSR-sicher).
-  useEffect(() => { setAudioUnlocked(isAudioUnlocked()); }, []);
-
-  const [vibrateSupported, setVibrateSupported] = useState(false);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Einmaliges Lesen einer Browser-Fähigkeit nach Mount (SSR-sicher).
-    setVibrateSupported(typeof navigator !== "undefined" && typeof navigator.vibrate === "function");
-  }, []);
+  const audioUnlocked = useAudioUnlocked();
+  const vibrateSupported = useBrowserCapability(
+    () => typeof navigator !== "undefined" && typeof navigator.vibrate === "function",
+    false,
+  );
 
   const [logState, setLogState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const loggedRef = useRef<symbol | null>(null);
@@ -306,8 +304,7 @@ function TimerView() {
 
   async function handleStart() {
     if (!audioUnlocked) {
-      const ok = await unlockAudio();
-      setAudioUnlocked(ok);
+      await unlockAudio();
     }
     t.start();
   }
@@ -405,7 +402,7 @@ function TimerView() {
               Tippe auf <strong>Start</strong> oder den Button unten.
             </p>
             <button
-              onClick={async () => { const ok = await unlockAudio(); setAudioUnlocked(ok); }}
+              onClick={async () => { await unlockAudio(); }}
               className="mt-3 rounded-xl px-4 py-2 text-xs font-bold uppercase transition-all"
               style={{
                 border: "1px solid rgba(35,196,206,.5)",

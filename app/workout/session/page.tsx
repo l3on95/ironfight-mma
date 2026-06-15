@@ -15,7 +15,7 @@ import Icon, { type IconName } from "@/components/ui/Icon";
 
 import ExerciseAnimation from "@/components/ExerciseAnimation";
 import { useAuth } from "@/lib/auth-context";
-import { unlockAudio, isAudioUnlocked } from "@/lib/audio";
+import { unlockAudio } from "@/lib/audio";
 import { getExerciseById } from "@/lib/exercises";
 import {
   setSpeechEnabled,
@@ -31,6 +31,7 @@ import {
   type Phase,
 } from "@/lib/use-workout-timer";
 import { useTimerSettings } from "@/lib/use-timer-settings";
+import { useAudioUnlocked } from "@/lib/use-audio";
 import { useWakeLock } from "@/lib/use-wake-lock";
 import { logWorkoutFull } from "@/lib/workouts";
 import { CATEGORY_LABEL } from "@/lib/techniques";
@@ -207,14 +208,11 @@ function SessionRunner() {
 
   // ─── Audio-Unlock ─────────────────────────────────────────────────────────────
 
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- Einmaliges Lesen einer Browser-Fähigkeit nach Mount (SSR-sicher).
-  useEffect(() => setAudioUnlocked(isAudioUnlocked()), []);
+  const audioUnlocked = useAudioUnlocked();
 
   async function handleStart() {
     if (!audioUnlocked) {
-      const ok = await unlockAudio();
-      setAudioUnlocked(ok);
+      await unlockAudio();
     }
     t.start();
   }
