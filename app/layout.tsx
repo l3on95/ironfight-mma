@@ -10,6 +10,7 @@ import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import FighterNameModal from "@/components/auth/FighterNameModal";
 import TrainerOnboardingModal from "@/components/auth/TrainerOnboardingModal";
 import SubscriptionAutoSync from "@/components/SubscriptionAutoSync";
+import QueryProvider from "@/components/QueryProvider";
 
 const barlowCondensed = Barlow_Condensed({
   subsets: ["latin"],
@@ -73,14 +74,16 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            <PwaRegister />
-            <PwaInstallPrompt />
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <FighterNameModal />
-            <TrainerOnboardingModal />
-            <SubscriptionAutoSync />
+            <QueryProvider>
+              <PwaRegister />
+              <PwaInstallPrompt />
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+              <FighterNameModal />
+              <TrainerOnboardingModal />
+              <SubscriptionAutoSync />
+            </QueryProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
