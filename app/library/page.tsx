@@ -2,7 +2,8 @@
 
 import Icon from "@/components/ui/Icon";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth-context";
@@ -74,42 +75,41 @@ export default function LibraryPage() {
 function LibraryContent() {
   const { user } = useAuth();
 
-  const [entries, setEntries] = useState<EnrichedEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const libraryKey = ["library", user?.uid] as const;
+
+  const {
+    data: entries = [],
+    isPending,
+    isFetching,
+  } = useQuery({
+    queryKey: libraryKey,
+    enabled: !!user,
+    queryFn: async () => {
+      const raw = await getLibrary(user!.uid);
+      return raw.map((e) => ({
+        ...e,
+        technique: getTechniqueById(e.exerciseId),
+      }));
+    },
+  });
+  // Entspricht dem alten loading-Flag: Skeleton beim Erst-Laden UND beim erneuten
+  // Laden nach einer Mutation (invalidate → refetch).
+  const loading = isPending || isFetching;
+
   const [filterCat, setFilterCat] = useState<Category | "all">("all");
   const [showBrowse, setShowBrowse] = useState(false);
-  const [browseSearch, setBrowseSearch] = useState(""  );
+  const [browseSearch, setBrowseSearch] = useState("");
   const [browseDiscipline, setBrowseDiscipline] = useState<string>("all");
   const [addingId, setAddingId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
-
-  const loadLibrary = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const raw = await getLibrary(user.uid);
-      setEntries(
-        raw.map((e) => ({
-          ...e,
-          technique: getTechniqueById(e.exerciseId),
-        })),
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    loadLibrary();
-  }, [loadLibrary]);
 
   async function handleManualAdd(techniqueId: string) {
     if (!user) return;
     setAddingId(techniqueId);
     try {
       await addTechniqueToLibrary(user.uid, techniqueId, "manual");
-      await loadLibrary();
+      await queryClient.invalidateQueries({ queryKey: libraryKey });
     } finally {
       setAddingId(null);
     }
@@ -120,7 +120,9 @@ function LibraryContent() {
     setRemovingId(exerciseId);
     try {
       await removeFromLibrary(user.uid, exerciseId);
-      setEntries((prev) => prev.filter((e) => e.exerciseId !== exerciseId));
+      queryClient.setQueryData<EnrichedEntry[]>(libraryKey, (prev) =>
+        (prev ?? []).filter((e) => e.exerciseId !== exerciseId),
+      );
     } finally {
       setRemovingId(null);
     }
