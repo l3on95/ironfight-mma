@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Skeleton from "@/components/ui/Skeleton";
@@ -14,7 +15,6 @@ import {
   deleteOpponent,
   getOpponent,
   updateOpponent,
-  type Opponent,
 } from "@/lib/opponents";
 import { totalAnswered } from "@/lib/gegner-dna";
 
@@ -58,41 +58,50 @@ function VideosPlaceholder() {
 function OpponentDetailContent({ id }: { id: string }) {
   const { user } = useAuth();
   const router = useRouter();
-  const [opponent, setOpponent] = useState<Opponent | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const opponentKey = ["opponent", id] as const;
+  const [mutationError, setMutationError] = useState<string | null>(null);
+  const {
+    data,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: opponentKey,
+    queryFn: async () => {
+      const o = await getOpponent(id);
+      if (!o) throw new Error("Gegner-DNA-Profil nicht gefunden");
+      return o;
+    },
+  });
+  const opponent = queryError ? null : (data ?? null);
+  const error =
+    mutationError ??
+    (queryError
+      ? queryError instanceof Error
+        ? queryError.message
+        : "Unbekannter Fehler"
+      : null);
+  const retry = () => {
+    setMutationError(null);
+    refetch();
+  };
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<DetailTab>("uebersicht");
 
-  const load = useCallback(async () => {
-    setError(null);
-    setOpponent(null);
-    try {
-      const o = await getOpponent(id);
-      if (!o) throw new Error("Gegner-DNA-Profil nicht gefunden");
-      setOpponent(o);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unbekannter Fehler");
-    }
-  }, [id]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    load();
-  }, [load]);
-
   async function handleSave(value: OpponentEditorValue) {
     if (!opponent) return;
     setBusy(true);
+    setMutationError(null);
     try {
       await updateOpponent(opponent.id, {
         ...value,
         updatedBy: user?.uid ?? null,
       });
-      await load();
+      await queryClient.invalidateQueries({ queryKey: opponentKey });
       setEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Speichern fehlgeschlagen");
+      setMutationError(err instanceof Error ? err.message : "Speichern fehlgeschlagen");
     } finally {
       setBusy(false);
     }
@@ -110,7 +119,7 @@ function OpponentDetailContent({ id }: { id: string }) {
       await deleteOpponent(opponent.id);
       router.push("/trainer/competitions?tab=dna");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Löschen fehlgeschlagen");
+      setMutationError(err instanceof Error ? err.message : "Löschen fehlgeschlagen");
     }
   }
 
@@ -120,7 +129,7 @@ function OpponentDetailContent({ id }: { id: string }) {
         <ErrorState
           title="Profil konnte nicht geladen werden"
           message={error}
-          onRetry={load}
+          onRetry={retry}
         />
       </div>
     );
@@ -197,7 +206,7 @@ function OpponentDetailContent({ id }: { id: string }) {
       <div className="mx-auto max-w-3xl px-4 py-7 sm:px-6">
         {error && (
           <div className="mb-4">
-            <ErrorState title="Fehler" message={error} onRetry={load} />
+            <ErrorState title="Fehler" message={error} onRetry={retry} />
           </div>
         )}
 

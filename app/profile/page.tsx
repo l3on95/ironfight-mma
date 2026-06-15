@@ -21,10 +21,10 @@ import {
 import { updateAthleteProfile } from "@/lib/user-profile";
 import { getSubscriptions, unsubscribeFromBlock } from "@/lib/training-sessions";
 import { WEEKDAY_SHORT } from "@/lib/schedule";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import AchievementsPanel from "@/components/AchievementsPanel";
-import type { BlockSubscription } from "@/lib/types";
 
 // ─── Hilfs-Komponenten ─────────────────────────────────────────────────────
 
@@ -170,26 +170,23 @@ function patchFromForm(form: AthleteForm): Partial<AthleteProfile> {
 // ─── Kurs-Abos Block ──────────────────────────────────────────────────────
 
 function SubscriptionsBlock({ uid }: { uid: string }) {
-  const [subs, setSubs] = useState<BlockSubscription[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
-
-  async function load() {
-    const list = await getSubscriptions(uid);
-    list.sort((a, b) => (a.weekday - b.weekday) || a.startTime.localeCompare(b.startTime));
-    setSubs(list);
-  }
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uid]);
+  const queryClient = useQueryClient();
+  const subsKey = ["subscriptions", uid] as const;
+  const { data: subs = null } = useQuery({
+    queryKey: subsKey,
+    queryFn: async () => {
+      const list = await getSubscriptions(uid);
+      list.sort((a, b) => (a.weekday - b.weekday) || a.startTime.localeCompare(b.startTime));
+      return list;
+    },
+  });
 
   async function handleRemove(blockId: string) {
     setBusy(blockId);
     try {
       await unsubscribeFromBlock(uid, blockId);
-      await load();
+      await queryClient.invalidateQueries({ queryKey: subsKey });
     } finally {
       setBusy(null);
     }

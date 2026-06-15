@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Skeleton from "@/components/ui/Skeleton";
@@ -18,7 +19,7 @@ import {
   type FightCamp,
   type OpponentProfile,
 } from "@/lib/fight-camp";
-import { getStudentEntry, type StudentEntry } from "@/lib/admin";
+import { getStudentEntry } from "@/lib/admin";
 
 function formatDate(d: Date | null | undefined): string {
   if (!d) return "—";
@@ -49,36 +50,44 @@ function CompetitionDetailContent({
   campId: string;
 }) {
   const router = useRouter();
-  const [camp, setCamp] = useState<FightCamp | null>(null);
-  const [student, setStudent] = useState<StudentEntry | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [editingDna, setEditingDna] = useState(false);
-  const [busy, setBusy] = useState(false);
-
-  const load = useCallback(async () => {
-    setError(null);
-    setCamp(null);
-    try {
+  const queryClient = useQueryClient();
+  const detailKey = ["competition-detail", uid, campId] as const;
+  const [mutationError, setMutationError] = useState<string | null>(null);
+  const {
+    data,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: detailKey,
+    queryFn: async () => {
       const [c, s] = await Promise.all([
         getFightCamp(uid, campId),
         getStudentEntry(uid).catch(() => null),
       ]);
       if (!c) throw new Error("Wettkampf nicht gefunden");
-      setCamp(c);
-      setStudent(s);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unbekannter Fehler");
-    }
-  }, [uid, campId]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    load();
-  }, [load]);
+      return { camp: c, student: s };
+    },
+  });
+  const camp = queryError ? null : (data?.camp ?? null);
+  const student = queryError ? null : (data?.student ?? null);
+  const error =
+    mutationError ??
+    (queryError
+      ? queryError instanceof Error
+        ? queryError.message
+        : "Unbekannter Fehler"
+      : null);
+  const retry = () => {
+    setMutationError(null);
+    refetch();
+  };
+  const [editingDna, setEditingDna] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   async function handleSaveDna(value: OpponentEditorValue) {
     if (!camp) return;
     setBusy(true);
+    setMutationError(null);
     try {
       const opponent: OpponentProfile = {
         name: value.name,
@@ -97,10 +106,10 @@ function CompetitionDetailContent({
         opponentId: camp.opponent.opponentId ?? camp.opponentId ?? null,
       };
       await updateFightCamp(uid, campId, { opponent });
-      await load();
+      await queryClient.invalidateQueries({ queryKey: detailKey });
       setEditingDna(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Speichern fehlgeschlagen");
+      setMutationError(err instanceof Error ? err.message : "Speichern fehlgeschlagen");
     } finally {
       setBusy(false);
     }
@@ -109,11 +118,12 @@ function CompetitionDetailContent({
   async function setStatus(status: FightCamp["status"]) {
     if (!camp) return;
     setBusy(true);
+    setMutationError(null);
     try {
       await updateFightCamp(uid, campId, { status });
-      await load();
+      await queryClient.invalidateQueries({ queryKey: detailKey });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Status-Update fehlgeschlagen");
+      setMutationError(err instanceof Error ? err.message : "Status-Update fehlgeschlagen");
     } finally {
       setBusy(false);
     }
@@ -126,7 +136,7 @@ function CompetitionDetailContent({
       await deleteFightCamp(uid, campId);
       router.push("/trainer/competitions");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Löschen fehlgeschlagen");
+      setMutationError(err instanceof Error ? err.message : "Löschen fehlgeschlagen");
     }
   }
 
@@ -136,7 +146,7 @@ function CompetitionDetailContent({
         <ErrorState
           title="Wettkampf konnte nicht geladen werden"
           message={error}
-          onRetry={load}
+          onRetry={retry}
         />
       </div>
     );
@@ -247,7 +257,7 @@ function CompetitionDetailContent({
       <div className="mx-auto max-w-4xl px-4 py-7 sm:px-6">
         {error && (
           <div className="mb-5">
-            <ErrorState title="Fehler" message={error} onRetry={load} />
+            <ErrorState title="Fehler" message={error} onRetry={retry} />
           </div>
         )}
 
