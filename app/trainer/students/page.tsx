@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import TrainerHint from "@/components/TrainerHint";
 import Skeleton from "@/components/ui/Skeleton";
 import ErrorState from "@/components/ui/ErrorState";
@@ -10,7 +11,6 @@ import {
 } from "@/lib/admin";
 import {
   getStudentProgress,
-  type StudentProgress,
 } from "@/lib/student-progress";
 import {
   ATHLETE_LEVEL_LABEL,
@@ -19,6 +19,8 @@ import {
   WEIGHT_CLASS_LABEL,
 } from "@/lib/types";
 import Link from "next/link";
+
+const EMPTY_STUDENTS: StudentEntry[] = [];
 
 // ─── Helper ────────────────────────────────────────────────────────────────
 
@@ -97,37 +99,22 @@ function Stat({
 
 function StudentCard({ entry }: { entry: StudentEntry }) {
   const [open, setOpen] = useState(false);
-  const [progress, setProgress] = useState<StudentProgress | null>(null);
-  const [progressLoading, setProgressLoading] = useState(false);
-  const [progressError, setProgressError] = useState<string | null>(null);
+  const {
+    data: progress = null,
+    isFetching: progressLoading,
+    error: progressQueryError,
+  } = useQuery({
+    queryKey: ["student-progress", entry.uid],
+    enabled: open,
+    queryFn: () => getStudentProgress(entry.uid),
+  });
+  const progressError = progressQueryError
+    ? progressQueryError instanceof Error
+      ? progressQueryError.message
+      : "Daten nicht verfügbar"
+    : null;
 
   const athlete = entry.athlete;
-
-  // Lade Fortschritt erst wenn Karte expandiert wird (spart Reads)
-  useEffect(() => {
-    if (!open || progress !== null || progressLoading) return;
-    let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    setProgressLoading(true);
-    setProgressError(null);
-    getStudentProgress(entry.uid)
-      .then((p) => {
-        if (!cancelled) setProgress(p);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setProgressError(
-            err instanceof Error ? err.message : "Daten nicht verfügbar",
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setProgressLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [open, entry.uid, progress, progressLoading]);
 
   return (
     <div
@@ -398,27 +385,24 @@ function Row({ label, value }: { label: string; value: string }) {
 // ─── Hauptinhalt ──────────────────────────────────────────────────────────
 
 function StudentsContent() {
-  const [students, setStudents] = useState<StudentEntry[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-
-  const load = useCallback(async () => {
-    setError(null);
-    setStudents(null);
-    try {
-      const data = await listAllStudents();
-      setStudents(data);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Unbekannter Fehler";
-      setError(msg);
-      setStudents([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Daten-Fetch aus Firestore — bewusster Effekt, kein abgeleiteter Render-State.
-    load();
-  }, [load]);
+  const {
+    data,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ["all-students"],
+    queryFn: () => listAllStudents(),
+  });
+  const students = queryError ? EMPTY_STUDENTS : (data ?? null);
+  const error = queryError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Unbekannter Fehler"
+    : null;
+  const retry = () => {
+    refetch();
+  };
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -486,7 +470,7 @@ function StudentsContent() {
               title="Schüler konnten nicht geladen werden"
               message={error}
               hint="Prüfe die Firestore-Regeln — Trainer brauchen Lesezugriff auf die users-Collection."
-              onRetry={load}
+              onRetry={retry}
             />
           </div>
         )}
