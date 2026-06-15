@@ -97,11 +97,21 @@ Rules + indexes: `firestore.rules`, `firestore.indexes.json`, `firebase.json`.
   were refactored to `useSyncExternalStore` / derived state under characterization
   tests; mechanical findings (purity, static-components, unescaped-entities) were
   fixed in place.
-- [ ] Revisit the 25 scoped `react-hooks/set-state-in-effect` suppressions in
-  `app/**` + `components/PwaInstallPrompt.tsx`. These are legitimate effects
-  (async Firestore fetches, error resets, prop/URL→state syncs, mount-time
-  browser-capability reads), suppressed with per-site justifications rather than
-  refactored because the pages have no unit tests. The principled fix is to move
-  data loading to a server/Suspense or React-Query pattern (and add page tests)
-  so the suppressions can be removed.
+- [x] Eliminate the 25 scoped `react-hooks/set-state-in-effect` suppressions in
+  `app/**` + `components/PwaInstallPrompt.tsx`. Done via the chosen full
+  React-Query migration: every Firestore-fetch effect → `useQuery` (TanStack
+  React Query v5, provider in `components/QueryProvider.tsx`); mount-time
+  browser-capability reads → `useSyncExternalStore`; prop/URL→state syncs →
+  derived / lazy-init state. The faithful derivation preserves the prior
+  semantics exactly — `null` while pending (drives existing skeleton checks),
+  error → stable empty fallback (empty-state, not perpetual skeleton); mutations
+  use `invalidateQueries` / optimistic `setQueryData`; the dashboard athlete
+  query keeps its 15s timeout race with `retry: false`. `grep -rn
+  "set-state-in-effect"` is now empty repo-wide and `npm run lint` is green.
+  Page tests guarding the conversions were added for the dashboard (athlete +
+  trainer) and admin-users pages (`app/**/__tests__/`, mock `useAuth` +
+  `next/navigation`, wrap in `QueryClientProvider`); the other converted pages
+  share the same query-derivation contract those tests exercise. (Separate,
+  out-of-scope: 3 pre-existing `react-hooks/exhaustive-deps` suppressions remain
+  in `app/workout/*`.)
 - [ ] Re-evaluate ESLint 10 once `eslint-plugin-react` supports it.
